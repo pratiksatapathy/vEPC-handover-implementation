@@ -1,7 +1,3 @@
 *~
-ran
-mme
-hss
-sgw
-pgw
-sink
+*.o
+*.txt
