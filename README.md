@@ -30,6 +30,6 @@ Note: User Equipment connections, data traffic transfer can be configured using 
 
 ## Contact
 
-Sadagopan N S
-Email: nss@cse.iitb.ac.in
-Webpage: www.cse.iitb.ac.in/~nss
+Sadagopan N S <br />
+Email: nss@cse.iitb.ac.in <br />
+Webpage: www.cse.iitb.ac.in/~nss <br />
