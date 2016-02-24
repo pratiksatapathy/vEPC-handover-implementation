@@ -18,6 +18,7 @@ struct UDPClient {
 	Packet pkt;
 	
 	UDPClient();
+	int create_udp_socket();
 	void bind_client();
 	void set_server_details(int, const char*);
 	void read_data(bool&);

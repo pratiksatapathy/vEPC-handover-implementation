@@ -6,11 +6,19 @@ UDPServer::UDPServer() {
 	signal(SIGPIPE, SIG_IGN);	  
 }
 
+int UDPServer::create_udp_socket(){
+	int sockfd;
+
+	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	handle_failure(sockfd, "Socket error: UDP server");
+	return sockfd;	
+}
+
 void UDPServer::bind_server(int arg_server_port, const char *arg_server_addr) {
 
 	server_socket = create_udp_socket();
 	status = setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &g_reuse, sizeof(int));
-	report_error(status, "At UDPClient side - Error in setting socket options");	
+	handle_failure(status, "Setsockopt reuse error: UDP server");	
 	server_addr.assign(arg_server_addr);
 	server_port = arg_server_port;
 	bzero((char *) &server_sock_addr, sizeof(server_sock_addr));
@@ -22,12 +30,10 @@ void UDPServer::bind_server(int arg_server_port, const char *arg_server_addr) {
 		exit(EXIT_FAILURE);
 	}
 	status = bind(server_socket, (struct sockaddr*)&server_sock_addr, sizeof(server_sock_addr));
-	report_error(status);	
+	handle_failure(status, "Bind error: UDP server");	
 }
 
 void UDPServer::write_data(struct sockaddr_in &client_sock_addr, Packet &pkt){
-	string text;
-
 	while(1){
 		status = sendto(server_socket, pkt.data, pkt.data_len, 0, (sockaddr*)&client_sock_addr, g_addr_len);
 		if(errno == EPERM){
@@ -39,8 +45,7 @@ void UDPServer::write_data(struct sockaddr_in &client_sock_addr, Packet &pkt){
 			break;
 		}
 	}
-	text = "At server side: Error in sending data - " + to_string(server_socket); 
-	report_error(status, text.c_str());
+	handle_error(status, "Sendto error: UDP server");
 }
 
 void UDPServer::print_status(const char *server_name){

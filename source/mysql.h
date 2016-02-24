@@ -3,9 +3,8 @@
 
 #include "utils.h"
 
-//(C) Operations: MySQL_DB functions
+/* (C) MYSQL, MYSQL_RES, mysql_init */
 #include <mysql/mysql.h>
-#include <mysql/my_global.h>
 
 struct ConnDetails {
 	char *server;

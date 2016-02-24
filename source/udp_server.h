@@ -13,6 +13,7 @@ struct UDPServer {
 	int status;
 
 	UDPServer();
+	int create_udp_socket();
 	void bind_server(int, const char*);
 	void write_data(struct sockaddr_in&, Packet&);
 	void print_status(const char*);

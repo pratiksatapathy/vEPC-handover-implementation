@@ -1,54 +1,61 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-//(C++) Operations: Input/Output
-#include <iostream>
+/* (C++) cout, endl */
+#include <iostream> 
 
-//(C++) STL Operations: String, Vector, String stream, Unordered map
+/* (C++) STL: string, vector, unordered map */
 #include <string>
 #include <vector>
-#include <sstream>
 #include <unordered_map>
 
-//(C) Operations: Input/Output, String, Standard libraries(like atoi, malloc)
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+/* (C++) stringstream */
+#include <sstream>
 
-//(C) Operations: Socket programming
+/* (C++) chrono: high_resolution_clock, microseconds */
+#include <chrono>
+
+/* (C++) default_random_engine, exponential_distribution<T> */
+#include <random>
+
+/* (C) memset, memmove */
+#include <stdio.h>
+
+/* (C) strlen */
+#include <string.h>
+
+/* (C) read, write, close */
 #include <unistd.h>
+
+/* (C) socket */
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <signal.h>
-#include <netdb.h> 
-#include <arpa/inet.h>
+
+/* (C) open */
 #include <fcntl.h>
-#include <sys/types.h>
+
+/* (C) select */
 #include <sys/select.h>
 
-//(C) Operations: Multithreading
+/* (C) inet_aton, inet_ntop */
+#include <arpa/inet.h>
+
+/* (C) signal */
+#include <signal.h>
+
+/* (C) pthread_create, pthread_kill */
 #include <pthread.h>
 
-//(C) Operations: Raw socket programming with headers(IP, TCP, UDP)
+/* (C) ip_hdr */
 #include <netinet/ip.h>
-#include <netinet/tcp.h>     
-#include <netinet/udp.h>    
-#include <sys/ioctl.h>      
-#include <bits/ioctls.h>    
-#include <net/if.h>         
 
-//(C) Operations: TUN interface Programming
+/* (C) ioctl */
+#include <sys/ioctl.h>
+
+/* (C) IFF_TUN, IFF_NO_PI, TUNSETIFF */
 #include <linux/if_tun.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <errno.h>
-#include <stdarg.h>
 
-//(C) Operations: Date & Time
-#include <ctime>
-
-//(C++) To measure Time in precision of milliseconds
-#include <chrono>
+/* (C) ifreq, IFNAMSIZ */
+#include <net/if.h>         
 
 using namespace std;
 
@@ -75,7 +82,7 @@ extern string g_pgw_dlink_addr;
 extern string g_public_sink_addr;
 extern string g_private_sink_addr;
 
-extern socklen_t g_addr_len;
+extern socklen_t g_sock_addr_len;
 
 extern struct timeval g_timeout;
 
@@ -91,13 +98,9 @@ extern struct timeval g_timeout;
 // extern string g_pgw_server_for_sink_addr;
 // extern int g_fail_count;
 
-void report_error(int);
-void report_error(int, const char*);
-void report_error(int, bool&);
+void handle_failure(int, const char*);
+void handle_error(int, const char*);
 
-void print(string);
-void print(int);
-void print(string, int);
 void print_message(string);
 void print_message(string, int);
 void print_message(string, unsigned long long);
@@ -107,15 +110,10 @@ const char* to_char_array(unsigned long long);
 char* allocate_str_mem(int);
 uint8_t* allocate_uint8_mem(int);
 struct ip* allocate_ip_mem(int);
-struct tcphdr* allocate_tcp_mem(int);
 
 void check_server_usage(int, char*[]);
 void check_client_usage(int, char*[]);
 
 void time_check(time_t&, double&, bool&);
-
-void handle_exceptions();
-
-int create_udp_socket();
 
 #endif //UTILS_H

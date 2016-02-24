@@ -29,7 +29,7 @@ string g_pgw_dlink_addr = "192.168.1.76";
 string g_public_sink_addr = "192.168.1.78";
 string g_private_sink_addr = "172.16.0.2";
 
-socklen_t g_addr_len = sizeof(sockaddr_in);
+socklen_t g_sock_addr_len = sizeof(sockaddr_in);
 
 struct timeval g_timeout = {1, 0};
 
@@ -39,22 +39,24 @@ struct timeval g_timeout = {1, 0};
 // string g_sgw3_addr = "192.168.1.74";
 // int g_fail_count = 0;
 
-void report_error(int arg) {
-
-	if (arg < 0){
-		perror("ERROR");
-		cout << "Killing the thread." << endl;
-		pthread_exit(NULL);			
+void handle_failure(int arg, const char *mess) {
+	if (arg < 0) {
+		perror(mess);
+		exit(-1);
 	}
 }
 
-void report_error(int arg, const char *message) {
-
-	if (arg < 0){
-		perror(message);
-		cout << "Killing the thread." << endl;
-		pthread_exit(NULL);	
-	}
+void handle_error(int arg, const char *mess, bool &success) {
+	success = 1;
+	if(arg<0){
+		perror(mess);
+		if(errno == EAGAIN || errno == EWOULDBLOCK){
+			success = 0;
+		}
+		else{
+			pthread_exit(NULL);
+		}
+	}	
 }
 
 void report_error(int arg, bool &success){
@@ -70,21 +72,6 @@ void report_error(int arg, bool &success){
 			pthread_exit(NULL);
 		}
 	}
-}
-
-void print(string message) {
-
-	cout << message << endl;
-}
-
-void print(int arg) {
-
-	cout << arg << endl;
-}
-
-void print(string message, int arg) {
-
-	cout << message << " " << arg << endl;
 }
 
 void print_message(string message) {
@@ -172,24 +159,6 @@ struct ip* allocate_ip_mem(int len) {
 	}
 }
 
-struct tcphdr* allocate_tcp_mem(int len) {
-	struct tcphdr *tcp_hdr;
-
-	if (len <= 0) {
-		print("ERROR: Given_memory_length<=0");
-		exit(EXIT_FAILURE);
-	}
-	tcp_hdr = (tcphdr*)malloc(len * sizeof (uint8_t));
-	if (tcp_hdr != NULL) {
-		memset(tcp_hdr, 0, len * sizeof (uint8_t));
-		return tcp_hdr;
-	} 
-	else {
-		print("ERROR: Memory allocation failure");
-		exit (EXIT_FAILURE);
-	}
-}
-
 void check_server_usage(int argc, char *argv[]) {
 
 	if (argc < 2) {
@@ -224,18 +193,4 @@ void time_check(time_t &start_time, double &duration_time, bool &time_exceeded) 
 	if ((elapsed_time = difftime(time(0), start_time)) > duration_time) {
 		time_exceeded = true;
 	}
-}
-
-void handle_exceptions() {
-
-	cout << "Exception: Possible because of garbage data" << endl;
-	pthread_exit(NULL);
-}
-
-int create_udp_socket(){
-	int sockfd;
-
-	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	report_error(sockfd, "Error in creating socket");
-	return sockfd;	
 }
