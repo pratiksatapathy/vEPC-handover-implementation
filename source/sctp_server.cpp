@@ -1,65 +1,109 @@
 #include "sctp_server.h"
 
-SCTPServer::SCTPServer(int arg_port, arg_ip_addr, int arg_workers_count) {
-	port = arg_port;
-	ip_addr = arg_ip_addr;	
-	workers_count = arg_workers_count;
-}
-
-void SCTPServer::init() {
+SCTPServer::SCTPServer() {
 	clear_queue();	
-	max_queue_size= INT_MAX;
-	workers.resize(workers_count);
+	max_qsize = INT_MAX;
+	pthread_mutex_init(&mux, NULL);
+	pthread_cond_init(&qempty, NULL);
+	pthread_cond_init(&qfull, NULL);
 	listen_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
 	handle_failure(listen_fd, "Socket error");
 }
 
-void SCTPServer::bind() {
+void SCTPServer::run(int arg_port, string arg_ip_addr, int arg_workers_count, void serve_client(int)) {
+	init(arg_port, arg_ip_addr, arg_workers_count, serve_client);
+	create_workers();
+	bind_server();
+	accept_clients();
+}
+
+void SCTPServer::init(int arg_port, string arg_ip_addr, int arg_workers_count, void arg_serve_client(int)) {
+	port = arg_port;
+	ip_addr = arg_ip_addr;	
+	workers_count = arg_workers_count;	
+	serve_client = arg_serve_client;
+	workers.resize(workers_count);
+}
+
+void SCTPServer::create_workers() {
+	int i;
+
+	for (i = 0; i < workers_count; i++) {
+		workers[i] = thread(&SCTPServer::worker_func, this);
+	}	
+}
+
+void SCTPServer::worker_func() {
+	int status;
+	int conn_fd;
+
+	while (1) {
+		status = pthread_mutex_lock(&mux);
+		handle_failure(status, "Lock error");
+		if(conn_q.empty()) {
+			status = pthread_cond_wait(&qempty, &mux);
+			handle_failure(status, "Condition wait error - Queue empty");
+			status = pthread_mutex_unlock(&mux);
+			handle_failure(status, "Unlock error");	
+		}
+		else {
+			conn_fd = conn_q.front();
+			conn_q.pop();
+			status = pthread_cond_signal(&qfull);
+			handle_failure(status, "Condition signal error - Queue full");
+			status = pthread_mutex_unlock(&mux);
+			handle_failure(status, "Unlock error");	
+			serve_client(conn_fd);
+			close(conn_fd);
+		}
+	}
+}
+
+void SCTPServer::bind_server() {
+	int status;
+
 	bzero((void*)&sock_addr, sizeof(sock_addr));
 	sock_addr.sin_family = AF_INET;
 	sock_addr.sin_port = htons(port);
-	status = inet_aton(ip_addr, &sock_addr.sin_addr);	
+	status = inet_aton(ip_addr.c_str(), &sock_addr.sin_addr);	
 	if (status == 0) {
-		cout << "inet_aton error: SCTP server" << endl;
+		cout << "inet_aton error" << endl;
 		exit(EXIT_FAILURE);
 	}	
-	bind(listen_fd, (struct sockaddr*)&sock_addr, sizeof(sock_addr));
-}
-
-void SCTPServer::create_workers(void (*serve_client)(int)) {
-	for(i = 0; i < workers_count; i++) {
-		workers[i] = thread(worker_func, serve_client);
-	}
+	status = bind(listen_fd, (struct sockaddr*)&sock_addr, sizeof(sock_addr));
+	handle_failure(status, "Bind error");
 }
 
 void SCTPServer::accept_clients() {
+	int i;
 	int conn_fd;
+	int status;
+	socklen_t sock_addr_len;
+	struct sockaddr_in client_sock_addr;
 
 	listen(listen_fd, 500);
+	cout << "Server started!" << endl;
 	for(i = 1;; i++) {
-		conn_fd = accept(listen_fd, (struct sockaddr *)&client_sock_addr, &g_sock_addr_len);
+		conn_fd = accept(listen_fd, (struct sockaddr *)&client_sock_addr, &sock_addr_len);
 		handle_failure(conn_fd, "Accept error");
 		status = pthread_mutex_lock(&mux);
 		handle_failure(status, "Lock error");
-		if(conn_queue.size() >= max_queue_size) {
-			cout<<"Waiting"<<endl;
-			status = pthread_cond_wait(&queue_full, &mux);
+		if(conn_q.size() >= max_qsize) {
+			status = pthread_cond_wait(&qfull, &mux);
 			handle_failure(status, "Condition wait error - Queue full");
 		}
-		conn_queue.push(conn_fd);
-		status = pthread_cond_signal(&queue_empty);
+		conn_q.push(conn_fd);
+		status = pthread_cond_signal(&qempty);
 		handle_failure(status, "Condition signal error - Queue empty");
 		status = pthread_mutex_unlock(&mux);
 		handle_failure(status, "Unlock error");		
-	}
-	for(i = 0; i < workers_count; i++) {
-		workers[i].join();
-	}
-	close(listen_fd);	
+	}	
 }
 
-void SCTPServer::worker_func(void (*serve_client)(int)) {
-
+void SCTPServer::clear_queue() {
+	while (!conn_q.empty()) {
+		conn_q.pop();
+	}
 }
 
 void SCTPServer::handle_failure(int arg, const char *c_msg) {
@@ -72,19 +116,20 @@ void SCTPServer::handle_failure(int arg, const char *c_msg) {
 }
 
 void SCTPServer::handle_error(int arg, const char *c_msg) {
-	string msg(cmsg);
+	string msg(c_msg);
 	msg = msg + ": SCTP server";
 	if (arg < 0) {
 		perror(msg.c_str());
 	}
 }
 
-void SCTPServer::clear_queue() {
-	while (!conn_q.empty()) {
-		conn_q.pop();
-	}
-}
-
 SCTPServer::~SCTPServer() {
+	int i;
 
+	for (i = 0; i < workers_count; i++) {
+		if (workers[i].joinable()) {
+			workers[i].join();
+		}
+	}
+	close(listen_fd);
 }

@@ -4,33 +4,38 @@
 #include "utils.h"
 #include "packet.h"
 
+using namespace std;
+
 class SCTPServer {
 public:
-	int listen_fd;
-	int conn_fd;
+	/* Address parameters */
 	int port;
+	int listen_fd;
 	string ip_addr;
 	struct sockaddr_in sock_addr;
-	vector<thread> workers;
-	Packet pkt;
-	
+
+	/* Thread pool parameters */
+	int max_qsize;
+	int workers_count;
+	queue<int> conn_q;	
+	vector<thread> workers;	
+	void (*serve_client)(int);
+
+	/* Lock and signal parameters */
 	pthread_mutex_t mux;
 	pthread_cond_t qempty;
 	pthread_cond_t qfull;
 
-	int max_qsize;
-	int workers_count;
-	queue<int> conn_q;	
-
-	SCTPServer(int, string, int);
-	void init();
-	void bind();
-	void create_workers(void (*serve_client)(int));
+	SCTPServer();
+	void run(int, string, int, void (*)(int));
+	void init(int, string, int, void (*)(int));
+	void create_workers();
+	void worker_func();
+	void bind_server();
 	void accept_clients();
-	void worker_func(void (*serve_client)(int));
-	void handle_failure(int, const char*);
-	void handle_error(int, const char*);
 	void clear_queue();
+	void handle_failure(int, const char*);
+	void handle_error(int, const char*);	
 	~SCTPServer();
 };
 
