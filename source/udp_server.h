@@ -5,18 +5,17 @@
 #include "packet.h"
 
 struct UDPServer {
-	int server_socket;
-	int server_port;
-	string server_addr;
-	struct sockaddr_in server_sock_addr;
+	/* Address parameters */
+	int conn_fd;
+	int port;
+	string ip_addr;
+	struct sockaddr_in sock_addr;
 	
-	int status;
-
 	UDPServer();
-	int create_udp_socket();
-	void bind_server(int, const char*);
-	void write_data(struct sockaddr_in&, Packet&);
-	void print_status(const char*);
+	void run(const char*, int);
+	void init(const char*, int);
+	void bind_server();
+	void snd(struct sockaddr_in&, Packet&);
 	~UDPServer();
 };
 

@@ -2,27 +2,22 @@
 #define PACKET_H
 
 #include "utils.h"
+#include "gtp.h"
+#include "s1ap.h"
+#include "diameter.h"
 
-#define GTPC_LEN 4
-#define GTPU_LEN 4
-#define IP_LEN 20
-#define TCP_LEN 20
+#define IP_HDR_LEN 20
+#define TCP_HDR_LEN 20
 
-struct GTPc {
-	uint16_t cteid;
-};
-
-struct GTPu { 
-	uint16_t uteid;
-};
-
-struct Packet {
-	struct GTPc gtpc_hdr;
-	struct GTPu gtpu_hdr;
-
+class Packet {
+public:
+	Gtpv1 gtpu_hdr;
+	Gtpv2 gtpc_hdr;
+	S1ap s1ap_hdr;
+	Diameter diameter_hdr;
 	uint8_t *data;
-	int data_len;
-	int curr_pos;
+	int data_pos;
+	int len;
 	
 	Packet();
 	Packet(const Packet&);
@@ -30,8 +25,10 @@ struct Packet {
 	Packet& operator=(Packet);
 	Packet(Packet&&);
 
+
 	void add_gtpc_hdr(uint16_t);
 	void add_gtpu_hdr(uint16_t);
+	void add_s1ap_hdr();
 
 	void add_data(int);
 	void add_data(uint16_t);
@@ -50,13 +47,7 @@ struct Packet {
 	void copy_data(char*, int&);	
 	void copy_data(string&, int&);
 
-	void add_metadata(int, int, int);	
-	void copy_metadata(int&, int&, int&);
 	
-	void copy_pkts(Packet&, Packet&);
-	void copy_frompkt(Packet&);
-	void copy_topkt(Packet&);
-
 	void clear_data();
 
 	~Packet();

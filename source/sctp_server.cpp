@@ -10,19 +10,29 @@ SCTPServer::SCTPServer() {
 	handle_failure(listen_fd, "Socket error");
 }
 
-void SCTPServer::run(int arg_port, string arg_ip_addr, int arg_workers_count, void serve_client(int)) {
+void SCTPServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_count, void serve_client(int)) {
 	init(arg_port, arg_ip_addr, arg_workers_count, serve_client);
 	create_workers();
 	bind_server();
 	accept_clients();
 }
 
-void SCTPServer::init(int arg_port, string arg_ip_addr, int arg_workers_count, void arg_serve_client(int)) {
+void SCTPServer::init(const char *arg_ip_addr, int arg_port, int arg_workers_count, void arg_serve_client(int)) {
+	int status;
+
 	port = arg_port;
-	ip_addr = arg_ip_addr;	
+	ip_addr.assign(arg_ip_addr);
+	bzero((void*)&sock_addr, sizeof(sock_addr));
+	sock_addr.sin_family = AF_INET;
+	sock_addr.sin_port = htons(port);
+	status = inet_aton(ip_addr.c_str(), &sock_addr.sin_addr);	
+	if (status == 0) {
+		cout << "inet_aton error" << endl;
+		exit(EXIT_FAILURE);
+	}	
 	workers_count = arg_workers_count;	
-	serve_client = arg_serve_client;
 	workers.resize(workers_count);
+	serve_client = arg_serve_client;
 }
 
 void SCTPServer::create_workers() {
@@ -61,21 +71,12 @@ void SCTPServer::worker_func() {
 
 void SCTPServer::bind_server() {
 	int status;
-
-	bzero((void*)&sock_addr, sizeof(sock_addr));
-	sock_addr.sin_family = AF_INET;
-	sock_addr.sin_port = htons(port);
-	status = inet_aton(ip_addr.c_str(), &sock_addr.sin_addr);	
-	if (status == 0) {
-		cout << "inet_aton error" << endl;
-		exit(EXIT_FAILURE);
-	}	
+	
 	status = bind(listen_fd, (struct sockaddr*)&sock_addr, sizeof(sock_addr));
 	handle_failure(status, "Bind error");
 }
 
 void SCTPServer::accept_clients() {
-	int i;
 	int conn_fd;
 	int status;
 	socklen_t sock_addr_len;
@@ -83,7 +84,7 @@ void SCTPServer::accept_clients() {
 
 	listen(listen_fd, 500);
 	cout << "Server started!" << endl;
-	for(i = 1;; i++) {
+	while (1) {
 		conn_fd = accept(listen_fd, (struct sockaddr *)&client_sock_addr, &sock_addr_len);
 		handle_failure(conn_fd, "Accept error");
 		status = pthread_mutex_lock(&mux);

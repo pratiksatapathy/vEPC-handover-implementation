@@ -1,65 +1,77 @@
 #include "udp_server.h"
 
 UDPServer::UDPServer() {
-	
-	server_socket = -1;
-	signal(SIGPIPE, SIG_IGN);	  
+	int status;
+
+	conn_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	handle_failure(conn_fd, "Socket error");	
+	status = setsockopt(conn_fd, SOL_SOCKET, SO_REUSEADDR, &g_reuse, sizeof(int));
+	handle_failure(status, "Setsockopt reuse error");	
 }
 
-int UDPServer::create_udp_socket(){
-	int sockfd;
-
-	sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	handle_failure(sockfd, "Socket error: UDP server");
-	return sockfd;	
+void UDPServer::run(const char *arg_ip_addr, int arg_port) {
+	init(arg_ip_addr, arg_port);
+	bind_server();
 }
 
-void UDPServer::bind_server(int arg_server_port, const char *arg_server_addr) {
+void UDPServer::init(const char *arg_ip_addr, int arg_port) {
+	int status;
 
-	server_socket = create_udp_socket();
-	status = setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &g_reuse, sizeof(int));
-	handle_failure(status, "Setsockopt reuse error: UDP server");	
-	server_addr.assign(arg_server_addr);
-	server_port = arg_server_port;
-	bzero((char *) &server_sock_addr, sizeof(server_sock_addr));
-	server_sock_addr.sin_family = AF_INET;  	
-	server_sock_addr.sin_port = htons(server_port);
-	status = inet_aton(arg_server_addr, &server_sock_addr.sin_addr);	
+	port = arg_port;
+	ip_addr.assign(arg_ip_addr);
+	bzero((char *) &sock_addr, sizeof(sock_addr));
+	sock_addr.sin_family = AF_INET;  	
+	sock_addr.sin_port = htons(port);
+	status = inet_aton(ip_addr.c_str(), &sock_addr.sin_addr);	
 	if (status == 0) {
-		cout << "ERROR: Invalid IP address" << endl;
+		cout << "inet_aton error" << endl;
 		exit(EXIT_FAILURE);
-	}
-	status = bind(server_socket, (struct sockaddr*)&server_sock_addr, sizeof(server_sock_addr));
-	handle_failure(status, "Bind error: UDP server");	
+	}	
 }
 
-void UDPServer::write_data(struct sockaddr_in &client_sock_addr, Packet &pkt){
-	while(1){
-		status = sendto(server_socket, pkt.data, pkt.data_len, 0, (sockaddr*)&client_sock_addr, g_addr_len);
-		if(errno == EPERM){
+void UDPServer::bind_server() {
+	int status;
+
+	status = bind(conn_fd, (struct sockaddr*)&sock_addr, sizeof(sock_addr));
+	handle_failure(status, "Bind error");	
+}
+
+void UDPServer::snd(struct sockaddr_in &dst_sock_addr, Packet &pkt){
+	int status;
+
+	while (1) {
+		status = sendto(conn_fd, pkt.data, pkt.data_len, 0, (sockaddr*)&dst_sock_addr, g_sock_addr_len);
+		if (errno == EPERM) {
 			errno = 0;
 			usleep(1000);
 			continue;
 		}
-		else{
+		else {
 			break;
 		}
 	}
-	handle_error(status, "Sendto error: UDP server");
+	handle_error(status, "Sendto error");
 }
 
-void UDPServer::print_status(const char *server_name){
-	string arg;
+void SCTPServer::handle_failure(int arg, const char *c_msg) {
+	string msg(c_msg);
 
-	arg.assign(server_name);
-	arg = arg + " SERVER STARTED on port " + to_string(server_port);		
-	cout<<"-------------------------------------------"<<endl;
-	cout<<arg<<endl;
-	cout<<"-------------------------------------------"<<endl;	
+	msg = msg + ": UDP server";
+	if (arg < 0) {
+		perror(msg.c_str());
+		exit(EXIT_FAILURE);
+	}
+}
+
+void SCTPServer::handle_error(int arg, const char *c_msg) {
+	string msg(c_msg);
+
+	msg = msg + ": UDP server";
+	if (arg < 0) {
+		perror(msg.c_str());
+	}
 }
 
 UDPServer::~UDPServer() {
-	
-	if (server_socket >= 0)
-		close(server_socket);
+	close(conn_fd);
 }

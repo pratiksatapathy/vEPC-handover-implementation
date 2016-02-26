@@ -4,8 +4,6 @@
 #include "utils.h"
 #include "packet.h"
 
-using namespace std;
-
 class SCTPServer {
 public:
 	/* Address parameters */
@@ -27,8 +25,8 @@ public:
 	pthread_cond_t qfull;
 
 	SCTPServer();
-	void run(int, string, int, void (*)(int));
-	void init(int, string, int, void (*)(int));
+	void run(const char*, int, int, void (*)(int));
+	void init(const char*, int, int, void (*)(int));
 	void create_workers();
 	void worker_func();
 	void bind_server();
