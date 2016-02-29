@@ -7,16 +7,15 @@
 #include "diameter.h"
 
 #define IP_HDR_LEN 20
-#define TCP_HDR_LEN 20
 
 class Packet {
 public:
-	Gtpv1 gtpu_hdr;
 	Gtpv2 gtpc_hdr;
+	Gtpv1 gtpu_hdr;
 	S1ap s1ap_hdr;
 	Diameter diameter_hdr;
 	uint8_t *data;
-	int data_pos;
+	int data_ptr;
 	int len;
 	
 	Packet();
@@ -24,32 +23,31 @@ public:
 	friend void swap(Packet&, Packet&);
 	Packet& operator=(Packet);
 	Packet(Packet&&);
-
-
-	void add_gtpc_hdr(uint16_t);
-	void add_gtpu_hdr(uint16_t);
-	void add_s1ap_hdr();
-
 	void add_data(int);
 	void add_data(uint16_t);
 	void add_data(unsigned long long);
 	void add_data(uint8_t*, int);	
 	void add_data(const char*);	
 	void add_data(string);
-
-	void copy_gtpc_hdr();
-	void copy_gtpu_hdr();
-
-	void copy_data(int&);
-	void copy_data(uint16_t&);
-	void copy_data(unsigned long long&);
-	void copy_data(uint8_t*, int&);	
-	void copy_data(char*, int&);	
-	void copy_data(string&, int&);
-
-	
+	void add_data(Gtpv2);
+	void add_data(Gtpv1);
+	void add_data(S1ap);
+	void add_data(Diameter);
+	void add_gtpc_hdr(uint8_t, uint16_t, uint32_t);
+	void add_gtpu_hdr(uint8_t, uint16_t, uint32_t);
+	void add_s1ap_hdr(uint8_t, uint16_t, uint32_t, uint32_t);
+	void add_diameter_hdr(uint8_t, uint16_t);
+	void rem_data(int&);
+	void rem_data(uint16_t&);
+	void rem_data(unsigned long long&);
+	void rem_data(uint8_t*, int&);	
+	void rem_data(char*, int&);	
+	void rem_data(string&, int&);
+	void rem_gtpc_hdr();
+	void rem_gtpu_hdr();
+	void rem_s1ap_hdr();
+	void rem_diameter_hdr();
 	void clear_data();
-
 	~Packet();
 };
 

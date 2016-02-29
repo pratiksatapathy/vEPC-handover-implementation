@@ -1,22 +1,19 @@
 #include "packet.h"
 
 Packet::Packet() {
-	
-	gtpc_hdr.cteid = -1;
-	gtpu_hdr.uteid = -1;
 	data = allocate_uint8_mem(BUF_SIZE);
-	data_len = 0;
-	curr_pos = 0;
+	data_ptr = 0;
+	len = 0;
 }
 
 Packet::Packet(const Packet &src_obj) {
-	
-	data = allocate_uint8_mem(BUF_SIZE);
 	gtpc_hdr = src_obj.gtpc_hdr;
 	gtpu_hdr = src_obj.gtpu_hdr;
-	memmove(data, src_obj.data, src_obj.data_len);
-	data_len = src_obj.data_len;
-	curr_pos = src_obj.curr_pos;
+	s1ap_hdr = src_obj.s1ap_hdr;
+	diameter_hdr = src_obj.diameter_hdr;
+	data = allocate_uint8_mem(BUF_SIZE);
+	data_ptr = src_obj.data_ptr;
+	len = src_obj.len;
 }
 
 void swap(Packet &src_obj, Packet &dst_obj) {
@@ -24,171 +21,177 @@ void swap(Packet &src_obj, Packet &dst_obj) {
 
 	swap(src_obj.gtpc_hdr, dst_obj.gtpc_hdr);
 	swap(src_obj.gtpu_hdr, dst_obj.gtpu_hdr);
+	swap(src_obj.s1ap_hdr, dst_obj.s1ap_hdr);
+	swap(src_obj.diameter_hdr, dst_obj.diameter_hdr);
 	swap(src_obj.data, dst_obj.data);
-	swap(src_obj.data_len, dst_obj.data_len);
-	swap(src_obj.curr_pos, dst_obj.curr_pos);
+	swap(src_obj.data_ptr, dst_obj.data_ptr);
+	swap(src_obj.len, dst_obj.len);
 }
 
 Packet& Packet::operator=(Packet src_obj) {
-	
 	swap(*this, src_obj);
 	return *this;	
 }
 
 Packet::Packet(Packet &&src_obj)
 	:Packet() {
-
 	swap(*this, src_obj);	
 }
 
-void Packet::add_gtpc_hdr(uint16_t cteid) {
-
-	add_data(cteid);
-}
-
-void Packet::add_gtpu_hdr(uint16_t uteid) {
-
-	add_data(uteid);
-}
-
 void Packet::add_data(int arg) {
-	int len = sizeof(int);
+	int data_len = sizeof(int);
 
-	memmove(data + curr_pos, &arg, len * sizeof(uint8_t));
-	data_len += len;
-	curr_pos += len;
+	memmove(data + data_ptr, &arg, data_len * sizeof(uint8_t));
+	len += data_len;
+	data_ptr += data_len;
 }
 
 void Packet::add_data(uint16_t arg) {
-	int len = sizeof(uint16_t);
+	int data_len = sizeof(uint16_t);
 	
-	memmove(data + curr_pos, &arg, len * sizeof(uint8_t));
-	data_len += len;
-	curr_pos += len;
+	memmove(data + data_ptr, &arg, data_len * sizeof(uint8_t));
+	len += data_len;
+	data_ptr += data_len;
 }
 
 void Packet::add_data(unsigned long long arg) {
-	int len = sizeof(unsigned long long);
+	int data_len = sizeof(unsigned long long);
 
-	memmove(data + curr_pos, &arg, len * sizeof(uint8_t));
-	data_len += len;
-	curr_pos += len;
+	memmove(data + data_ptr, &arg, data_len * sizeof(uint8_t));
+	len += data_len;
+	data_ptr += data_len;
 }
 
-void Packet::add_data(uint8_t *message, int len) {
-	
-	memmove(data + curr_pos, message, len * sizeof(uint8_t));
-	data_len += len;
-	curr_pos += len;
+void Packet::add_data(uint8_t *message, int data_len) {
+	memmove(data + data_ptr, message, data_len * sizeof(uint8_t));
+	len += data_len;
+	data_ptr += data_len;
 }
 
 void Packet::add_data(const char *message) {
-	int len = strlen(message);
+	int data_len = strlen(message);
 	
-	memmove(data + curr_pos, message, len * sizeof(uint8_t));
-	data_len += len;
-	curr_pos += len;
+	memmove(data + data_ptr, message, data_len * sizeof(uint8_t));
+	len += data_len;
+	data_ptr += data_len;
 }
 
 void Packet::add_data(string message) {
-	int len = message.size();
+	int data_len = message.size();
 
-	memmove(data + curr_pos, message.c_str(), len * sizeof(uint8_t));
-	data_len += len;
-	curr_pos += len;
+	memmove(data + data_ptr, message.c_str(), data_len * sizeof(uint8_t));
+	len += data_len;
+	data_ptr += data_len;
 }
 
-void Packet::copy_gtpc_hdr() {
+void Packet::add_gtpc_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
+	int data_len = GTPV2_HDR_LEN;
 
-	copy_data(gtpc_hdr.cteid);
+	gtpc_hdr.init(msg_type, msg_len, teid);
+	memmove(data + data_ptr, &gtpc_hdr, data_len * sizeof(uint8_t));
+	len += data_len;
+	data_ptr += data_len;	
 }
 
-void Packet::copy_gtpu_hdr() {
+void Packet::add_gtpu_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
+	int data_len = GTPV1_HDR_LEN;
 
-	copy_data(gtpu_hdr.uteid);
+	gtpu_hdr.init(msg_type, msg_len, teid);
+	memmove(data + data_ptr, &gtpu_hdr, data_len * sizeof(uint8_t));
+	len += data_len;
+	data_ptr += data_len;
 }
 
-void Packet::copy_data(int &arg){
-	int len = sizeof(int);
+void Packet::add_s1ap_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t enodeb_ue_id, uint32_t mme_ue_id) {
+	int data_len = S1AP_HDR_LEN;
 
-	memmove(&arg, data + curr_pos, len * sizeof(uint8_t));
-	curr_pos += len;
+	s1ap.init(msg_type, msg_len, enodeb_ue_id, mme_ue_id);
+	memmove(data + data_ptr, &s1ap_hdr, data_len * sizeof(uint8_t));
+	len += data_len;
+	data_ptr += data_len;
 }
 
-void Packet::copy_data(uint16_t &arg){
-	int len = sizeof(uint16_t);
+void Packet::add_diameter_hdr(uint8_t msg_type, uint16_t msg_len {
+	int data_len = DIAMETER_HDR_LEN;
 
-	memmove(&arg, data + curr_pos, len * sizeof(uint8_t));
-	curr_pos += len;
+	diameter.init(msg_type, msg_len);
+	memmove(data + data_ptr, &diameter_hdr, data_len * sizeof(uint8_t));
+	len += data_len;
+	data_ptr += data_len;
 }
 
-void Packet::copy_data(unsigned long long &arg){
-	int len = sizeof(unsigned long long);
+void Packet::rem_data(int &arg){
+	int data_len = sizeof(int);
 
-	memmove(&arg, data + curr_pos, len * sizeof(uint8_t));
-	curr_pos += len;
+	memmove(&arg, data + data_ptr, data_len * sizeof(uint8_t));
+	data_ptr += data_len;
 }
 
-void Packet::copy_data(uint8_t *message, int &len){
+void Packet::rem_data(uint16_t &arg){
+	int data_len = sizeof(uint16_t);
 
-	memmove(message, data + curr_pos, len * sizeof(uint8_t));
-	curr_pos += len;
+	memmove(&arg, data + data_ptr, data_len * sizeof(uint8_t));
+	data_ptr += data_len;
 }
 
-void Packet::copy_data(char *message, int &len){
+void Packet::rem_data(unsigned long long &arg){
+	int data_len = sizeof(unsigned long long);
 
-	memmove(message, data + curr_pos, len * sizeof(uint8_t));
-	curr_pos += len;
+	memmove(&arg, data + data_ptr, data_len * sizeof(uint8_t));
+	data_ptr += data_len;
 }
 
-void Packet::copy_data(string &arg, int &len){
-
-	memmove(&arg, data + curr_pos, len * sizeof(uint8_t));
-	curr_pos += len;
+void Packet::rem_data(uint8_t *message, int &data_len){
+	memmove(message, data + data_ptr, data_len * sizeof(uint8_t));
+	data_ptr += data_len;
 }
 
-void Packet::add_metadata(int type, int subtype, int ue_num){
-
-	clear_data();
-	add_data(type);
-	add_data(subtype);
-	add_data(ue_num);
+void Packet::rem_data(char *message, int &data_len){
+	memmove(message, data + data_ptr, data_len * sizeof(uint8_t));
+	data_ptr += data_len;
 }
 
-void Packet::copy_metadata(int &type, int &subtype, int &ue_num){
-
-	copy_data(type);
-	copy_data(subtype);
-	copy_data(ue_num);
+void Packet::rem_data(string &arg, int &data_len){
+	memmove(&arg, data + data_ptr, data_len * sizeof(uint8_t));
+	data_ptr += data_len;
 }
 
-void Packet::copy_pkts(Packet &dst, Packet &src) {
+void Packet::rem_gtpc_hdr(){
+	int data_len = GTPV2_HDR_LEN;
 
-	dst.clear_data();
-	dst.add_data(src.data, src.data_len);
+	memmove(&gtpc_hdr, data + data_ptr, data_len * sizeof(uint8_t));
+	data_ptr += data_len;
 }
 
-void Packet::copy_frompkt(Packet &src) {
+void Packet::rem_gtpu_hdr(){
+	int data_len = GTPV1_HDR_LEN;
 
-	this->clear_data();
-	this->add_data(src.data, src.data_len);
+	memmove(&gtpu_hdr, data + data_ptr, data_len * sizeof(uint8_t));
+	data_ptr += data_len;
 }
 
-void Packet::copy_topkt(Packet &dst) {
+void Packet::rem_s1ap_hdr(){
+	int data_len = S1AP_HDR_LEN;
 
-	dst.clear_data();
-	dst.add_data(data, data_len);
+	memmove(&s1ap_hdr, data + data_ptr, data_len * sizeof(uint8_t));
+	data_ptr += data_len;
+}
+
+void Packet::rem_diameter_hdr(){
+	int data_len = DIAMETER_HDR_LEN;
+
+	memmove(&diameter_hdr, data + data_ptr, data_len * sizeof(uint8_t));
+	data_ptr += data_len;
 }
 
 void Packet::clear_data() {
-	int len = BUF_SIZE;
+	int data_len = BUF_SIZE;
 	
-	memset(data, 0, len * sizeof (uint8_t));	
-	data_len = 0;
-	curr_pos = 0;
+	memset(data, 0, data_len * sizeof (uint8_t));	
+	len = 0;
+	data_ptr = 0;
 }
 
-Packet::~Packet() {
-	
+Packet::~Packet() {	
 	free(data);
 }
