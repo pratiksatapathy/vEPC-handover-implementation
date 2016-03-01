@@ -65,24 +65,6 @@ uint8_t* allocate_uint8_mem(int len) {
 	}
 }
 
-struct ip* allocate_ip_mem(int len) {
-	struct ip *ip_hdr;
-
-	if (len <= 0) {
-		print("ERROR: Given_memory_length<=0");
-		exit(EXIT_FAILURE);
-	}
-	ip_hdr = (ip*)malloc(len * sizeof (uint8_t));
-	if (ip_hdr != NULL) {
-		memset(ip_hdr, 0, len * sizeof (uint8_t));
-		return ip_hdr;
-	} 
-	else {
-		print("ERROR: Memory allocation failure");
-		exit (EXIT_FAILURE);
-	}
-}
-
 void time_check(time_t start_time, double duration_time, bool time_exceeded) {
 	double elapsed_time;
 

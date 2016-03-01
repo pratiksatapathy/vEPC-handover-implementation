@@ -9,14 +9,13 @@ SctpServer::SctpServer() {
 	pthread_mutex_init(&mux, NULL);
 	pthread_cond_init(&qempty, NULL);
 	pthread_cond_init(&qfull, NULL);
-	clear_queue();	
-	status = setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &g_reuse, sizeof(int));
-	handle_failure(status, "Setsockopt reuse error");		
 }
 
 void SctpServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_count, void serve_client(int)) {
 	init(arg_port, arg_ip_addr, arg_workers_count, serve_client);
 	create_workers();
+	clear_queue();	
+	set_sock_reuse();
 	bind_server();
 	accept_clients();
 }
@@ -71,6 +70,19 @@ void SctpServer::worker_func() {
 			close(conn_fd);
 		}
 	}
+}
+
+void SctpServer::clear_queue() {
+	while (!conn_q.empty()) {
+		conn_q.pop();
+	}
+}
+
+void UdpServer::set_sock_reuse() {
+	int status;
+
+	status = setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &g_reuse, sizeof(int));
+	handle_failure(status, "Setsockopt reuse error");
 }
 
 void SctpServer::bind_server() {
@@ -130,12 +142,6 @@ void SctpServer::rcv(int conn_fd, Packet &pkt) {
 	handle_error(status, "Read error");
 	pkt.data_ptr = 0;
 	pkt.len = status;
-}
-
-void SctpServer::clear_queue() {
-	while (!conn_q.empty()) {
-		conn_q.pop();
-	}
 }
 
 void SctpServer::handle_failure(int arg, const char *c_msg) {

@@ -32,11 +32,12 @@ public:
 	void init(const char*, int, int, void (*)(int));
 	void create_workers();
 	void worker_func();
+	void clear_queue();
+	void set_sock_reuse();
 	void bind_server();
 	void accept_clients();
 	void snd(int, Packet);
 	void rcv(int, Packet&);
-	void clear_queue();
 	void handle_failure(int, const char*);
 	void handle_error(int, const char*);	
 	~SctpServer();

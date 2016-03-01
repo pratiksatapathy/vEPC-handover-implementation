@@ -24,38 +24,11 @@
 /* (C) strlen */
 #include <string.h>
 
-/* (C) read, write, close */
-#include <unistd.h>
-
-/* (C) socket */
-#include <sys/socket.h>
-
-/* (C) open */
-#include <fcntl.h>
-
-/* (C) select */
-#include <sys/select.h>
-
-/* (C) inet_aton, inet_ntop */
-#include <arpa/inet.h>
-
 /* (C) signal */
 #include <signal.h>
 
 /* (C) pthread_create, pthread_kill */
 #include <pthread.h>
-
-/* (C) ip_hdr */
-#include <netinet/ip.h>
-
-/* (C) ioctl */
-#include <sys/ioctl.h>
-
-/* (C) IFF_TUN, IFF_NO_PI, TUNSETIFF */
-#include <linux/if_tun.h>
-
-/* (C) ifreq, IFNAMSIZ */
-#include <net/if.h>         
 
 using namespace std;
 
@@ -82,7 +55,6 @@ extern struct timeval g_timeout;
 string ulltos(unsigned long long);
 char* allocate_str_mem(int);
 uint8_t* allocate_uint8_mem(int);
-struct ip* allocate_ip_mem(int);
-void time_check(time_t&, double&, bool&);
+void time_check(time_t, double, bool);
 
 #endif /* UTILS_H */

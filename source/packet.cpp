@@ -195,3 +195,21 @@ void Packet::clear_pkt() {
 Packet::~Packet() {	
 	free(data);
 }
+
+struct ip* allocate_ip_hdr_mem(int len) {
+	struct ip *ip_hdr;
+
+	if (len <= 0) {
+		print("ERROR: Given_memory_length<=0");
+		exit(EXIT_FAILURE);
+	}
+	ip_hdr = (ip*)malloc(len * sizeof (uint8_t));
+	if (ip_hdr != NULL) {
+		memset(ip_hdr, 0, len * sizeof (uint8_t));
+		return ip_hdr;
+	} 
+	else {
+		print("ERROR: Memory allocation failure");
+		exit (EXIT_FAILURE);
+	}
+}

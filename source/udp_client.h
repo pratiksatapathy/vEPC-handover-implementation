@@ -2,29 +2,34 @@
 #define UDP_CLIENT_H
 
 #include "utils.h"
+#include "gtp.h"
+#include "s1ap.h"
+#include "diameter.h"
 #include "packet.h"
 
-struct UDPClient {
-	int client_socket;
-	int client_port;
-	string client_addr;
-	struct sockaddr_in client_sock_addr;
-	
+class UdpClient {
+public:
+	/* Address parameters */
+	int conn_fd;
+	int port;
+	struct sockaddr_in sock_addr;
+
+	/* Server parameters */
 	int server_port;
-	string server_addr;
+	string server_ip_addr;
 	struct sockaddr_in server_sock_addr;
 
-	int status;
-	Packet pkt;
-	
-	UDPClient();
-	int create_udp_socket();
+	UdpClient();
+	void conn(const char*, int);
+	void init(const char*, int);
+	void set_timeout();
 	void bind_client();
-	void set_server_details(int, const char*);
-	void read_data(bool&);
-	void write_data();	
-	void close_client();
-	~UDPClient();		
+	void set_port();
+	void snd(Packet);
+	void rcv(Packet&);
+	void handle_failure(int, const char*);
+	void handle_error(int, const char*);
+	~UdpClient();		
 };
 
-#endif //UDP_CLIENT_H
+#endif /* UDP_CLIENT_H */

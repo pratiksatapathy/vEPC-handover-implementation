@@ -6,6 +6,9 @@
 #include "s1ap.h"
 #include "diameter.h"
 
+/* (C) ip_hdr */
+#include <netinet/ip.h>
+
 #define BUF_SIZE 1024
 #define IP_HDR_LEN 20
 
@@ -47,5 +50,7 @@ public:
 	void clear_pkt();
 	~Packet();
 };
+
+struct ip* allocate_ip_hdr_mem(int);
 
 #endif /* PACKET_H */
