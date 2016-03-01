@@ -141,17 +141,17 @@ void Packet::extract_item(unsigned long long &arg){
 	data_ptr += data_len;
 }
 
-void Packet::extract_item(uint8_t *message, int &data_len){
+void Packet::extract_item(uint8_t *message, int data_len){
 	memmove(message, data + data_ptr, data_len * sizeof(uint8_t));
 	data_ptr += data_len;
 }
 
-void Packet::extract_item(char *message, int &data_len){
+void Packet::extract_item(char *message, int data_len){
 	memmove(message, data + data_ptr, data_len * sizeof(uint8_t));
 	data_ptr += data_len;
 }
 
-void Packet::extract_item(string &arg, int &data_len){
+void Packet::extract_item(string &arg, int data_len){
 	memmove(&arg, data + data_ptr, data_len * sizeof(uint8_t));
 	data_ptr += data_len;
 }

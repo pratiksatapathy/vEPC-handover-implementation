@@ -83,7 +83,7 @@ struct ip* allocate_ip_mem(int len) {
 	}
 }
 
-void time_check(time_t &start_time, double &duration_time, bool &time_exceeded) {
+void time_check(time_t start_time, double duration_time, bool time_exceeded) {
 	double elapsed_time;
 
 	if ((elapsed_time = difftime(time(0), start_time)) > duration_time) {

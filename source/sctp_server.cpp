@@ -1,23 +1,27 @@
 #include "sctp_server.h"
 
-SCTPServer::SCTPServer() {
-	clear_queue();	
+SctpServer::SctpServer() {
+	int status;
+
+	listen_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
+	handle_failure(listen_fd, "Socket error");
 	max_qsize = INT_MAX;
 	pthread_mutex_init(&mux, NULL);
 	pthread_cond_init(&qempty, NULL);
 	pthread_cond_init(&qfull, NULL);
-	listen_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
-	handle_failure(listen_fd, "Socket error");
+	clear_queue();	
+	status = setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &g_reuse, sizeof(int));
+	handle_failure(status, "Setsockopt reuse error");		
 }
 
-void SCTPServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_count, void serve_client(int)) {
+void SctpServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_count, void serve_client(int)) {
 	init(arg_port, arg_ip_addr, arg_workers_count, serve_client);
 	create_workers();
 	bind_server();
 	accept_clients();
 }
 
-void SCTPServer::init(const char *arg_ip_addr, int arg_port, int arg_workers_count, void arg_serve_client(int)) {
+void SctpServer::init(const char *arg_ip_addr, int arg_port, int arg_workers_count, void arg_serve_client(int)) {
 	int status;
 
 	port = arg_port;
@@ -27,7 +31,7 @@ void SCTPServer::init(const char *arg_ip_addr, int arg_port, int arg_workers_cou
 	sock_addr.sin_port = htons(port);
 	status = inet_aton(ip_addr.c_str(), &sock_addr.sin_addr);	
 	if (status == 0) {
-		cout << "inet_aton error" << endl;
+		cout << "inet_aton error: SCTP server" << endl;
 		exit(EXIT_FAILURE);
 	}	
 	workers_count = arg_workers_count;	
@@ -35,15 +39,15 @@ void SCTPServer::init(const char *arg_ip_addr, int arg_port, int arg_workers_cou
 	serve_client = arg_serve_client;
 }
 
-void SCTPServer::create_workers() {
+void SctpServer::create_workers() {
 	int i;
 
 	for (i = 0; i < workers_count; i++) {
-		workers[i] = thread(&SCTPServer::worker_func, this);
+		workers[i] = thread(&SctpServer::worker_func, this);
 	}	
 }
 
-void SCTPServer::worker_func() {
+void SctpServer::worker_func() {
 	int status;
 	int conn_fd;
 
@@ -69,14 +73,14 @@ void SCTPServer::worker_func() {
 	}
 }
 
-void SCTPServer::bind_server() {
+void SctpServer::bind_server() {
 	int status;
 	
 	status = bind(listen_fd, (struct sockaddr*)&sock_addr, sizeof(sock_addr));
 	handle_failure(status, "Bind error");
 }
 
-void SCTPServer::accept_clients() {
+void SctpServer::accept_clients() {
 	int conn_fd;
 	int status;
 	socklen_t sock_addr_len;
@@ -101,13 +105,40 @@ void SCTPServer::accept_clients() {
 	}	
 }
 
-void SCTPServer::clear_queue() {
+void SctpServer::snd(int conn_fd,  Packet pkt) {
+	int status;
+
+	while (1) {
+		status = write(conn_fd, pkt.data, pkt.len);
+		if (errno == EPERM) {
+			errno = 0;
+			usleep(1000);
+			continue;
+		}
+		else {
+			break;
+		}		
+	}
+	handle_error(status, "Write error");
+}
+
+void SctpServer::rcv(int conn_fd, Packet &pkt) {
+	int status;
+
+	pkt.clear_pkt();
+	status = read(conn_fd, pkt.data, BUF_SIZE);
+	handle_error(status, "Read error");
+	pkt.data_ptr = 0;
+	pkt.len = status;
+}
+
+void SctpServer::clear_queue() {
 	while (!conn_q.empty()) {
 		conn_q.pop();
 	}
 }
 
-void SCTPServer::handle_failure(int arg, const char *c_msg) {
+void SctpServer::handle_failure(int arg, const char *c_msg) {
 	string msg(c_msg);
 	msg = msg + ": SCTP server";
 	if (arg < 0) {
@@ -116,7 +147,7 @@ void SCTPServer::handle_failure(int arg, const char *c_msg) {
 	}
 }
 
-void SCTPServer::handle_error(int arg, const char *c_msg) {
+void SctpServer::handle_error(int arg, const char *c_msg) {
 	string msg(c_msg);
 	msg = msg + ": SCTP server";
 	if (arg < 0) {
@@ -124,7 +155,7 @@ void SCTPServer::handle_error(int arg, const char *c_msg) {
 	}
 }
 
-SCTPServer::~SCTPServer() {
+SctpServer::~SctpServer() {
 	int i;
 
 	for (i = 0; i < workers_count; i++) {

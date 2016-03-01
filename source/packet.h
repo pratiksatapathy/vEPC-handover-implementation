@@ -6,6 +6,7 @@
 #include "s1ap.h"
 #include "diameter.h"
 
+#define BUF_SIZE 1024
 #define IP_HDR_LEN 20
 
 class Packet {
@@ -36,9 +37,9 @@ public:
 	void extract_item(int&);
 	void extract_item(uint16_t&);
 	void extract_item(unsigned long long&);
-	void extract_item(uint8_t*, int&);	
-	void extract_item(char*, int&);	
-	void extract_item(string&, int&);
+	void extract_item(uint8_t*, int);	
+	void extract_item(char*, int);	
+	void extract_item(string&, int);
 	void extract_gtpc_hdr();
 	void extract_gtpu_hdr();
 	void extract_s1ap_hdr();
@@ -47,4 +48,4 @@ public:
 	~Packet();
 };
 
-#endif //PACKET_H
+#endif /* PACKET_H */

@@ -59,9 +59,6 @@
 
 using namespace std;
 
-#define MAX_CONNS 10000
-#define BUF_SIZE 1024
-
 extern int g_reuse;
 extern int g_freeport;
 extern int g_enodeb_port;
@@ -88,4 +85,4 @@ uint8_t* allocate_uint8_mem(int);
 struct ip* allocate_ip_mem(int);
 void time_check(time_t&, double&, bool&);
 
-#endif //UTILS_H
+#endif /* UTILS_H */
