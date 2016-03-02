@@ -17,8 +17,22 @@ string g_pgw_addr = "192.168.1.76";
 string g_pgw_dlink_addr = "192.168.1.76";
 string g_public_sink_addr = "192.168.1.78";
 string g_private_sink_addr = "172.16.0.2";
-socklen_t g_sock_addr_len = sizeof(sockaddr_in);
 struct timeval g_timeout = {1, 0};
+
+/* Action - Exit the program */
+void handle_type1_error(int arg, const char *msg) {
+	if (arg < 0) {
+		perror(msg);
+		exit(-1);
+	}	
+}
+
+/* Action - Nothing */
+void handle_type2_error(int arg, const char *msg) {
+	if (arg < 0) {
+		perror(msg);
+	}	
+}
 
 string ulltos(unsigned long long arg) {
 	stringstream out;
@@ -33,8 +47,7 @@ char* allocate_str_mem(int len) {
 	char *tem;
 
 	if (len <= 0) {
-		cout << "Memory length error: allocate_str_mem" << endl;
-		exit(EXIT_FAILURE);
+		handle_type1_error(-1, "Memory length error: allocate_str_mem");
 	}
 	tem = (char*)malloc(len * sizeof (char));
 	if (tem != NULL) {
@@ -42,8 +55,7 @@ char* allocate_str_mem(int len) {
 		return tem;
 	}
 	else {
-		cout << "Memory allocation error: allocate_str_mem" << endl;
-		exit(EXIT_FAILURE);
+		handle_type1_error(-1, "Memory allocation error: allocate_str_mem");
 	}
 }
 
@@ -51,8 +63,7 @@ uint8_t* allocate_uint8_mem(int len) {
 	uint8_t *tem;
 
 	if (len <= 0) {
-		cout << "Memory length error: allocate_uint8_mem" << endl;
-		exit(EXIT_FAILURE);
+		handle_type1_error(-1, "Memory length error: allocate_uint8_mem");
 	}
 	tem = (uint8_t*)malloc(len * sizeof (uint8_t));
 	if (tem != NULL) {
@@ -60,8 +71,7 @@ uint8_t* allocate_uint8_mem(int len) {
 		return tem;
 	} 
 	else {
-		cout << "Memory allocation error: allocate_uint8_mem" << endl;
-		exit (EXIT_FAILURE);
+		handle_type1_error(-1, "Memory allocation error: allocate_uint8_mem");
 	}
 }
 

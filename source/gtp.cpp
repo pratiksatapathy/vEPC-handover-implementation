@@ -1,4 +1,4 @@
-#include "gtp.cpp"
+#include "gtp.h"
 
 Gtpv1::Gtpv1() {
 	flags = (3 << 4); /* flags : Binary(00110000) */

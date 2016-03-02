@@ -1,6 +1,6 @@
 #---------------Final Target----------------#
 
-all:	ran.o mme.o hss.o sgw.o pgw.o sink.o
+all:	utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_server.o sctp_client.o udp_server.o udp_client.o
 
 #-------------------------------------------#
 
@@ -9,83 +9,55 @@ all:	ran.o mme.o hss.o sgw.o pgw.o sink.o
 
 G++ = g++ -std=c++0x -std=c++11 -std=gnu++0x -ggdb
 
-RAN_H	= utils.h packet.h udp_server.h udp_client.h ran_data.h ue.h enodeb.h
-RAN_CPP = utils.cpp packet.cpp udp_server.cpp udp_client.cpp ran_data.cpp ue.cpp enodeb.cpp
-
-MME_H = utils.h packet.h udp_server.h udp_client.h mme_data.h mme.h
-MME_CPP = utils.cpp packet.cpp udp_server.cpp udp_client.cpp mme_data.cpp mme.cpp
-
-HSS_H = utils.h packet.h udp_server.h mysql.h hss.h
-HSS_CPP = utils.cpp packet.cpp udp_server.cpp mysql.cpp hss.cpp
-
-SGW_H = utils.h packet.h udp_server.h udp_client.h sgw_data.h sgw.h
-SGW_CPP = utils.cpp packet.cpp udp_server.cpp udp_client.cpp sgw_data.cpp sgw.cpp
-
-PGW_H = utils.h packet.h udp_server.h udp_client.h pgw_data.h pgw_dlink.h pgw.h
-PGW_CPP = utils.cpp packet.cpp udp_server.cpp udp_client.cpp pgw_data.cpp pgw_dlink.cpp pgw.cpp
-
-SINK_H = utils.h packet.h udp_server.h udp_client.h sink_monitor.h
-SINK_CPP = utils.cpp packet.cpp udp_server.cpp udp_client.cpp sink_monitor.cpp
-
-TAGS = -w -o
-
 #-------------------------------------------#
 
 
 #---------Prerequisites and Recipes---------#
 
-RAN_P = ran.h ran.cpp $(RAN_H) $(RAN_CPP)
-RAN_R = $(G++) ran.cpp $(TAGS) ran.o $(RAN_CPP) -lpthread 
 
-
-MME_P = mme_server.h mme_server.cpp $(MME_H) $(MME_CPP)
-MME_R = $(G++) mme_server.cpp $(TAGS) mme.o $(MME_CPP) -lpthread 
-
-
-HSS_P = hss_server.h hss_server.cpp $(HSS_H) $(HSS_CPP)
-HSS_R = $(G++) hss_server.cpp $(TAGS) hss.o $(HSS_CPP) `mysql_config --cflags --libs`
-
-SGW_P = sgw_server.h sgw_server.cpp $(SGW_H) $(SGW_CPP)
-SGW_R = $(G++) sgw_server.cpp $(TAGS) sgw.o $(SGW_CPP) -lpthread 
-
-
-PGW_P = pgw_server.h pgw_server.cpp $(PGW_H) $(PGW_CPP)
-PGW_R = $(G++) pgw_server.cpp $(TAGS) pgw.o $(PGW_CPP) -lpthread 
-
-
-SINK_P = sink_server.h sink_server.cpp $(SINK_H) $(SINK_CPP)
-SINK_R = $(G++) sink_server.cpp $(TAGS) sink.o $(SINK_CPP) -lpthread
 
 #-------------------------------------------#
 
 
 #---------------Make Statements-------------#
 
-ran.o:	$(RAN_P)
-	$(RAN_R)
+utils.o:	utils.cpp
+	$(G++) -c utils.cpp
 
-mme.o:	$(MME_P)
-	$(MME_R)
-	
-hss.o:	$(HSS_P)
-	$(HSS_R)
+gtp.o:	gtp.cpp utils.h
+	$(G++) -c gtp.cpp
 
-sgw.o:	$(SGW_P)
-	$(SGW_R)
+s1ap.o:	s1ap.cpp utils.h
+	$(G++) -c s1ap.cpp
 
-pgw.o:	$(PGW_P)
-	$(PGW_R)
+diameter.o:	diameter.cpp utils.h
+	$(G++) -c diameter.cpp
 
-sink.o:	$(SINK_P)
-	$(SINK_R)
+packet.o:	packet.cpp utils.h gtp.h s1ap.h diameter.h
+	$(G++) -c packet.cpp
+
+network.o:	network.cpp utils.h
+	$(G++) -c network.cpp
+
+sctp_server.o:	sctp_server.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h
+	$(G++) -c sctp_server.cpp	
+
+sctp_client.o:	sctp_client.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h
+	$(G++) -c sctp_client.cpp
+
+udp_server.o:	udp_server.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h
+	$(G++) -c udp_server.cpp
+
+udp_client.o:	udp_client.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h
+	$(G++) -c udp_client.cpp
 
 clean:
-	rm -f ran.o mme.o hss.o sgw.o pgw.o sink.o *~
+	rm -f *~ *.o *.out
 
 #-------------------------------------------#
 
 #----------Special Commands-----------------#
 
-# make -k (To keep going even after encountering errors in making a former target)
+# make -k (To keep going on even after encountering errors in making a former target)
 
 #-------------------------------------------#

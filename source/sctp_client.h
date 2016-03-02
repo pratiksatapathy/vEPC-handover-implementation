@@ -6,6 +6,7 @@
 #include "s1ap.h"
 #include "diameter.h"
 #include "packet.h"
+#include "network.h"
 
 class SctpClient {
 public:
@@ -23,8 +24,6 @@ public:
 	void connect_with_server();
 	void snd(Packet);
 	void rcv(Packet&);
-	void handle_failure(int, const char*);
-	void handle_error(int, const char*);	
 	~SctpClient();
 };
 

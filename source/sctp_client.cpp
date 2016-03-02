@@ -2,7 +2,7 @@
 
 SctpClient::SctpClient() {
 	conn_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
-	handle_failure(conn_fd, "Socket error");
+	handle_type1_error(conn_fd, "Socket error");
 }
 
 void SctpClient::conn(const char *arg_server_ip_addr, int arg_server_port) {
@@ -15,21 +15,14 @@ void SctpClient::init(const char *arg_server_ip_addr, int arg_server_port) {
 
 	server_port = arg_server_port;
 	server_ip_addr.assign(arg_server_ip_addr);
-	bzero((void*)&server_sock_addr, sizeof(server_sock_addr));
-	server_sock_addr.sin_family = AF_INET;
-	server_sock_addr.sin_port = htons(server_port);
-	status = inet_aton(server_ip_addr.c_str(), &server_sock_addr.sin_addr);	
-	if (status == 0) {
-		cout << "inet_aton error: SCTP Client" << endl;
-		exit(EXIT_FAILURE);
-	}		
+	set_inet_sock_addr(server_ip_addr.c_str(), server_port, server_sock_addr);
 }
 
 void SctpClient::connect_with_server() {
 	int status;
 
 	status = connect(conn_fd, (struct sockaddr *)&server_sock_addr, sizeof(server_sock_addr));
-	handle_error(status, "Connect error");
+	handle_type2_error(status, "Connect error");
 }
 
 void SctpClient::snd(Packet pkt) {
@@ -46,7 +39,7 @@ void SctpClient::snd(Packet pkt) {
 			break;
 		}		
 	}
-	handle_error(status, "Write error");
+	handle_type2_error(status, "Write error");
 }
 
 void SctpClient::rcv(Packet &pkt) {
@@ -54,26 +47,9 @@ void SctpClient::rcv(Packet &pkt) {
 
 	pkt.clear_pkt();
 	status = read(conn_fd, pkt.data, BUF_SIZE);
-	handle_error(status, "Read error");
+	handle_type2_error(status, "Read error");
 	pkt.data_ptr = 0;
 	pkt.len = status;
-}
-
-void SctpClient::handle_failure(int, const char*) {
-	string msg(c_msg);
-	msg = msg + ": SCTP client";
-	if (arg < 0) {
-		perror(msg.c_str());
-		exit(-1);
-	}
-}
-
-void SctpClient::handle_error(int, const char*); {
-	string msg(c_msg);
-	msg = msg + ": SCTP client";
-	if (arg < 0) {
-		perror(msg.c_str());
-	}
 }
 
 SctpClient::~SctpClient() {

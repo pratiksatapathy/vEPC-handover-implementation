@@ -105,16 +105,16 @@ void Packet::append_gtpu_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid) 
 void Packet::append_s1ap_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t enodeb_ue_id, uint32_t mme_ue_id) {
 	int data_len = S1AP_HDR_LEN;
 
-	s1ap.init(msg_type, msg_len, enodeb_ue_id, mme_ue_id);
+	s1ap_hdr.init(msg_type, msg_len, enodeb_ue_id, mme_ue_id);
 	memmove(data + data_ptr, &s1ap_hdr, data_len * sizeof(uint8_t));
 	len += data_len;
 	data_ptr += data_len;
 }
 
-void Packet::append_diameter_hdr(uint8_t msg_type, uint16_t msg_len {
+void Packet::append_diameter_hdr(uint8_t msg_type, uint16_t msg_len) {
 	int data_len = DIAMETER_HDR_LEN;
 
-	diameter.init(msg_type, msg_len);
+	diameter_hdr.init(msg_type, msg_len);
 	memmove(data + data_ptr, &diameter_hdr, data_len * sizeof(uint8_t));
 	len += data_len;
 	data_ptr += data_len;
@@ -200,8 +200,7 @@ struct ip* allocate_ip_hdr_mem(int len) {
 	struct ip *ip_hdr;
 
 	if (len <= 0) {
-		print("ERROR: Given_memory_length<=0");
-		exit(EXIT_FAILURE);
+		handle_type1_error(-1, "Memory length error: allocate_ip_hdr_mem");
 	}
 	ip_hdr = (ip*)malloc(len * sizeof (uint8_t));
 	if (ip_hdr != NULL) {
@@ -209,7 +208,6 @@ struct ip* allocate_ip_hdr_mem(int len) {
 		return ip_hdr;
 	} 
 	else {
-		print("ERROR: Memory allocation failure");
-		exit (EXIT_FAILURE);
+		handle_type1_error(-1, "Memory allocation error: allocate_ip_hdr_mem");
 	}
 }

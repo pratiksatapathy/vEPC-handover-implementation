@@ -6,6 +6,7 @@
 #include "s1ap.h"
 #include "diameter.h"
 #include "packet.h"
+#include "network.h"
 
 class UdpServer {
 public:
@@ -18,12 +19,8 @@ public:
 	UdpServer();
 	void run(const char*, int);
 	void init(const char*, int);
-	void set_sock_reuse();
-	void bind_server();
 	void snd(struct sockaddr_in, Packet);
 	void rcv(struct sockaddr_in, Packet&);
-	void handle_failure(int, const char*);
-	void handle_error(int, const char*);	
 	~UdpServer();
 };
 

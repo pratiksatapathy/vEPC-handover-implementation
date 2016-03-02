@@ -6,6 +6,7 @@
 #include "s1ap.h"
 #include "diameter.h"
 #include "packet.h"
+#include "network.h"
 
 class UdpClient {
 public:
@@ -22,13 +23,9 @@ public:
 	UdpClient();
 	void conn(const char*, int);
 	void init(const char*, int);
-	void set_timeout();
-	void bind_client();
 	void set_port();
 	void snd(Packet);
 	void rcv(Packet&);
-	void handle_failure(int, const char*);
-	void handle_error(int, const char*);
 	~UdpClient();		
 };
 

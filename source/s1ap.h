@@ -14,7 +14,7 @@ public:
 	uint16_t msg_len;	
 
 	/* 24 - 55 S1AP eNodeB UE ID */
-	uint32_t enodeB_ue_id;
+	uint32_t enodeb_ue_id;
 
 	/* 56 - 87 S1AP eNodeB UE ID */
 	uint32_t mme_ue_id;

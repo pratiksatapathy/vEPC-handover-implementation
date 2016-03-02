@@ -1,13 +1,13 @@
 #ifndef PACKET_H
 #define PACKET_H
 
+/* (C) ip_hdr */
+#include <netinet/ip.h>
+
 #include "utils.h"
 #include "gtp.h"
 #include "s1ap.h"
 #include "diameter.h"
-
-/* (C) ip_hdr */
-#include <netinet/ip.h>
 
 #define BUF_SIZE 1024
 #define IP_HDR_LEN 20

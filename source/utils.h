@@ -4,9 +4,11 @@
 /* (C++) cout, endl */
 #include <iostream> 
 
-/* (C++) STL: string, vector, unordered map */
+/* (C++) STL: string, vector, queue, thread, unordered map */
 #include <string>
 #include <vector>
+#include <queue>
+#include <thread>
 #include <unordered_map>
 
 /* (C++) stringstream */
@@ -30,6 +32,9 @@
 /* (C) pthread_create, pthread_kill */
 #include <pthread.h>
 
+/* (C) INT_MAX */
+#include <limits.h>
+
 using namespace std;
 
 extern int g_reuse;
@@ -49,9 +54,10 @@ extern string g_pgw_addr;
 extern string g_pgw_dlink_addr;
 extern string g_public_sink_addr;
 extern string g_private_sink_addr;
-extern socklen_t g_sock_addr_len;
 extern struct timeval g_timeout;
 
+void handle_type1_error(int, const char*);
+void handle_type2_error(int, const char*);
 string ulltos(unsigned long long);
 char* allocate_str_mem(int);
 uint8_t* allocate_uint8_mem(int);
