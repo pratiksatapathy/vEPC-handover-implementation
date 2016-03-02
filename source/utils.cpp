@@ -9,14 +9,14 @@ int g_sgw_port = 7000;
 int g_pgw_port = 8000;
 int g_pgw_dlink_port = 9000;
 int g_public_sink_port = 10000;
-string g_enodeb_addr = "192.168.1.82";
-string g_mme_addr = "192.168.1.72";
-string g_hss_addr = "192.168.1.80";
-string g_sgw1_addr = "192.168.1.74";
-string g_pgw_addr = "192.168.1.76";
-string g_pgw_dlink_addr = "192.168.1.76";
-string g_public_sink_addr = "192.168.1.78";
-string g_private_sink_addr = "172.16.0.2";
+string g_enodeb_ip_addr = "192.168.1.82";
+string g_mme_ip_addr = "192.168.1.72";
+string g_hss_ip_addr = "192.168.1.80";
+string g_sgw1_ip_addr = "192.168.1.74";
+string g_pgw_ip_addr = "192.168.1.76";
+string g_pgw_dlink_ip_addr = "192.168.1.76";
+string g_public_sink_ip_addr = "192.168.1.78";
+string g_private_sink_ip_addr = "172.16.0.2";
 struct timeval g_timeout = {1, 0};
 
 /* Action - Exit the program */
