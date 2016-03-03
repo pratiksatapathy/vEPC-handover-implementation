@@ -1,5 +1,5 @@
-#ifndef MME_SERVER_H
-#define MME_SERVER_H
+#ifndef RAN_SIMULATOR_H
+#define RAN_SIMULATOR_H
 
 #include "utils.h"
 #include "gtp.h"
@@ -7,16 +7,15 @@
 #include "diameter.h"
 #include "packet.h"
 #include "network.h"
-#include "sctp_server.h"
 #include "sctp_client.h"
 #include "udp_client.h"
-#include "mme.h"
+#include "ran.h"
 
-extern SctpServer g_mme_server;
-extern int g_workers_count;
+extern int g_threads_count;
+extern vector<thread> g_threads;
 
 void check_usage(int);
 void init(char**);
 void run();
 
-#endif /* MME_SERVER_H */
+#endif /* RAN_SIMULATOR_H */

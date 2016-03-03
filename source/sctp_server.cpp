@@ -37,9 +37,10 @@ void SctpServer::init(const char *arg_ip_addr, int arg_port, int arg_workers_cou
 
 void SctpServer::create_workers() {
 	int i;
-	
+
 	for (i = 0; i < workers_count; i++) {
 		workers[i] = thread(&SctpServer::worker_func, this);
+		workers[i].detach();
 	}	
 }
 
@@ -137,12 +138,5 @@ void SctpServer::rcv(int conn_fd, Packet &pkt) {
 }
 
 SctpServer::~SctpServer() {
-	int i;
-
-	for (i = 0; i < workers_count; i++) {
-		if (workers[i].joinable()) {
-			workers[i].join();
-		}
-	}
 	close(listen_fd);
 }

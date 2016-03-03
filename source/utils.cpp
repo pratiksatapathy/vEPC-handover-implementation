@@ -23,7 +23,7 @@ struct timeval g_timeout = {1, 0};
 void handle_type1_error(int arg, const char *msg) {
 	if (arg < 0) {
 		perror(msg);
-		exit(-1);
+		exit(EXIT_FAILURE);
 	}	
 }
 
