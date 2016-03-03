@@ -92,7 +92,6 @@ void SctpServer::accept_clients() {
 	struct sockaddr_in client_sock_addr;
 
 	listen(listen_fd, 500);
-	cout << "Server started!" << endl;
 	while (1) {
 		conn_fd = accept(listen_fd, (struct sockaddr *)&client_sock_addr, &sock_addr_len);
 		handle_type1_error(conn_fd, "Accept error");

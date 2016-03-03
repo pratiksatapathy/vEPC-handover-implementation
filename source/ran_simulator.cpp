@@ -4,6 +4,8 @@ int g_threads_count;
 vector<thread> g_threads;
 
 void simulator(int num) {
+	Ran ran;
+	
 
 }
 

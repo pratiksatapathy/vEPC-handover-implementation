@@ -33,9 +33,18 @@ struct UeContext {
 	uint32_t s1_teid_dl; /* S1 Tunnel Endpoint Identifier - Downlink */
 };
 
+struct EpcAddrs {
+	int mme_port;
+	int sgw_port;
+	string mme_ip_addr;
+	string sgw_ip_addr;
+};
+
 class Ran {
 public:
 	UeContext ue_context;
+	SctpClient to_mme;
+	Packet pkt;
 
 	Ran();
 	~Ran();
