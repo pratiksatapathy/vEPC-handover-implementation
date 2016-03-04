@@ -10,7 +10,12 @@
 #include "sctp_client.h"
 #include "udp_client.h"
 
-struct UeContext {
+class RanContext {
+public:
+	/* EMM and ECM states */
+	int emm_state; /* EPS Mobililty Management state */
+	int ecm_state; /* EPS Connection Management state */
+	
 	/* UE id */
 	uint64_t imsi; /* International Mobile Subscriber Identity */
 	uint64_t guti; /* Globally Unique Temporary Identifier */
@@ -33,7 +38,14 @@ struct UeContext {
 	uint32_t s1_teid_dl; /* S1 Tunnel Endpoint Identifier - Downlink */
 };
 
-struct EpcAddrs {
+class RanIds {
+public:
+
+
+};
+
+class EpcAddrs {
+public:
 	int mme_port;
 	int sgw_port;
 	string mme_ip_addr;
@@ -42,7 +54,9 @@ struct EpcAddrs {
 
 class Ran {
 public:
-	UeContext ue_context;
+	RanContext ran_context;
+	RanIds ran_ids;
+	EpcAddrs epc_addrs;
 	SctpClient to_mme;
 	Packet pkt;
 

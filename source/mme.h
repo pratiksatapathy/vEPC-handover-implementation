@@ -11,7 +11,12 @@
 #include "sctp_client.h"
 #include "udp_client.h"
 
-struct UeContext {
+class UeContext {
+public:
+	/* EMM and ECM states */
+	int emm_state; /* EPS Mobililty Management state */
+	int ecm_state; /* EPS Connection Management state */
+
 	/* UE id */
 	uint64_t imsi; /* International Mobile Subscriber Identity */
 	string ip_addr;
@@ -35,9 +40,8 @@ struct UeContext {
 	uint32_t s5_teid_dl; /* S5 Tunnel Endpoint Identifier - Downlink */
 };
 
-class Mme {
+class MmeIds {
 public:
-	/* MME Identifiers */
 	uint16_t mcc; /* Mobile Country Code */
 	uint16_t mnc; /* Mobile Network Code */
 	uint16_t plmn_id; /* Public Land Mobile Network ID */
@@ -45,8 +49,20 @@ public:
 	uint8_t mmec; /* MME Code */
 	uint32_t mmei; /* MME Identifier */
 	uint64_t gummei; /* Globally Unique MME Identifier */
+
+	MmeIds();
+	~MmeIds();
+};
+
+class Mme {
+public:
+	MmeIds mme_ids;
 	unordered_map<uint64_t, UeContext> ue_context_table; 
 	unordered_map<uint32_t, uint64_t> ue_identification_table;
+
+	/* Lock parameters */
+	pthread_mutex_t ue_context_table_mux;
+	pthread_mutex_t ue_identification_table_mux;
 
 	Mme();
 	~Mme();

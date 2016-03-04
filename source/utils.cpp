@@ -42,15 +42,6 @@ void handle_type2_error(int arg, const char *msg) {
 	}	
 }
 
-string ulltos(unsigned long long arg) {
-	stringstream out;
-	string ans;
-
-	out << arg;
-	ans = out.str();
-	return ans;
-}
-
 char* allocate_str_mem(int len) {
 	char *tem;
 

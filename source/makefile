@@ -2,26 +2,15 @@
 
 all:	ran.out mme.out
 
-#all:	utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_server.o sctp_client.o udp_server.o udp_client.o
-
 #-------------------------------------------#
 
 
-#-----------------Variables-----------------#
+#-----------------Compiler------------------#
 
 G++ = g++ -std=c++0x -std=c++11 -std=gnu++0x -ggdb
 
 #-------------------------------------------#
 
-
-#---------Prerequisites and Recipes---------#
-
-
-
-#-------------------------------------------#
-
-
-#---------------Make Statements-------------#
 
 #---------------Object files----------------#
 
@@ -69,22 +58,38 @@ ran_simulator.o:	ran_simulator.cpp	utils.h gtp.h s1ap.h diameter.h packet.h netw
 
 #-------------------------------------------#
 
-#--------------Executable files-------------#
 
-ran.out:	utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_client.o udp_client.o ran.o ran_simulator.o
-	$(G++) -o ran.out utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_client.o udp_client.o ran.o ran_simulator.o -pthread
+#---------Prerequisites and Recipes---------#
 
-mme.out:	utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_server.o sctp_client.o udp_client.o mme.o mme_server.o
-	$(G++) -o mme.out utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_server.o sctp_client.o udp_client.o mme.o mme_server.o -pthread
+RAN_P = utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_client.o udp_client.o ran.o ran_simulator.o
+RAN_R = $(G++) -o ran.out $(RAN_P) -pthread
+
+MME_P = utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_server.o sctp_client.o udp_client.o mme.o mme_server.o
+MME_R = $(G++) -o mme.out $(MME_P) -pthread
 
 #-------------------------------------------#
+
+
+#---------------Executable files------------#
+
+ran.out:	$(RAN_P)
+	$(RAN_R)
+
+mme.out:	$(MME_P)
+	$(MME_R)
+
+#-------------------------------------------#
+
+
+#------------------Cleaner------------------#
 
 clean:
 	rm -f *~ *.o *.out
 
 #-------------------------------------------#
 
-#----------Special Commands-----------------#
+
+#--------------Special Commands-------------#
 
 # make -k (To keep going on even after encountering errors in making a former target)
 

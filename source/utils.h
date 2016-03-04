@@ -58,7 +58,6 @@ extern struct timeval g_timeout;
 
 void handle_type1_error(int, const char*);
 void handle_type2_error(int, const char*);
-string ulltos(unsigned long long);
 char* allocate_str_mem(int);
 uint8_t* allocate_uint8_mem(int);
 void time_check(time_t, double, bool);

@@ -13,6 +13,7 @@
 #include "mme.h"
 
 extern SctpServer g_mme_server;
+extern Mme g_mme;
 extern int g_workers_count;
 
 void check_usage(int);

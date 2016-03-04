@@ -4,7 +4,21 @@ SctpServer g_mme_server;
 int g_workers_count;
 
 int handle_ue(int conn_fd) {
-	return 0;
+	Packet pkt;
+	
+	g_mme_server.rcv(conn_fd, pkt);
+	pkt.extract_s1ap_hdr();
+	switch (pkt.s1ap_hdr.msg_type) {
+		case 1: /* Attach request - Initial UE message */
+			g_mme.get_data(1);
+			g_mme.init_authentication(pkt);
+			g_mm_server.snd(conn_fd, pkt);
+			break;
+		case 2:
+			break;
+		default:
+	}
+	return 1;
 }
 
 void check_usage(int argc) {
