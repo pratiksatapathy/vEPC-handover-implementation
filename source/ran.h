@@ -9,13 +9,14 @@
 #include "network.h"
 #include "sctp_client.h"
 #include "udp_client.h"
+#include "telecom.h"
 
 class RanContext {
 public:
 	/* EMM and ECM states */
 	int emm_state; /* EPS Mobililty Management state */
 	int ecm_state; /* EPS Connection Management state */
-	
+
 	/* UE id */
 	uint64_t imsi; /* International Mobile Subscriber Identity */
 	uint64_t guti; /* Globally Unique Temporary Identifier */

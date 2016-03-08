@@ -3,9 +3,9 @@
 SctpServer g_mme_server;
 int g_workers_count;
 
-int handle_ue(int conn_fd) {
+void handle_ue(int conn_fd) {
 	Packet pkt;
-	
+
 	g_mme_server.rcv(conn_fd, pkt);
 	pkt.extract_s1ap_hdr();
 	switch (pkt.s1ap_hdr.msg_type) {
@@ -18,7 +18,6 @@ int handle_ue(int conn_fd) {
 			break;
 		default:
 	}
-	return 1;
 }
 
 void check_usage(int argc) {

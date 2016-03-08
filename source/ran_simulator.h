@@ -9,6 +9,7 @@
 #include "network.h"
 #include "sctp_client.h"
 #include "udp_client.h"
+#include "telecom.h"
 #include "ran.h"
 
 extern int g_threads_count;

@@ -10,6 +10,7 @@
 #include "sctp_server.h"
 #include "sctp_client.h"
 #include "udp_client.h"
+#include "telecom.h"
 
 class UeContext {
 public:

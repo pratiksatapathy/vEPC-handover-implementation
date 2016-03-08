@@ -10,12 +10,14 @@
 #include "sctp_server.h"
 #include "sctp_client.h"
 #include "udp_client.h"
+#include "telecom.h"
 #include "mme.h"
 
 extern SctpServer g_mme_server;
 extern Mme g_mme;
 extern int g_workers_count;
 
+void handle_ue(int);
 void check_usage(int);
 void init(char**);
 void run();

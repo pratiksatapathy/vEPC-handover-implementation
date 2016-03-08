@@ -16,7 +16,7 @@ void SctpServer::clear_queue() {
 	}
 }
 
-void SctpServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_count, int serve_client(int)) {
+void SctpServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_count, void serve_client(int)) {
 	init(arg_ip_addr, arg_port, arg_workers_count, serve_client);
 	create_workers();
 	set_sock_reuse(listen_fd);
@@ -24,7 +24,7 @@ void SctpServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_coun
 	accept_clients();
 }
 
-void SctpServer::init(const char *arg_ip_addr, int arg_port, int arg_workers_count, int arg_serve_client(int)) {
+void SctpServer::init(const char *arg_ip_addr, int arg_port, int arg_workers_count, void arg_serve_client(int)) {
 	int status;
 
 	port = arg_port;
@@ -64,23 +64,8 @@ void SctpServer::worker_func() {
 			handle_type1_error(status, "Condition signal error - Queue full");
 			status = pthread_mutex_unlock(&mux);
 			handle_type1_error(status, "Unlock error");	
-			status = serve_client(conn_fd);
-			if (status == 1) {
-				status = pthread_mutex_lock(&mux);
-				handle_type1_error(status, "Lock error");
-				while (conn_q.size() >= max_qsize) {
-					status = pthread_cond_wait(&qfull, &mux);
-					handle_type1_error(status, "Condition wait error - Queue full");
-				}
-				conn_q.push(conn_fd);
-				status = pthread_cond_signal(&qempty);
-				handle_type1_error(status, "Condition signal error - Queue empty");				
-				status = pthread_mutex_unlock(&mux);
-				handle_type1_error(status, "Unlock error");		
-			}
-			else if (status == 0) {
-				close(conn_fd);
-			}
+			serve_client(conn_fd);
+			close(conn_fd);
 		}
 	}
 }

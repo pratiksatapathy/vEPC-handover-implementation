@@ -44,16 +44,19 @@ udp_server.o:	udp_server.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h
 udp_client.o:	udp_client.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h
 	$(G++) -c udp_client.cpp
 
-mme.o:	mme.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_server.h sctp_client.h udp_client.h
+telecom.o:	telecom.cpp utils.h
+	$(G++) -c telecom.cpp
+
+mme.o:	mme.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_server.h sctp_client.h udp_client.h telecom.h
 	$(G++) -c mme.cpp
 
-mme_server.o:	mme_server.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_server.h sctp_client.h udp_client.h mme.h
+mme_server.o:	mme_server.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_server.h sctp_client.h udp_client.h telecom.h mme.h
 	$(G++) -c mme_server.cpp	
 
-ran.o:	ran.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_client.h udp_client.h
+ran.o:	ran.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_client.h udp_client.h telecom.h
 	$(G++) -c ran.cpp
 
-ran_simulator.o:	ran_simulator.cpp	utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_client.h udp_client.h ran.h
+ran_simulator.o:	ran_simulator.cpp	utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_client.h udp_client.h telecom.h ran.h
 	$(G++) -c ran_simulator.cpp
 
 #-------------------------------------------#
@@ -61,10 +64,10 @@ ran_simulator.o:	ran_simulator.cpp	utils.h gtp.h s1ap.h diameter.h packet.h netw
 
 #---------Prerequisites and Recipes---------#
 
-RAN_P = utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_client.o udp_client.o ran.o ran_simulator.o
+RAN_P = utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_client.o udp_client.o telecom.o ran.o ran_simulator.o
 RAN_R = $(G++) -o ran.out $(RAN_P) -pthread
 
-MME_P = utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_server.o sctp_client.o udp_client.o mme.o mme_server.o
+MME_P = utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_server.o sctp_client.o udp_client.o telecom.o mme.o mme_server.o
 MME_R = $(G++) -o mme.out $(MME_P) -pthread
 
 #-------------------------------------------#

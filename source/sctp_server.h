@@ -21,7 +21,7 @@ public:
 	int workers_count;
 	queue<int> conn_q;	
 	vector<thread> workers;	
-	int (*serve_client)(int);
+	void (*serve_client)(int);
 
 	/* Lock and signal parameters */
 	pthread_mutex_t mux;
@@ -30,8 +30,8 @@ public:
 
 	SctpServer();
 	void clear_queue();
-	void run(const char*, int, int, int (*)(int));
-	void init(const char*, int, int, int (*)(int));
+	void run(const char*, int, int, void (*)(int));
+	void init(const char*, int, int, void (*)(int));
 	void create_workers();
 	void worker_func();
 	void accept_clients();
