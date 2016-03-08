@@ -29,7 +29,7 @@ public:
 	vector<uint64_t> tai_list; /* Tracking Area Identifier list */
 
 	/* UE security context */
-	/* To be filled */
+	uint64_t k_asme;
 
 	/* EPS info, EPS bearer info */
 	uint64_t default_apn; /* Default Access Point Name */
@@ -39,6 +39,9 @@ public:
 	uint32_t s1_teid_dl; /* S1 Tunnel Endpoint Identifier - Downlink */
 	uint32_t s5_teid_ul; /* S5 Tunnel Endpoint Identifier - Uplink */
 	uint32_t s5_teid_dl; /* S5 Tunnel Endpoint Identifier - Downlink */
+
+	/* Authentication Info */ 
+	uint64_t xres;
 };
 
 class MmeIds {
@@ -58,14 +61,18 @@ public:
 class Mme {
 public:
 	MmeIds mme_ids;
-	unordered_map<uint64_t, UeContext> ue_context_table; 
+	uint64_t ue_count;
 	unordered_map<uint32_t, uint64_t> ue_identification_table;
+	unordered_map<uint64_t, UeContext> ue_context_table; 
 
 	/* Lock parameters */
-	pthread_mutex_t ue_context_table_mux;
 	pthread_mutex_t ue_identification_table_mux;
+	pthread_mutex_t ue_context_table_mux;
 
 	Mme();
+	void handle_type1_attach(Packet&);
+	void add_ue_context(Packet);
+	void handle_authentication(Packet&);
 	~Mme();
 };
 

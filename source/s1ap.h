@@ -3,7 +3,7 @@
 
 #include "utils.h"
 
-#define S1AP_HDR_LEN 11
+#define S1AP_HDR_LEN 19
 
 class S1ap {
 public:
@@ -19,8 +19,11 @@ public:
 	/* 56 - 87 S1AP eNodeB UE ID */
 	uint32_t mme_ue_id;
 
+	/* 88 - 152 Tracking Area Identifier of UE */
+	uint64_t ue_tai;	
+
 	S1ap();
-	void init(uint8_t, uint16_t, uint32_t, uint32_t);
+	void init(uint8_t, uint16_t, uint32_t, uint32_t, uint64_t);
 	~S1ap();
 };
 

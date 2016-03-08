@@ -54,8 +54,8 @@ void Packet::append_item(uint16_t arg) {
 	data_ptr += data_len;
 }
 
-void Packet::append_item(unsigned long long arg) {
-	int data_len = sizeof(unsigned long long);
+void Packet::append_item(uint64_t arg) {
+	int data_len = sizeof(uint64_t);
 
 	memmove(data + data_ptr, &arg, data_len * sizeof(uint8_t));
 	len += data_len;
@@ -84,40 +84,56 @@ void Packet::append_item(string message) {
 	data_ptr += data_len;
 }
 
-void Packet::append_gtpc_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
+void Packet::prepend_gtpc_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
+	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);
 	int data_len = GTPV2_HDR_LEN;
 
 	gtpc_hdr.init(msg_type, msg_len, teid);
-	memmove(data + data_ptr, &gtpc_hdr, data_len * sizeof(uint8_t));
+	memmove(tem_data, &gtpc_hdr, data_len * sizeof(uint8_t));
+	memmove(tem_data + data_len, data, len * sizeof(uint8_t));
+	swap(data, tem_data);
 	len += data_len;
-	data_ptr += data_len;	
+	data_ptr += data_len;
+	free(tem_data);
 }
 
-void Packet::append_gtpu_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
+void Packet::prepend_gtpu_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
+	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);	
 	int data_len = GTPV1_HDR_LEN;
 
 	gtpu_hdr.init(msg_type, msg_len, teid);
-	memmove(data + data_ptr, &gtpu_hdr, data_len * sizeof(uint8_t));
+	memmove(tem_data, &gtpu_hdr, data_len * sizeof(uint8_t));
+	memmove(tem_data + data_len, data, len * sizeof(uint8_t));
+	swap(data, tem_data);
 	len += data_len;
 	data_ptr += data_len;
+	free(tem_data);
 }
 
-void Packet::append_s1ap_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t enodeb_ue_id, uint32_t mme_ue_id) {
+void Packet::prepend_s1ap_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t enodeb_ue_id, uint32_t mme_ue_id, uint64_t ue_tai) {
+	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);	
 	int data_len = S1AP_HDR_LEN;
 
-	s1ap_hdr.init(msg_type, msg_len, enodeb_ue_id, mme_ue_id);
-	memmove(data + data_ptr, &s1ap_hdr, data_len * sizeof(uint8_t));
+	s1ap_hdr.init(msg_type, msg_len, enodeb_ue_id, mme_ue_id, ue_tai);
+	memmove(tem_data, &s1ap_hdr, data_len * sizeof(uint8_t));
+	memmove(tem_data + data_len, data, len * sizeof(uint8_t));
+	swap(data, tem_data);
 	len += data_len;
 	data_ptr += data_len;
+	free(tem_data);
 }
 
-void Packet::append_diameter_hdr(uint8_t msg_type, uint16_t msg_len) {
+void Packet::prepend_diameter_hdr(uint8_t msg_type, uint16_t msg_len) {
+	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);	
 	int data_len = DIAMETER_HDR_LEN;
 
 	diameter_hdr.init(msg_type, msg_len);
-	memmove(data + data_ptr, &diameter_hdr, data_len * sizeof(uint8_t));
+	memmove(tem_data, &diameter_hdr, data_len * sizeof(uint8_t));
+	memmove(tem_data + data_len, data, len * sizeof(uint8_t));
+	swap(data, tem_data);
 	len += data_len;
 	data_ptr += data_len;
+	free(tem_data);
 }
 
 void Packet::extract_item(int &arg){
@@ -134,8 +150,8 @@ void Packet::extract_item(uint16_t &arg){
 	data_ptr += data_len;
 }
 
-void Packet::extract_item(unsigned long long &arg){
-	int data_len = sizeof(unsigned long long);
+void Packet::extract_item(uint64_t &arg){
+	int data_len = sizeof(uint64_t);
 
 	memmove(&arg, data + data_ptr, data_len * sizeof(uint8_t));
 	data_ptr += data_len;

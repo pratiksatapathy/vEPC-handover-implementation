@@ -7,10 +7,10 @@ Gtpv1::Gtpv1() {
 	next_ext_header_type = 0;
 }
 
-void Gtpv1::init(uint8_t msg_type_arg, uint16_t msg_len_arg, uint32_t teid_arg) {
-	msg_type = msg_type_arg;
-	msg_len = msg_len_arg;
-	teid = teid_arg;
+void Gtpv1::init(uint8_t arg_msg_type, uint16_t arg_msg_len, uint32_t arg_teid) {
+	msg_type = arg_msg_type;
+	msg_len = arg_msg_len;
+	teid = arg_teid;
 }
 
 Gtpv1::~Gtpv1() {
@@ -23,10 +23,10 @@ Gtpv2::Gtpv2() {
 	spare = 0;
 }
 
-void Gtpv2::init(uint8_t msg_type_arg, uint16_t msg_len_arg, uint32_t teid_arg) {
-	msg_type = msg_type_arg;
-	msg_len = msg_len_arg;
-	teid = teid_arg;
+void Gtpv2::init(uint8_t arg_msg_type, uint16_t arg_msg_len, uint32_t arg_teid) {
+	msg_type = arg_msg_type;
+	msg_len = arg_msg_len;
+	teid = arg_teid;
 	if (teid > 0) {
 		flags += 8;
 	}
