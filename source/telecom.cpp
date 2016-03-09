@@ -11,3 +11,7 @@ uint32_t get_mmei(uint16_t mmegi, uint8_t mmec) {
 uint64_t get_gummei(uint16_t plmn_id, uint32_t mmei) {
 	return stoull(to_string(plmn_id) + to_string(mmei));
 }
+
+uint64_t get_guti(uint16_t gummei, uint32_t m_tmsi) {
+	return stoull(to_string(gummei) + to_string(m_tmsi));
+}

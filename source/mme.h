@@ -14,8 +14,15 @@
 
 class UeContext {
 public:
-	/* EMM and ECM states */
+	/* EMM state 
+	 * 0 - Deregistered
+	 * 1 - Registered */
 	int emm_state; /* EPS Mobililty Management state */
+
+	/* ECM state 
+	 * 0 - Disconnected
+	 * 1 - Connected 
+	 * 2 - Idle */	 
 	int ecm_state; /* EPS Connection Management state */
 
 	/* UE id */
@@ -42,6 +49,8 @@ public:
 
 	/* Authentication Info */ 
 	uint64_t xres;
+
+	void init();
 };
 
 class MmeIds {
@@ -59,20 +68,23 @@ public:
 };
 
 class Mme {
+private:
+	/* Lock parameters */
+	pthread_mutex_t table1_mux; /* Handles table1 and ue_count */
+	pthread_mutex_t table2_mux; /* Handles table2 */
+
 public:
 	MmeIds mme_ids;
-	uint64_t ue_count;
-	unordered_map<uint32_t, uint64_t> ue_identification_table;
-	unordered_map<uint64_t, UeContext> ue_context_table; 
-
-	/* Lock parameters */
-	pthread_mutex_t ue_identification_table_mux;
-	pthread_mutex_t ue_context_table_mux;
+	int ue_count;
+	unordered_map<uint32_t, uint64_t> table1; /* UE Identification table */
+	unordered_map<uint64_t, UeContext> table2; /* UE Context table */
 
 	Mme();
 	void handle_type1_attach(Packet&);
 	void add_ue_context(Packet);
 	void handle_authentication(Packet&);
+	void mlock(int);
+	void munlock(int);
 	~Mme();
 };
 
