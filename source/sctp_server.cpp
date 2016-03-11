@@ -2,7 +2,7 @@
 
 SctpServer::SctpServer() {
 	listen_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
-	handle_type1_error(listen_fd, "Socket error");
+	handle_type1_error(listen_fd, "Socket error: sctpserver_sctpserver");
 	max_qsize = INT_MAX;
 	clear_queue();
 	pthread_mutex_init(&mux, NULL);
@@ -49,21 +49,16 @@ void SctpServer::worker_func() {
 	int conn_fd;
 
 	while (1) {
-		status = pthread_mutex_lock(&mux);
-		handle_type1_error(status, "Lock error");
+		mlock();
 		if (conn_q.empty()) {
-			status = pthread_cond_wait(&qempty, &mux);
-			handle_type1_error(status, "Condition wait error - Queue empty");
-			status = pthread_mutex_unlock(&mux);
-			handle_type1_error(status, "Unlock error");	
+			mwait(qempty);
+			munlock();
 		}
 		else {
 			conn_fd = conn_q.front();
 			conn_q.pop();
-			status = pthread_cond_signal(&qfull);
-			handle_type1_error(status, "Condition signal error - Queue full");
-			status = pthread_mutex_unlock(&mux);
-			handle_type1_error(status, "Unlock error");	
+			msignal(qfull);
+			munlock();
 			serve_client(conn_fd);
 			close(conn_fd);
 		}
@@ -79,18 +74,14 @@ void SctpServer::accept_clients() {
 	listen(listen_fd, 500);
 	while (1) {
 		conn_fd = accept(listen_fd, (struct sockaddr *)&client_sock_addr, &sock_addr_len);
-		handle_type1_error(conn_fd, "Accept error");
-		status = pthread_mutex_lock(&mux);
-		handle_type1_error(status, "Lock error");
+		handle_type1_error(conn_fd, "Accept error: sctpserver_acceptclient");
+		mlock();
 		while (conn_q.size() >= max_qsize) {
-			status = pthread_cond_wait(&qfull, &mux);
-			handle_type1_error(status, "Condition wait error - Queue full");
+			mwait(qfull);
 		}
 		conn_q.push(conn_fd);
-		status = pthread_cond_signal(&qempty);
-		handle_type1_error(status, "Condition signal error - Queue empty");
-		status = pthread_mutex_unlock(&mux);
-		handle_type1_error(status, "Unlock error");		
+		msignal(qempty);
+		munlock();
 	}	
 }
 
@@ -108,7 +99,7 @@ void SctpServer::snd(int conn_fd,  Packet pkt) {
 			break;
 		}		
 	}
-	handle_type2_error(status, "Write error");
+	handle_type2_error(status, "Write error: sctpserver_snd");
 }
 
 void SctpServer::rcv(int conn_fd, Packet &pkt) {
@@ -116,9 +107,37 @@ void SctpServer::rcv(int conn_fd, Packet &pkt) {
 
 	pkt.clear_pkt();
 	status = read(conn_fd, pkt.data, BUF_SIZE);
-	handle_type2_error(status, "Read error");
+	handle_type2_error(status, "Read error: sctpserver_rcv");
 	pkt.data_ptr = 0;
 	pkt.len = status;
+}
+
+void SctpServer::mlock() {
+	int status;
+
+	status = pthread_mutex_lock(&mux);
+	handle_type1_error(status, "Lock error: sctpserver_mlock");	
+}
+
+void SctpServer::munlock() {
+	int status;
+
+	status = pthread_mutex_unlock(&mux);
+	handle_type1_error(status, "Unlock error: sctpserver_munlock");
+}
+
+void SctpServer::mwait(pthread_cond_t &arg_cond_var) {
+	int status;
+
+	status = pthread_cond_wait(&arg_cond_var, &mux);
+	handle_type1_error(status, "Condition wait error: sctpserver_mwait");		
+}
+
+void SctpServer::msignal(pthread_cond_t &arg_cond_var) {
+	int status;
+
+	status = pthread_cond_signal(&arg_cond_var);
+	handle_type1_error(status, "Condition signal error: sctpserver_msignal");
 }
 
 SctpServer::~SctpServer() {

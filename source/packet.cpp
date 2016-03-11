@@ -216,7 +216,7 @@ struct ip* allocate_ip_hdr_mem(int len) {
 	struct ip *ip_hdr;
 
 	if (len <= 0) {
-		handle_type1_error(-1, "Memory length error: allocate_ip_hdr_mem");
+		handle_type1_error(-1, "Memory length error: packet_allocateiphdrmem");
 	}
 	ip_hdr = (ip*)malloc(len * sizeof (uint8_t));
 	if (ip_hdr != NULL) {
@@ -224,6 +224,6 @@ struct ip* allocate_ip_hdr_mem(int len) {
 		return ip_hdr;
 	} 
 	else {
-		handle_type1_error(-1, "Memory allocation error: allocate_ip_hdr_mem");
+		handle_type1_error(-1, "Memory allocation error: packet_allocateiphdrmem");
 	}
 }

@@ -50,7 +50,7 @@ public:
 	/* Authentication Info */ 
 	uint64_t xres;
 
-	void init();
+	void init(uint64_t, uint32_t, uint32_t, uint64_t);
 };
 
 class MmeIds {
@@ -83,8 +83,10 @@ public:
 	void handle_type1_attach(Packet&);
 	void add_ue_context(Packet);
 	void handle_authentication(Packet&);
-	void mlock(int);
-	void munlock(int);
+	void rem_table1_entry(uint32_t);
+	void rem_table2_entry(uint64_t);
+	void mlock(pthread_mutex_t&);
+	void munlock(pthread_mutex_t&);
 	~Mme();
 };
 

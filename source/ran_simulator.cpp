@@ -12,7 +12,7 @@ void simulator(int num) {
 void check_usage(int argc) {
 	if (argc < 2) {
 		cout << "Usage: ./<ran_simulator_exec> UE_COUNT" << endl;
-		handle_type1_error(-1, "Invalid usage error");
+		handle_type1_error(-1, "Invalid usage error: ransimulator_ransimulator");
 	}
 }
 

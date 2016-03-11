@@ -27,8 +27,6 @@ public:
 	friend void swap(Packet&, Packet&);
 	Packet& operator=(Packet);
 	Packet(Packet&&);
-	template
-
 	void append_item(int);
 	void append_item(uint16_t);
 	void append_item(uint64_t);

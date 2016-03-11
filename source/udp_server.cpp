@@ -2,7 +2,7 @@
 
 UdpServer::UdpServer() {
 	conn_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	handle_type1_error(conn_fd, "Socket error");		
+	handle_type1_error(conn_fd, "Socket error: udpserver_udpserver");		
 }
 
 void UdpServer::run(const char *arg_ip_addr, int arg_port) {
@@ -33,7 +33,7 @@ void UdpServer::snd(struct sockaddr_in dst_sock_addr, Packet pkt){
 			break;
 		}
 	}
-	handle_type2_error(status, "Sendto error");
+	handle_type2_error(status, "Sendto error: udpserver_snd");
 }
 
 void UdpServer::rcv(struct sockaddr_in src_sock_addr, Packet &pkt) {
@@ -41,7 +41,7 @@ void UdpServer::rcv(struct sockaddr_in src_sock_addr, Packet &pkt) {
 
 	pkt.clear_pkt();
 	status = recvfrom(conn_fd, pkt.data, BUF_SIZE, 0, (sockaddr*)&src_sock_addr, &g_sock_addr_len);
-	handle_type2_error(status, "Recvfrom error");
+	handle_type2_error(status, "Recvfrom error: udpserver_rcv");
 	pkt.data_ptr = 0;
 	pkt.len = status;
 }

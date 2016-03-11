@@ -2,7 +2,7 @@
 
 UdpClient::UdpClient() {
 	conn_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	handle_type1_error(conn_fd, "Socket error");
+	handle_type1_error(conn_fd, "Socket error: udpclient_udpclient");
 	port = g_freeport;
 	set_inet_sock_addr("127.0.0.1", port, sock_addr);
 }
@@ -41,7 +41,7 @@ void UdpClient::snd(Packet pkt) {
 			break;
 		}
 	}
-	handle_type2_error(status, "Sendto error");
+	handle_type2_error(status, "Sendto error: udpclient_snd");
 }
 
 void UdpClient::rcv(Packet &pkt) {
@@ -49,7 +49,7 @@ void UdpClient::rcv(Packet &pkt) {
 
 	pkt.clear_pkt();
 	status = recvfrom(conn_fd, pkt.data, BUF_SIZE, 0, (sockaddr*)&server_sock_addr, &g_sock_addr_len);
-	handle_type2_error(status, "Recvfrom error");
+	handle_type2_error(status, "Recvfrom error: udpclient_rcv");
 	pkt.data_ptr = 0;
 	pkt.len = status;
 }
