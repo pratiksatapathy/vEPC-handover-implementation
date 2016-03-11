@@ -2,11 +2,29 @@
 
 int g_threads_count;
 vector<thread> g_threads;
+double g_req_duration;
+time_t g_start_time;
 
 void simulator(int num) {
 	Ran ran;
+	int ran_num;
+	int status;
+	bool time_exceeded;
 	
-
+	ran_num = *((int*)arg);
+	time_exceeded = false;
+	while(1){
+		time_check(g_start_time, g_req_duration, time_exceeded);
+		if (time_exceeded) {
+			break;
+		}	
+		ran.initial_attach();
+		ran.authenticate();
+		ran.setup_security_context();
+		ran.setup_eps_session();
+		ran.transfer_data();
+		ran.detach();
+	}
 }
 
 void check_usage(int argc) {
@@ -34,9 +52,14 @@ void run() {
 	}	
 }
 
+void print_results() {
+
+}
+
 int main(int argc, char *argv[]) {
 	check_usage(argc);
 	init(argv);
 	run();
+	print_results();
 	return 0;
 }

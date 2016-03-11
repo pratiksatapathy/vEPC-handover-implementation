@@ -35,7 +35,7 @@ public:
 	void append_item(string);
 	void prepend_gtpc_hdr(uint8_t, uint16_t, uint32_t);
 	void prepend_gtpu_hdr(uint8_t, uint16_t, uint32_t);
-	void prepend_s1ap_hdr(uint8_t, uint16_t, uint32_t, uint32_t, uint64_t);
+	void prepend_s1ap_hdr(uint8_t, uint16_t, uint32_t, uint32_t);
 	void prepend_diameter_hdr(uint8_t, uint16_t);
 	void extract_item(int&);
 	void extract_item(uint16_t&);

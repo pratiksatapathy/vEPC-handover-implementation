@@ -110,11 +110,11 @@ void Packet::prepend_gtpu_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid)
 	free(tem_data);
 }
 
-void Packet::prepend_s1ap_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t enodeb_ue_id, uint32_t mme_ue_id, uint64_t ue_tai) {
+void Packet::prepend_s1ap_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t enodeb_ue_id, uint32_t mme_ue_id) {
 	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);	
 	int data_len = S1AP_HDR_LEN;
 
-	s1ap_hdr.init(msg_type, msg_len, enodeb_ue_id, mme_ue_id, ue_tai);
+	s1ap_hdr.init(msg_type, msg_len, enodeb_ue_id, mme_ue_id);
 	memmove(tem_data, &s1ap_hdr, data_len * sizeof(uint8_t));
 	memmove(tem_data + data_len, data, len * sizeof(uint8_t));
 	swap(data, tem_data);

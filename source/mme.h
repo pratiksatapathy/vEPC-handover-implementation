@@ -83,6 +83,8 @@ public:
 	void handle_type1_attach(Packet&);
 	void add_ue_context(Packet);
 	void handle_authentication(Packet&);
+	bool check_table1_entry(uint32_t);
+	bool check_table2_entry(uint64_t);	
 	void rem_table1_entry(uint32_t);
 	void rem_table2_entry(uint64_t);
 	void mlock(pthread_mutex_t&);

@@ -14,9 +14,13 @@
 
 extern int g_threads_count;
 extern vector<thread> g_threads;
+extern double g_req_duration;
+extern time_t g_start_time;
 
+void simulator(int);
 void check_usage(int);
 void init(char**);
 void run();
+void print_results();
 
 #endif /* RAN_SIMULATOR_H */

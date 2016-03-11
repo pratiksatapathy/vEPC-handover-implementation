@@ -87,10 +87,10 @@ void Mme::handle_type1_attach(Packet &pkt) {
 	pkt.append_item(autn_num);
 	pkt.append_item(rand_num);
 	pkt.append_item(ksi_asme);
+	pkt.prepend_s1ap_hdr(1, pkt.len, enodeb_s1ap_id, mme_s1ap_id);
 }
 
 void Mme::handle_authentication(Packet &pkt) {
-
 	uint32_t mme_s1ap_id;
 	uint64_t guti;
 	uint64_t res;
@@ -115,6 +115,28 @@ void Mme::handle_authentication(Packet &pkt) {
 		rem_table1_entry(mme_s1ap_id);
 		rem_table2_entry(guti);		
 	}
+}
+
+bool Mme::check_table1_entry(uint32_t arg_mme_s1ap_id) {
+	mlock(table1_mux);
+	if (table1.find(arg_mme_s1ap_id) != table1.end()) {
+		return true;
+	}
+	else {
+		return false;
+	}
+	munlock(table1_mux);
+}
+
+bool Mme::check_table2_entry(uint64_t arg_guti) {
+	mlock(table2_mux);
+	if (table2.find(arg_guti) != table2.end()) {
+		return true;
+	}
+	else {
+		return false;
+	}
+	munlock(table2_mux);
 }
 
 void Mme::rem_table1_entry(uint32_t arg_mme_s1ap_id) {
