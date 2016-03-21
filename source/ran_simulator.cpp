@@ -5,13 +5,13 @@ vector<thread> g_threads;
 double g_req_duration;
 time_t g_start_time;
 
-void simulator(int num) {
+void simulate(int arg) {
 	Ran ran;
 	int ran_num;
 	int status;
 	bool time_exceeded;
 	
-	ran_num = *((int*)arg);
+	ran_num = arg;
 	time_exceeded = false;
 	while(1){
 		time_check(g_start_time, g_req_duration, time_exceeded);
@@ -43,7 +43,7 @@ void run() {
 	int i;
 
 	for (i = 0; i < g_threads_count; i++) {
-		g_threads[i] = thread(simulator, i);
+		g_threads[i] = thread(simulate, i);
 	}	
 	for (i = 0; i < g_threads_count; i++) {
 		if (g_threads[i].joinable()) {

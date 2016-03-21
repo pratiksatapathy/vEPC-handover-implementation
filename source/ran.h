@@ -62,6 +62,12 @@ public:
 	Packet pkt;
 
 	Ran();
+	void initial_attach();
+	void authenticate();
+	void setup_security_context();
+	void setup_eps_session();
+	void transfer_data();
+	void detach();	
 	~Ran();
 };
 

@@ -1,6 +1,6 @@
 #---------------Final Target----------------#
 
-all:	ran.out mme.out
+all:	ransim.out mme.out
 
 #-------------------------------------------#
 
@@ -14,50 +14,50 @@ G++ = g++ -std=c++0x -std=c++11 -std=gnu++0x -ggdb
 
 #---------------Object files----------------#
 
-utils.o:	utils.cpp
-	$(G++) -c utils.cpp
+utils.o:	utils.h
+	$(G++) -c -o utils.o utils.cpp
 
-gtp.o:	gtp.cpp utils.h
-	$(G++) -c gtp.cpp
+gtp.o:	gtp.h utils.h
+	$(G++) -c -o gtp.o gtp.cpp
 
-s1ap.o:	s1ap.cpp utils.h
-	$(G++) -c s1ap.cpp
+s1ap.o:	s1ap.h utils.h
+	$(G++) -c -o s1ap.o s1ap.cpp
 
-diameter.o:	diameter.cpp utils.h
-	$(G++) -c diameter.cpp
+diameter.o:	diameter.h utils.h
+	$(G++) -c -o diameter.o diameter.cpp
 
-packet.o:	packet.cpp utils.h gtp.h s1ap.h diameter.h
-	$(G++) -c packet.cpp
+packet.o:	packet.h utils.h gtp.h s1ap.h diameter.h
+	$(G++) -c -o packet.o packet.cpp
 
-network.o:	network.cpp utils.h
-	$(G++) -c network.cpp
+network.o:	network.h utils.h
+	$(G++) -c -o network.o network.cpp
 
-sctp_server.o:	sctp_server.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h
-	$(G++) -c sctp_server.cpp	
+sctp_server.o:	sctp_server.h utils.h gtp.h s1ap.h diameter.h packet.h network.h
+	$(G++) -c -o sctp_server.o sctp_server.cpp	
 
-sctp_client.o:	sctp_client.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h
-	$(G++) -c sctp_client.cpp
+sctp_client.o:	sctp_client.h utils.h gtp.h s1ap.h diameter.h packet.h network.h
+	$(G++) -c -o sctp_client.o sctp_client.cpp
 
-udp_server.o:	udp_server.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h
-	$(G++) -c udp_server.cpp
+udp_server.o:	udp_server.h utils.h gtp.h s1ap.h diameter.h packet.h network.h
+	$(G++) -c -o udp_server.o udp_server.cpp
 
-udp_client.o:	udp_client.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h
-	$(G++) -c udp_client.cpp
+udp_client.o:	udp_client.h utils.h gtp.h s1ap.h diameter.h packet.h network.h
+	$(G++) -c -o udp_client.o udp_client.cpp
 
-telecom.o:	telecom.cpp utils.h
-	$(G++) -c telecom.cpp
+telecom.o:	telecom.h utils.h
+	$(G++) -c -o telecom.o telecom.cpp
 
-mme.o:	mme.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_server.h sctp_client.h udp_client.h telecom.h
-	$(G++) -c mme.cpp
+mme.o:	mme.h utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_server.h sctp_client.h udp_client.h telecom.h
+	$(G++) -c -o mme.o mme.cpp
 
-mme_server.o:	mme_server.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_server.h sctp_client.h udp_client.h telecom.h mme.h
-	$(G++) -c mme_server.cpp	
+mme_server.o:	mme_server.h utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_server.h sctp_client.h udp_client.h telecom.h mme.h
+	$(G++) -c -o mme_server.o mme_server.cpp	
 
-ran.o:	ran.cpp utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_client.h udp_client.h telecom.h
-	$(G++) -c ran.cpp
+ran.o:	ran.h utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_client.h udp_client.h telecom.h
+	$(G++) -c -o ran.o ran.cpp
 
-ran_simulator.o:	ran_simulator.cpp	utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_client.h udp_client.h telecom.h ran.h
-	$(G++) -c ran_simulator.cpp
+ran_simulator.o:	ran_simulator.h utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_client.h udp_client.h telecom.h ran.h
+	$(G++) -c -o ran_simulator.o ran_simulator.cpp
 
 #-------------------------------------------#
 
@@ -65,7 +65,7 @@ ran_simulator.o:	ran_simulator.cpp	utils.h gtp.h s1ap.h diameter.h packet.h netw
 #---------Prerequisites and Recipes---------#
 
 RAN_P = utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_client.o udp_client.o telecom.o ran.o ran_simulator.o
-RAN_R = $(G++) -o ran.out $(RAN_P) -pthread
+RAN_R = $(G++) -o ransim.out $(RAN_P) -pthread
 
 MME_P = utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_server.o sctp_client.o udp_client.o telecom.o mme.o mme_server.o
 MME_R = $(G++) -o mme.out $(MME_P) -pthread
@@ -75,7 +75,7 @@ MME_R = $(G++) -o mme.out $(MME_P) -pthread
 
 #---------------Executable files------------#
 
-ran.out:	$(RAN_P)
+ransim.out:	$(RAN_P)
 	$(RAN_R)
 
 mme.out:	$(MME_P)

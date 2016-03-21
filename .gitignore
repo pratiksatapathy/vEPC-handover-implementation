@@ -2,3 +2,6 @@
 *.o
 *.out
 *.txt
+commit.py
+push.py
+pull.py

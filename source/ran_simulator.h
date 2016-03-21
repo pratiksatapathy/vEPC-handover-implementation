@@ -17,7 +17,7 @@ extern vector<thread> g_threads;
 extern double g_req_duration;
 extern time_t g_start_time;
 
-void simulator(int);
+void simulate(int);
 void check_usage(int);
 void init(char**);
 void run();
