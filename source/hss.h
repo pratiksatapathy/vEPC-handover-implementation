@@ -8,6 +8,12 @@
 #include "sctp_server.h"
 #include "mysql.h"
 
+class HSS {
+public:
+	
+
+};
+
 struct HSS {
 	MySql db_client;
 	MYSQL_ROW query_res;

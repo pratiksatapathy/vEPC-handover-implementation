@@ -1,6 +1,6 @@
 #---------------Final Target----------------#
 
-all:	ransim.out mme.out
+all:	ransim.out mme.out hss.out
 
 #-------------------------------------------#
 
@@ -53,6 +53,15 @@ mme.o:	mme.h utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_server.h sc
 mme_server.o:	mme_server.h utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_server.h sctp_client.h udp_client.h telecom.h mme.h
 	$(G++) -c -o mme_server.o mme_server.cpp	
 
+mysql.o:	mysql.h utils.h
+	$(G++) -c -o mysql.o mysql.cpp
+
+hss.o:	hss.h utils.h diameter.h packet.h network.h sctp_server.h mysql.h
+	$(G++) -c -o hss.o hss.cpp	
+
+hss_server.o:	hss_server.o utils.h diameter.h packet.h network.h sctp_server.h mysql.h hss.h
+	$(G++) -c -o hss_server.o hss_server.cpp	
+
 ran.o:	ran.h utils.h gtp.h s1ap.h diameter.h packet.h network.h sctp_client.h udp_client.h telecom.h
 	$(G++) -c -o ran.o ran.cpp
 
@@ -70,6 +79,9 @@ RAN_R = $(G++) -o ransim.out $(RAN_P) -pthread
 MME_P = utils.o gtp.o s1ap.o diameter.o packet.o network.o sctp_server.o sctp_client.o udp_client.o telecom.o mme.o mme_server.o
 MME_R = $(G++) -o mme.out $(MME_P) -pthread
 
+HSS_P = utils.o diameter.o packet.o network.o sctp_server.o mysql.o hss.o hss_server.o
+HSS_R = $(G++) -o mme.out $(HSS_P) -pthread
+
 #-------------------------------------------#
 
 
@@ -80,6 +92,9 @@ ransim.out:	$(RAN_P)
 
 mme.out:	$(MME_P)
 	$(MME_R)
+
+hss.out:	$(HSS_P)
+	$(HSS_R)
 
 #-------------------------------------------#
 

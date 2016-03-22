@@ -6,35 +6,28 @@
 /* (C) MYSQL, MYSQL_RES, mysql_init */
 #include <mysql/mysql.h>
 
-class ConnDetails {
-public:	
-	char *server;
-	char *user;
-	char *password;
-	char *db;
+class ConnInfo {
+public:
+	string server;
+	string user;
+	string passwd;
+	string db;
 
-	ConnDetails();
-	ConnDetails(const ConnDetails&);
-	friend void swap(ConnDetails&, ConnDetails&);
-	ConnDetails& operator=(ConnDetails);
-	ConnDetails(ConnDetails&&);
-	~ConnDetails();
+	ConnInfo();
+	~ConnInfo();
 };
 
 class MySql {
 public:
-	MYSQL *conn;
+	MYSQL *conn_fd;
 	MYSQL_RES *result;
+	ConnInfo conn_info;
 
 	MySql();
-	void setup_conn();
-	void perform_query(const char*);
-	void report_db_error(MYSQL*);
+	void conn();
+	void handle_query(const char*);
+	void handle_db_error();
 	~MySql();
 };
-
-extern ConnDetails g_conn_details;
-
-void setup_conn_details();
 
 #endif //MYSQL_H
