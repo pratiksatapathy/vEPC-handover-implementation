@@ -13,8 +13,17 @@
 
 class RanContext {
 public:
-	/* EMM and ECM states */
+	/* EMM state 
+	 * 0 - Deregistered
+	 * 1 - Registered 
+	 */	
 	int emm_state; /* EPS Mobililty Management state */
+
+	/* ECM state 
+	 * 0 - Disconnected
+	 * 1 - Connected 
+	 * 2 - Idle 
+	 */
 	int ecm_state; /* EPS Connection Management state */
 
 	/* UE id */
@@ -29,7 +38,9 @@ public:
 	vector<uint64_t> tai_list; /* Tracking Area Identifier list */
 
 	/* UE security context */
-	/* To be filled */
+	uint64_t key; /* Primary key used in generating secondary keys */
+	uint64_t k_asme; /* Key for Access Security Management Entity */
+	uint64_t ksi_asme; /* Key Selection Identifier for Access Security Management Entity */
 
 	/* EPS info, EPS bearer info */
 	uint64_t apn_in_use; /* Access Point Name in Use */
@@ -37,12 +48,17 @@ public:
 	uint8_t e_rab_id; /* Evolved Radio Access Bearer ID */
 	uint32_t s1_teid_ul; /* S1 Tunnel Endpoint Identifier - Uplink */
 	uint32_t s1_teid_dl; /* S1 Tunnel Endpoint Identifier - Downlink */
-};
 
-class RanIds {
-public:
+	/* Network Operator info */
+	uint16_t mcc; /* Mobile Country Code */
+	uint16_t mnc; /* Mobile Network Code */
+	uint16_t plmn_id; /* Public Land Mobile Network ID */	
+	uint32_t msisdn; /* Mobile Station International Subscriber Directory Number - Mobile number */
+	uint16_t network_capability;
 
-
+	RanContext();
+	void init(uint32_t);
+	~RanContext();	
 };
 
 class EpcAddrs {
@@ -51,17 +67,20 @@ public:
 	int sgw_port;
 	string mme_ip_addr;
 	string sgw_ip_addr;
+
+	EpcAddrs();
+	~EpcAddrs();
 };
 
 class Ran {
 public:
 	RanContext ran_context;
-	RanIds ran_ids;
 	EpcAddrs epc_addrs;
 	SctpClient to_mme;
 	Packet pkt;
 
 	Ran();
+	void init(int);
 	void initial_attach();
 	void authenticate();
 	void setup_security_context();

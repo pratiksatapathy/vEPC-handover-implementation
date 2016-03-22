@@ -49,7 +49,7 @@ extern int g_public_sink_port;
 extern string g_enodeb_ip_addr;
 extern string g_mme_ip_addr;
 extern string g_hss_ip_addr;
-extern string g_sgw1_ip_addr;
+extern string g_sgw_ip_addr;
 extern string g_pgw_ip_addr;
 extern string g_pgw_dlink_ip_addr;
 extern string g_public_sink_ip_addr;

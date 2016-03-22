@@ -13,6 +13,7 @@ void simulate(int arg) {
 	
 	ran_num = arg;
 	time_exceeded = false;
+	ran.init(arg);
 	while(1){
 		time_check(g_start_time, g_req_duration, time_exceeded);
 		if (time_exceeded) {
@@ -29,8 +30,8 @@ void simulate(int arg) {
 
 void check_usage(int argc) {
 	if (argc < 2) {
-		cout << "Usage: ./<ran_simulator_exec> UE_COUNT" << endl;
-		handle_type1_error(-1, "Invalid usage error: ransimulator_ransimulator");
+		cout << "Usage: ./<ran_simulator_exec> THREAD_COUNT" << endl;
+		handle_type1_error(-1, "Invalid usage error: ransimulator_checkusage");
 	}
 }
 

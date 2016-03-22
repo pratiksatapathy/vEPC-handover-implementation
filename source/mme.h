@@ -36,7 +36,8 @@ public:
 	vector<uint64_t> tai_list; /* Tracking Area Identifier list */
 
 	/* UE security context */
-	uint64_t k_asme;
+	uint64_t ksi_asme; /* Key Selection Identifier for Access Security Management Entity */	
+	uint64_t k_asme; /* Key for Access Security Management Entity */	
 
 	/* EPS info, EPS bearer info */
 	uint64_t default_apn; /* Default Access Point Name */
