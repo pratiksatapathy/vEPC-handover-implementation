@@ -1,12 +1,12 @@
 #ifndef UDP_CLIENT_H
 #define UDP_CLIENT_H
 
-#include "utils.h"
-#include "gtp.h"
-#include "s1ap.h"
 #include "diameter.h"
-#include "packet.h"
+#include "gtp.h"
 #include "network.h"
+#include "packet.h"
+#include "s1ap.h"
+#include "utils.h"
 
 class UdpClient {
 public:

@@ -1,16 +1,17 @@
 #ifndef MME_H
 #define MME_H
 
-#include "utils.h"
-#include "gtp.h"
-#include "s1ap.h"
 #include "diameter.h"
-#include "packet.h"
+#include "gtp.h"
 #include "network.h"
-#include "sctp_server.h"
+#include "packet.h"
+#include "s1ap.h"
 #include "sctp_client.h"
-#include "udp_client.h"
+#include "sctp_server.h"
+#include "sync.h"
 #include "telecom.h"
+#include "udp_client.h"
+#include "utils.h"
 
 class UeContext {
 public:
@@ -75,21 +76,20 @@ private:
 	pthread_mutex_t table2_mux; /* Handles table2 */
 
 public:
+	SctpServer server;
 	MmeIds mme_ids;
 	int ue_count;
 	unordered_map<uint32_t, uint64_t> table1; /* UE Identification table */
 	unordered_map<uint64_t, UeContext> table2; /* UE Context table */
 
 	Mme();
-	void handle_type1_attach(Packet&);
+	void handle_type1_attach(int, Packet&);
 	void add_ue_context(Packet);
-	void handle_authentication(Packet&);
+	void handle_autn(int, Packet&);
 	bool check_table1_entry(uint32_t);
 	bool check_table2_entry(uint64_t);	
 	void rem_table1_entry(uint32_t);
 	void rem_table2_entry(uint64_t);
-	void mlock(pthread_mutex_t&);
-	void munlock(pthread_mutex_t&);
 	~Mme();
 };
 

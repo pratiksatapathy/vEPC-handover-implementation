@@ -1,12 +1,12 @@
 #ifndef UDP_SERVER_H
 #define UDP_SERVER_H
 
-#include "utils.h"
-#include "gtp.h"
-#include "s1ap.h"
 #include "diameter.h"
-#include "packet.h"
+#include "gtp.h"
 #include "network.h"
+#include "packet.h"
+#include "s1ap.h"
+#include "utils.h"
 
 class UdpServer {
 public:

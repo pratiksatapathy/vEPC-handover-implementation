@@ -1,10 +1,10 @@
 #ifndef MYSQL_H
 #define MYSQL_H
 
-#include "utils.h"
-
 /* (C) MYSQL, MYSQL_RES, mysql_init */
 #include <mysql/mysql.h>
+
+#include "utils.h"
 
 class ConnInfo {
 public:

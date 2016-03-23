@@ -30,7 +30,7 @@ void simulate(int arg) {
 
 void check_usage(int argc) {
 	if (argc < 2) {
-		cout << "Usage: ./<ran_simulator_exec> THREAD_COUNT" << endl;
+		cout << "Usage: ./<ran_simulator_exec> THREADS_COUNT" << endl;
 		handle_type1_error(-1, "Invalid usage error: ransimulator_checkusage");
 	}
 }

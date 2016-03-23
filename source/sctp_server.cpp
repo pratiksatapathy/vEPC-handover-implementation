@@ -5,9 +5,9 @@ SctpServer::SctpServer() {
 	handle_type1_error(listen_fd, "Socket error: sctpserver_sctpserver");
 	max_qsize = INT_MAX;
 	clear_queue();
-	pthread_mutex_init(&mux, NULL);
-	pthread_cond_init(&qempty, NULL);
-	pthread_cond_init(&qfull, NULL);
+	mux_init(mux);
+	cndvar_init(qempty);
+	cndvar_init(qfull);
 }
 
 void SctpServer::clear_queue() {
@@ -49,16 +49,16 @@ void SctpServer::worker_func() {
 	int conn_fd;
 
 	while (1) {
-		mlock();
+		mlock(mux);
 		if (conn_q.empty()) {
-			mwait(qempty);
-			munlock();
+			cndwait(qempty, mux);
+			munlock(mux);
 		}
 		else {
 			conn_fd = conn_q.front();
 			conn_q.pop();
-			msignal(qfull);
-			munlock();
+			cndsignal(qfull);
+			munlock(mux);
 			serve_client(conn_fd);
 			close(conn_fd);
 		}
@@ -75,13 +75,13 @@ void SctpServer::accept_clients() {
 	while (1) {
 		conn_fd = accept(listen_fd, (struct sockaddr *)&client_sock_addr, &sock_addr_len);
 		handle_type1_error(conn_fd, "Accept error: sctpserver_acceptclient");
-		mlock();
+		mlock(mux);
 		while (conn_q.size() >= max_qsize) {
-			mwait(qfull);
+			cndwait(qfull, mux);
 		}
 		conn_q.push(conn_fd);
-		msignal(qempty);
-		munlock();
+		cndsignal(qempty);
+		munlock(mux);
 	}	
 }
 
@@ -110,34 +110,6 @@ void SctpServer::rcv(int conn_fd, Packet &pkt) {
 	handle_type2_error(status, "Read error: sctpserver_rcv");
 	pkt.data_ptr = 0;
 	pkt.len = status;
-}
-
-void SctpServer::mlock() {
-	int status;
-
-	status = pthread_mutex_lock(&mux);
-	handle_type1_error(status, "Lock error: sctpserver_mlock");	
-}
-
-void SctpServer::munlock() {
-	int status;
-
-	status = pthread_mutex_unlock(&mux);
-	handle_type1_error(status, "Unlock error: sctpserver_munlock");
-}
-
-void SctpServer::mwait(pthread_cond_t &arg_cond_var) {
-	int status;
-
-	status = pthread_cond_wait(&arg_cond_var, &mux);
-	handle_type1_error(status, "Condition wait error: sctpserver_mwait");		
-}
-
-void SctpServer::msignal(pthread_cond_t &arg_cond_var) {
-	int status;
-
-	status = pthread_cond_signal(&arg_cond_var);
-	handle_type1_error(status, "Condition signal error: sctpserver_msignal");
 }
 
 SctpServer::~SctpServer() {

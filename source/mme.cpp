@@ -23,11 +23,11 @@ MmeIds::~MmeIds() {
 
 Mme::Mme() {
 	ue_count = 0;
-	pthread_mutex_init(&table1_mux, NULL);
-	pthread_mutex_init(&table2_mux, NULL);	
+	mux_init(table1_mux);
+	mux_init(table2_mux);
 }
 
-void Mme::handle_type1_attach(Packet &pkt) {
+void Mme::handle_type1_attach(int conn_fd, Packet &pkt) {
 	SctpClient to_hss;
 	uint64_t imsi;
 	uint64_t tai;
@@ -88,9 +88,10 @@ void Mme::handle_type1_attach(Packet &pkt) {
 	pkt.append_item(rand_num);
 	pkt.append_item(ksi_asme);
 	pkt.prepend_s1ap_hdr(1, pkt.len, enodeb_s1ap_id, mme_s1ap_id);
+	server.snd(conn_fd, pkt);
 }
 
-void Mme::handle_authentication(Packet &pkt) {
+void Mme::handle_autn(int conn_fd, Packet &pkt) {
 	uint32_t mme_s1ap_id;
 	uint64_t guti;
 	uint64_t res;
@@ -149,20 +150,6 @@ void Mme::rem_table2_entry(uint64_t arg_guti) {
 	mlock(table2_mux);
 	table2.erase(arg_guti);
 	munlock(table2_mux);
-}
-
-void Mme::mlock(pthread_mutex_t &arg_mux) {
-	int status;
-
-	status = pthread_mutex_lock(&arg_mux);
-	handle_type1_error(status, "Lock error: mme_mlock");
-}
-
-void Mme::munlock(pthread_mutex_t &arg_mux) {
-	int status;
-
-	status = pthread_mutex_unlock(&arg_mux);
-	handle_type1_error(status, "Unlock error: mme_munlock");
 }
 
 Mme::~Mme() {

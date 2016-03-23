@@ -1,12 +1,13 @@
 #ifndef SCTP_SERVER_H
 #define SCTP_SERVER_H
 
-#include "utils.h"
-#include "gtp.h"
-#include "s1ap.h"
 #include "diameter.h"
-#include "packet.h"
+#include "gtp.h"
 #include "network.h"
+#include "packet.h"
+#include "s1ap.h"
+#include "sync.h"
+#include "utils.h"
 
 class SctpServer {
 private:
@@ -38,10 +39,6 @@ public:
 	void accept_clients();
 	void snd(int, Packet);
 	void rcv(int, Packet&);
-	void mlock();
-	void munlock();
-	void mwait(pthread_cond_t&);
-	void msignal(pthread_cond_t&);
 	~SctpServer();
 };
 

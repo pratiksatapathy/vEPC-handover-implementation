@@ -36,6 +36,5 @@ void MySql::handle_db_error() {
 }
 
 MySql::~MySql() {
-	mysql_free_result(result);
 	mysql_close(conn_fd);
 }

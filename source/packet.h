@@ -4,10 +4,10 @@
 /* (C) ip_hdr */
 #include <netinet/ip.h>
 
-#include "utils.h"
+#include "diameter.h"
 #include "gtp.h"
 #include "s1ap.h"
-#include "diameter.h"
+#include "utils.h"
 
 #define BUF_SIZE 1024
 #define IP_HDR_LEN 20

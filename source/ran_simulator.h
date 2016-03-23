@@ -1,16 +1,16 @@
 #ifndef RAN_SIMULATOR_H
 #define RAN_SIMULATOR_H
 
-#include "utils.h"
-#include "gtp.h"
-#include "s1ap.h"
 #include "diameter.h"
-#include "packet.h"
+#include "gtp.h"
 #include "network.h"
-#include "sctp_client.h"
-#include "udp_client.h"
-#include "telecom.h"
+#include "packet.h"
 #include "ran.h"
+#include "s1ap.h"
+#include "sctp_client.h"
+#include "telecom.h"
+#include "udp_client.h"
+#include "utils.h"
 
 extern int g_threads_count;
 extern vector<thread> g_threads;

@@ -1,24 +1,26 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-/* (C++) cout, endl */
-#include <iostream> 
-
-/* (C++) STL: string, vector, queue, thread, unordered map */
-#include <string>
-#include <vector>
-#include <queue>
-#include <thread>
-#include <unordered_map>
-
-/* (C++) stringstream */
-#include <sstream>
-
 /* (C++) chrono: high_resolution_clock, microseconds */
 #include <chrono>
 
+/* (C++) cout, endl */
+#include <iostream> 
+
+/* (C) INT_MAX */
+#include <limits.h>
+
+/* (C) pthread_create, pthread_kill */
+#include <pthread.h>
+
+/* (C++) STL: queue */
+#include <queue>
+
 /* (C++) default_random_engine, exponential_distribution<T> */
 #include <random>
+
+/* (C) signal */
+#include <signal.h>
 
 /* (C) memset, memmove */
 #include <stdio.h>
@@ -26,14 +28,20 @@
 /* (C) strlen */
 #include <string.h>
 
-/* (C) signal */
-#include <signal.h>
+/* (C++) STL: string */
+#include <string>
 
-/* (C) pthread_create, pthread_kill */
-#include <pthread.h>
+/* (C++) stringstream */
+#include <sstream>
 
-/* (C) INT_MAX */
-#include <limits.h>
+/* (C++) STL: thread */
+#include <thread>
+
+/* (C++) STL: unordered map */
+#include <unordered_map>
+
+/* (C++) STL: vector */
+#include <vector>
 
 using namespace std;
 

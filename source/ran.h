@@ -1,15 +1,15 @@
 #ifndef RAN_H
 #define RAN_H
 
-#include "utils.h"
-#include "gtp.h"
-#include "s1ap.h"
 #include "diameter.h"
-#include "packet.h"
+#include "gtp.h"
 #include "network.h"
+#include "packet.h"
+#include "s1ap.h"
 #include "sctp_client.h"
-#include "udp_client.h"
 #include "telecom.h"
+#include "udp_client.h"
+#include "utils.h"
 
 class RanContext {
 public:
