@@ -30,8 +30,8 @@ public:
 	uint64_t imsi; /* International Mobile Subscriber Identity */
 	uint64_t guti; /* Globally Unique Temporary Identifier */
 	string ip_addr;
-	uint32_t enodeb_s1ap_id; /* eNodeB S1AP UE ID */
-	uint32_t mme_s1ap_id; /* MME S1AP UE ID */
+	uint32_t enodeb_s1ap_ue_id; /* eNodeB S1AP UE ID */
+	uint32_t mme_s1ap_ue_id; /* MME S1AP UE ID */
 
 	/* UE location info */
 	uint64_t tai; /* Tracking Area Identifier */
@@ -76,7 +76,7 @@ class Ran {
 public:
 	RanContext ran_context;
 	EpcAddrs epc_addrs;
-	SctpClient to_mme;
+	SctpClient mme_client;
 	Packet pkt;
 
 	Ran();

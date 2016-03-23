@@ -12,18 +12,16 @@ ConnInfo::~ConnInfo() {
 }
 
 MySql::MySql() {
-	conn_fd = NULL;
-	result = NULL;
+	conn_fd = mysql_init(NULL);
 }
 
 void MySql::conn() {
-	conn_fd = mysql_init(NULL);
 	if (!mysql_real_connect(conn_fd, conn_info.server.c_str(), conn_info.user.c_str(), conn_info.passwd.c_str(), conn_info.db.c_str(), 0, NULL, 0)) {
 		handle_db_error();
 	}
 }
 
-void MySql::handle_query(const char *query) {
+void MySql::handle_query(const char *query, MYSQL_RES *result) {
 	if (mysql_query(conn_fd, query)) {
 		handle_db_error();
 	}

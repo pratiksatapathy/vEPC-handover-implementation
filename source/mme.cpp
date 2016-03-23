@@ -1,10 +1,19 @@
 #include "mme.h"
 
-void UeContext::init(uint64_t arg_imsi, uint32_t arg_enodeb_s1ap_id, uint32_t arg_mme_s1ap_id, uint64_t arg_tai) {
+UeContext::UeContext() {
+	nw_type = 0;
+}
+
+void UeContext::init(uint64_t arg_imsi, uint32_t arg_enodeb_s1ap_ue_id, uint32_t arg_mme_s1ap_ue_id, uint64_t arg_tai, uint16_t arg_nw_capability) {
 	imsi = arg_imsi;
-	enodeb_s1ap_id = arg_enodeb_s1ap_id;
-	mme_s1ap_id = arg_mme_s1ap_id;
+	enodeb_s1ap_ue_id = arg_enodeb_s1ap_ue_id;
+	mme_s1ap_ue_id = arg_mme_s1ap_ue_id;
 	tai = arg_tai;
+	nw_capability = arg_nw_capability;
+}
+
+UeContext::~UeContext() {
+
 }
 
 MmeIds::MmeIds() {
@@ -28,38 +37,40 @@ Mme::Mme() {
 }
 
 void Mme::handle_type1_attach(int conn_fd, Packet &pkt) {
-	SctpClient to_hss;
+	SctpClient hss_client;
 	uint64_t imsi;
 	uint64_t tai;
 	uint64_t ksi_asme;
-	uint16_t network_capability;
+	uint16_t nw_type;
+	uint16_t nw_capability;
 	uint64_t autn_num;
 	uint64_t rand_num;
 	uint64_t xres;
 	uint64_t k_asme;
-	uint32_t enodeb_s1ap_id;
-	uint32_t mme_s1ap_id;
+	uint32_t enodeb_s1ap_ue_id;
+	uint32_t mme_s1ap_ue_id;
 	uint64_t guti;
-	int num_autn_vectors;
+	uint64_t num_autn_vectors;
 
 	num_autn_vectors = 1;
 	pkt.extract_item(imsi);
 	pkt.extract_item(tai);
 	pkt.extract_item(ksi_asme); /* No use in this case */
-	pkt.extract_item(network_capability); /* No use in this case */
+	pkt.extract_item(nw_capability); /* No use in this case */
 
-	enodeb_s1ap_id = pkt.s1ap_hdr.enodeb_ue_id;
+	enodeb_s1ap_ue_id = pkt.s1ap_hdr.enodeb_s1ap_ue_id;
 	
 
 	guti = get_guti(mme_ids.gummei, imsi);
 	mlock(table1_mux);
 	ue_count++;
-	mme_s1ap_id = ue_count;
-	table1[mme_s1ap_id] = guti;
+	mme_s1ap_ue_id = ue_count;
+	table1[mme_s1ap_ue_id] = guti;
 	munlock(table1_mux);
 
 	mlock(table2_mux);
-	table2[guti].init(imsi, enodeb_s1ap_id, mme_s1ap_id, tai);
+	table2[guti].init(imsi, enodeb_s1ap_ue_id, mme_s1ap_ue_id, tai, nw_capability);
+	nw_type = table2[guti].nw_type;
 	munlock(table2_mux);
 	
 
@@ -67,11 +78,11 @@ void Mme::handle_type1_attach(int conn_fd, Packet &pkt) {
 	pkt.append_item(imsi);
 	pkt.append_item(mme_ids.plmn_id);
 	pkt.append_item(num_autn_vectors);
-	pkt.append_item("nil");
+	pkt.append_item(nw_type);
 	pkt.prepend_diameter_hdr(1, pkt.len);
-	to_hss.conn(g_hss_ip_addr.c_str(), g_hss_port);
-	to_hss.snd(pkt);
-	to_hss.rcv(pkt);
+	hss_client.conn(g_hss_ip_addr.c_str(), g_hss_port);
+	hss_client.snd(pkt);
+	hss_client.rcv(pkt);
 
 	pkt.extract_item(autn_num);
 	pkt.extract_item(rand_num);
@@ -87,20 +98,20 @@ void Mme::handle_type1_attach(int conn_fd, Packet &pkt) {
 	pkt.append_item(autn_num);
 	pkt.append_item(rand_num);
 	pkt.append_item(ksi_asme);
-	pkt.prepend_s1ap_hdr(1, pkt.len, enodeb_s1ap_id, mme_s1ap_id);
+	pkt.prepend_s1ap_hdr(1, pkt.len, enodeb_s1ap_ue_id, mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
 }
 
 void Mme::handle_autn(int conn_fd, Packet &pkt) {
-	uint32_t mme_s1ap_id;
+	uint32_t mme_s1ap_ue_id;
 	uint64_t guti;
 	uint64_t res;
 	uint64_t xres;
 
-	mme_s1ap_id = pkt.s1ap_hdr.mme_ue_id;
+	mme_s1ap_ue_id = pkt.s1ap_hdr.mme_s1ap_ue_id;
 
 	mlock(table1_mux);
-	guti = table1[mme_s1ap_id];
+	guti = table1[mme_s1ap_ue_id];
 	munlock(table1_mux);
 
 	pkt.extract_item(res);
@@ -113,14 +124,14 @@ void Mme::handle_autn(int conn_fd, Packet &pkt) {
 		/* Success */
 	}
 	else {
-		rem_table1_entry(mme_s1ap_id);
+		rem_table1_entry(mme_s1ap_ue_id);
 		rem_table2_entry(guti);		
 	}
 }
 
-bool Mme::check_table1_entry(uint32_t arg_mme_s1ap_id) {
+bool Mme::check_table1_entry(uint32_t arg_mme_s1ap_ue_id) {
 	mlock(table1_mux);
-	if (table1.find(arg_mme_s1ap_id) != table1.end()) {
+	if (table1.find(arg_mme_s1ap_ue_id) != table1.end()) {
 		return true;
 	}
 	else {
@@ -140,9 +151,9 @@ bool Mme::check_table2_entry(uint64_t arg_guti) {
 	munlock(table2_mux);
 }
 
-void Mme::rem_table1_entry(uint32_t arg_mme_s1ap_id) {
+void Mme::rem_table1_entry(uint32_t arg_mme_s1ap_ue_id) {
 	mlock(table1_mux);
-	table1.erase(arg_mme_s1ap_id);
+	table1.erase(arg_mme_s1ap_ue_id);
 	munlock(table1_mux);
 }
 

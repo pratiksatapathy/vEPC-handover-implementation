@@ -10,12 +10,6 @@
 #include "utils.h"
 
 class SctpServer {
-private:
-	/* Lock and signal parameters */
-	pthread_mutex_t mux;
-	pthread_cond_t qempty; /* arg for mwait/msignal - 1 */
-	pthread_cond_t qfull; /* arg for mwait/msignal - 2 */
-
 public:
 	/* Address parameters */
 	int port;
@@ -29,6 +23,11 @@ public:
 	queue<int> conn_q;	
 	vector<thread> workers;	
 	void (*serve_client)(int);
+
+	/* Lock and signal parameters */
+	pthread_mutex_t mux;
+	pthread_cond_t qempty; /* arg for mwait/msignal - 1 */
+	pthread_cond_t qfull; /* arg for mwait/msignal - 2 */
 
 	SctpServer();
 	void clear_queue();

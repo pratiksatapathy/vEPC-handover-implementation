@@ -29,8 +29,8 @@ public:
 	/* UE id */
 	uint64_t imsi; /* International Mobile Subscriber Identity */
 	string ip_addr;
-	uint32_t enodeb_s1ap_id; /* eNodeB S1AP UE ID */
-	uint32_t mme_s1ap_id; /* MME S1AP UE ID */
+	uint32_t enodeb_s1ap_ue_id; /* eNodeB S1AP UE ID */
+	uint32_t mme_s1ap_ue_id; /* MME S1AP UE ID */
 
 	/* UE location info */
 	uint64_t tai; /* Tracking Area Identifier */
@@ -52,7 +52,13 @@ public:
 	/* Authentication Info */ 
 	uint64_t xres;
 
-	void init(uint64_t, uint32_t, uint32_t, uint64_t);
+	/* UE Operator network info */
+	uint16_t nw_type;
+	uint16_t nw_capability;
+
+	UeContext();
+	void init(uint64_t, uint32_t, uint32_t, uint64_t, uint16_t);
+	~UeContext();
 };
 
 class MmeIds {
@@ -70,17 +76,16 @@ public:
 };
 
 class Mme {
-private:
-	/* Lock parameters */
-	pthread_mutex_t table1_mux; /* Handles table1 and ue_count */
-	pthread_mutex_t table2_mux; /* Handles table2 */
-
 public:
 	SctpServer server;
 	MmeIds mme_ids;
 	int ue_count;
 	unordered_map<uint32_t, uint64_t> table1; /* UE Identification table */
 	unordered_map<uint64_t, UeContext> table2; /* UE Context table */
+
+	/* Lock parameters */
+	pthread_mutex_t table1_mux; /* Handles table1 and ue_count */
+	pthread_mutex_t table2_mux; /* Handles table2 */
 
 	Mme();
 	void handle_type1_attach(int, Packet&);

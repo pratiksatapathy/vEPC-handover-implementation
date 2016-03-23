@@ -28,7 +28,7 @@ void handle_mme(int conn_fd) {
 	pkt.extract_diameter_hdr();
 	switch (pkt.diameter_hdr.msg_type) {
 		case 1:
-			g_hss.handle_autn_info_req(conn_fd, pkt);
+			g_hss.handle_autninfo_req(conn_fd, pkt);
 			break;
 		default:
 			break;

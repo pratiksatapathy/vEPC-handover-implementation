@@ -12,15 +12,14 @@
 #include "utils.h"
 
 class Hss {
-private:
-	pthread_mutex_t mysql_client_mux;
-
 public:
 	SctpServer server;
 	MySql mysql_client;
+	pthread_mutex_t mysql_client_mux;
 
 	Hss();
-	void handle_autn_info_req(int, Packet&);
+	void get_ue_info(uint64_t, uint64_t&, uint64_t&);
+	void handle_autninfo_req(int, Packet&);
 	~Hss();
 };
 

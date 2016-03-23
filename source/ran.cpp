@@ -10,9 +10,10 @@ RanContext::RanContext() {
 }
 
 void RanContext::init(uint32_t arg) {
-	msisdn = arg;
+	enodeb_s1ap_ue_id = arg;
+	key = arg;
+	msisdn = 9000000000 + arg;
 	imsi = get_imsi(plmn_id, msisdn);
-	enodeb_s1ap_id = arg;
 }
 
 RanContext::~RanContext() {
@@ -30,7 +31,7 @@ EpcAddrs::~EpcAddrs() {
 
 
 Ran::Ran(){
-	to_mme.conn(g_mme_ip_addr.c_str(), g_mme_port);
+	mme_client.conn(g_mme_ip_addr.c_str(), g_mme_port);
 }
 
 void Ran::init(int arg) {
@@ -43,18 +44,38 @@ void Ran::initial_attach() {
 	pkt.append_item(ran_context.tai);
 	pkt.append_item(ran_context.ksi_asme);
 	pkt.append_item(ran_context.network_capability);
-	to_mme.snd(pkt);
+	pkt.prepend_s1ap_hdr(1, pkt.len, ran_context.enodeb_s1ap_ue_id, -1);
+	mme_client.snd(pkt);
 }
 
 void Ran::authenticate() {
 	uint64_t autn_num;
+	uint64_t xautn_num;
 	uint64_t rand_num;
+	uint64_t sqn;
+	uint64_t res;
+	uint64_t ck;
+	uint64_t ik;
 
-	to_mme.rcv(pkt);
-	pkt.extract_item(autn_num);
+	mme_client.rcv(pkt);
+	pkt.extract_s1ap_hdr();
+	ran_context.mme_s1ap_ue_id = pkt.s1ap_hdr.mme_s1ap_ue_id;
+	pkt.extract_item(xautn_num);
 	pkt.extract_item(rand_num);
 	pkt.extract_item(ran_context.ksi_asme);
-	
+	sqn = rand_num + 1;
+	res = ran_context.key + sqn + rand_num;
+	autn_num = res + 1;
+	if (autn_num != xautn_num) {
+		handle_type1_error(-1, "Authentication of MME failed: ran_authenticate");
+	}
+	ck = res + 2;
+	ik = res + 3;
+	ran_context.k_asme = ck + ik + sqn + ran_context.plmn_id;
+	pkt.clear_pkt();
+	pkt.append_item(res);
+	pkt.prepend_s1ap_hdr(2, pkt.len, ran_context.enodeb_s1ap_ue_id, ran_context.mme_s1ap_ue_id);
+	cout << "ran_authenticate: authentication sucessful" << endl;
 }
 
 void Ran::setup_security_context() {

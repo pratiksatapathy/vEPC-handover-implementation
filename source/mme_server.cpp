@@ -23,7 +23,7 @@ void handle_ue(int conn_fd) {
 
 	g_mme.server.rcv(conn_fd, pkt);
 	pkt.extract_s1ap_hdr();
-	if (pkt.s1ap_hdr.mme_ue_id == -1) {
+	if (pkt.s1ap_hdr.mme_s1ap_ue_id == -1) {
 		switch (pkt.s1ap_hdr.msg_type) {
 			case 1: /* Attach request - Initial UE message */
 				g_mme.handle_type1_attach(conn_fd, pkt);
@@ -34,7 +34,7 @@ void handle_ue(int conn_fd) {
 				break;
 		}		
 	}
-	else if (pkt.s1ap_hdr.mme_ue_id > 0) {
+	else if (pkt.s1ap_hdr.mme_s1ap_ue_id > 0) {
 		switch (pkt.s1ap_hdr.msg_type) {
 			case 2: /* Authentication response from UE */
 				g_mme.handle_autn(conn_fd, pkt);

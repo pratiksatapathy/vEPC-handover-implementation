@@ -20,12 +20,11 @@ public:
 class MySql {
 public:
 	MYSQL *conn_fd;
-	MYSQL_RES *result;
 	ConnInfo conn_info;
 
 	MySql();
 	void conn();
-	void handle_query(const char*);
+	void handle_query(const char*, MYSQL_RES*);
 	void handle_db_error();
 	~MySql();
 };

@@ -14,10 +14,10 @@ public:
 	uint16_t msg_len;	
 
 	/* 24 - 55 S1AP eNodeB UE ID */
-	uint32_t enodeb_ue_id;
+	uint32_t enodeb_s1ap_ue_id;
 
 	/* 56 - 87 S1AP eNodeB UE ID */
-	uint32_t mme_ue_id;
+	uint32_t mme_s1ap_ue_id;
 
 	S1ap();
 	void init(uint8_t, uint16_t, uint32_t, uint32_t);
