@@ -35,6 +35,7 @@ MmeIds::~MmeIds() {
 }
 
 Mme::Mme() {
+	crypt.load();
 	ue_count = 0;
 	mux_init(table1_mux);
 	mux_init(table2_mux);
@@ -146,21 +147,41 @@ bool Mme::handle_autn(int conn_fd, Packet &pkt) {
 	}
 }
 
-void Mme::setup_security_context(int conn_fd, Packet &pkt) {
+void Mme::handle_security_setup(int conn_fd, Packet &pkt) {
+	uint32_t enodeb_s1ap_ue_id;
 	uint32_t mme_s1ap_ue_id;
 	uint64_t guti;
+	uint64_t ksi_asme;
+	uint16_t nw_capability;
+	uint64_t nas_enc_algo;
+	uint64_t nas_int_algo;
+	uint64_t k_nas_enc;
+	uint64_t k_nas_int;
 
+	enodeb_s1ap_ue_id = pkt.s1ap_hdr.enodeb_s1ap_ue_id;
 	mme_s1ap_ue_id = pkt.s1ap_hdr.mme_s1ap_ue_id;
 	mlock(table1_mux);
 	guti = table1[mme_s1ap_ue_id];
 	munlock(table1_mux);
 	setup_crypt_context(guti);
 	setup_integrity_context(guti);
+	mlock(table2_mux);
+	ksi_asme = table2[guti].ksi_asme;
+	nw_capability = table2[guti].nw_capability;
+	nas_enc_algo = table2[guti].nas_enc_algo;
+	nas_int_algo = table2[guti].nas_int_algo;
+	k_nas_enc = table2[guti].k_nas_enc;
+	k_nas_int = table2[guti].k_nas_int;
+	munlock(table2_mux);
 
-	
-	
-	
-		
+	pkt.clear_pkt();
+	pkt.append_item(ksi_asme);
+	pkt.append_item(nw_capability);
+	pkt.append_item(nas_enc_algo);
+	pkt.append_item(nas_int_algo);
+	integrity.add_hmac(pkt, k_nas_int);
+	pkt.prepend_s1ap_hdr(3, pkt.len, enodeb_s1ap_ue_id, mme_s1ap_ue_id);
+	server.snd(conn_fd, pkt);
 }
 
 void Mme::setup_crypt_context(uint64_t guti) {
@@ -177,7 +198,7 @@ void Mme::setup_integrity_context(uint64_t guti) {
 	munlock(table2_mux);
 }
 
-void Mme::update_ue_location() {
+void Mme::handle_ue_location_update() {
 
 }
 

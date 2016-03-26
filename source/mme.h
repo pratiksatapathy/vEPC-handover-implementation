@@ -6,6 +6,7 @@
 #include "network.h"
 #include "packet.h"
 #include "s1ap.h"
+#include "security.h"
 #include "sctp_client.h"
 #include "sctp_server.h"
 #include "sync.h"
@@ -89,6 +90,8 @@ class Mme {
 public:
 	SctpServer server;
 	MmeIds mme_ids;
+	Crypt crypt;
+	Integrity integrity;
 	int ue_count;
 	unordered_map<uint32_t, uint64_t> table1; /* UE Identification table */
 	unordered_map<uint64_t, UeContext> table2; /* UE Context table */
@@ -100,10 +103,10 @@ public:
 	Mme();
 	void handle_type1_attach(int, Packet&);
 	bool handle_autn(int, Packet&);
-	void setup_security_context(int, Packet&);
+	void handle_security_setup(int, Packet&);
 	void setup_crypt_context(uint64_t);
 	void setup_integrity_context(uint64_t);
-	void update_ue_location();
+	void handle_ue_location_update();
 	bool check_table1_entry(uint32_t);
 	bool check_table2_entry(uint64_t);	
 	void rem_table1_entry(uint32_t);

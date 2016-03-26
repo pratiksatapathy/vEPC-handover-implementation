@@ -7,6 +7,7 @@
 #include "network.h"
 #include "packet.h"
 #include "s1ap.h"
+#include "security.h"
 #include "sctp_client.h"
 #include "sctp_server.h"
 #include "sync.h"

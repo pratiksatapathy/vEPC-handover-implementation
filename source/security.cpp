@@ -66,3 +66,44 @@ Crypt::~Crypt() {
 	EVP_cleanup();
 	ERR_free_strings();
 }
+
+Integrity::Integrity() {
+	HMAC_CTX_init(&ctx);
+	key = (uint8_t*)"012345678";
+	hmac_len = 20;
+}
+
+void Integrity::add_hmac(Packet &pkt, uint64_t k_nas_int) {
+	uint8_t *hmac;
+
+	hmac = allocate_uint8_mem(hmac_len);
+	get_hmac(pkt.data, pkt.len, hmac, k_nas_int);
+	pkt.prepend_item(hmac, hmac_len);
+	free(hmac);
+}
+
+void Integrity::get_hmac(uint8_t *data, int data_len, uint8_t *result, uint64_t k_nas_int) {
+	HMAC_Init_ex(&ctx, key, strlen((const char*)key), EVP_sha1(), NULL);
+	HMAC_Update(&ctx, (const unsigned char*)&data, data_len);
+	HMAC_Final(&ctx, result, (unsigned int*)&hmac_len);
+}
+
+bool Integrity::cmp_hmacs(uint8_t *hmac1, uint8_t *hmac2) {
+	int i;
+
+	for (i = 0; i < hmac_len; i++) {
+		if ((unsigned int)hmac1[i] != (unsigned int)hmac2[i]) {
+			return false;
+		}
+	}
+	return true;
+}
+
+void Integrity::rem_hmac(Packet &pkt, uint8_t *hmac) {
+	pkt.extract_item(hmac, hmac_len);
+	pkt.truncate();
+}
+
+Integrity::~Integrity() {
+	HMAC_CTX_cleanup(&ctx);
+}

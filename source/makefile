@@ -50,7 +50,7 @@ ran_simulator.o:	diameter.h gtp.h network.h packet.h ran.h ran_simulator.cpp ran
 s1ap.o:	s1ap.cpp s1ap.h utils.h
 	$(G++) -c -o s1ap.o s1ap.cpp
 
-security.o:	security.cpp security.h utils.h
+security.o:	diameter.h gtp.h packet.h s1ap.h security.cpp security.h utils.h
 	$(G++) -c -o security.o security.cpp
 
 sctp_client.o:	diameter.h gtp.h network.h packet.h s1ap.h sctp_client.cpp sctp_client.h utils.h

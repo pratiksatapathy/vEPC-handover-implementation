@@ -33,6 +33,7 @@ public:
 	void append_item(uint8_t*, int);	
 	void append_item(const char*);	
 	void append_item(string);
+	void prepend_item(uint8_t*, int);
 	void prepend_gtpc_hdr(uint8_t, uint16_t, uint32_t);
 	void prepend_gtpu_hdr(uint8_t, uint16_t, uint32_t);
 	void prepend_s1ap_hdr(uint8_t, uint16_t, uint32_t, uint32_t);
@@ -47,6 +48,7 @@ public:
 	void extract_gtpu_hdr();
 	void extract_s1ap_hdr();
 	void extract_diameter_hdr();
+	void truncate();
 	void clear_pkt();
 	~Packet();
 };

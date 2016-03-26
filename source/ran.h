@@ -6,6 +6,7 @@
 #include "network.h"
 #include "packet.h"
 #include "s1ap.h"
+#include "security.h"
 #include "sctp_client.h"
 #include "telecom.h"
 #include "udp_client.h"
@@ -41,6 +42,14 @@ public:
 	uint64_t key; /* Primary key used in generating secondary keys */
 	uint64_t k_asme; /* Key for Access Security Management Entity */
 	uint64_t ksi_asme; /* Key Selection Identifier for Access Security Management Entity */
+	uint64_t k_nas_enc; /* Key for NAS Encryption / Decryption */
+	uint64_t k_nas_int; /* Key for NAS Integrity check */
+	uint64_t nas_enc_algo; /* Idenitifier of NAS Encryption / Decryption */
+	uint64_t nas_int_algo; /* Idenitifier of NAS Integrity check */
+	uint64_t count;
+	uint64_t bearer;
+	uint64_t dir;
+
 
 	/* EPS info, EPS bearer info */
 	uint64_t apn_in_use; /* Access Point Name in Use */
@@ -54,7 +63,7 @@ public:
 	uint16_t mnc; /* Mobile Network Code */
 	uint16_t plmn_id; /* Public Land Mobile Network ID */	
 	uint64_t msisdn; /* Mobile Station International Subscriber Directory Number - Mobile number */
-	uint16_t network_capability;
+	uint16_t nw_capability;
 
 	RanContext();
 	void init(uint32_t);
@@ -77,13 +86,17 @@ public:
 	RanContext ran_context;
 	EpcAddrs epc_addrs;
 	SctpClient mme_client;
+	Crypt crypt;
+	Integrity integrity;
 	Packet pkt;
 
 	Ran();
 	void init(int);
 	void initial_attach();
 	void authenticate();
-	void setup_security_context();
+	void setup_security();
+	void setup_crypt_context();
+	void setup_integrity_context();
 	void setup_eps_session();
 	void transfer_data();
 	void detach();	

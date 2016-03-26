@@ -48,8 +48,8 @@ int handle_ue(int conn_fd) {
 				cout << "mmeserver_handleue:" << " case 2:" << endl;
 				res = g_mme.handle_autn(conn_fd, pkt);
 				if (res) {
-					g_mme.setup_security_context(conn_fd, pkt);
-					g_mme.update_ue_location();
+					g_mme.handle_security_setup(conn_fd, pkt);
+					g_mme.handle_ue_location_update();
 				}
 				break;
 			case 3:
