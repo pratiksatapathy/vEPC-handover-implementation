@@ -24,7 +24,7 @@ public:
 
 	MySql();
 	void conn();
-	void handle_query(const char*, MYSQL_RES*);
+	void handle_query(const char*, MYSQL_RES**);
 	void handle_db_error();
 	~MySql();
 };

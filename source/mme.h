@@ -39,6 +39,13 @@ public:
 	/* UE security context */
 	uint64_t ksi_asme; /* Key Selection Identifier for Access Security Management Entity */	
 	uint64_t k_asme; /* Key for Access Security Management Entity */	
+	uint64_t k_nas_enc; /* Key for NAS Encryption / Decryption */
+	uint64_t k_nas_int; /* Key for NAS Integrity check */
+	uint64_t nas_enc_algo; /* Idenitifier of NAS Encryption / Decryption */
+	uint64_t nas_int_algo; /* Idenitifier of NAS Integrity check */
+	uint64_t count;
+	uint64_t bearer;
+	uint64_t dir;
 
 	/* EPS info, EPS bearer info */
 	uint64_t default_apn; /* Default Access Point Name */
@@ -55,6 +62,9 @@ public:
 	/* UE Operator network info */
 	uint16_t nw_type;
 	uint16_t nw_capability;
+
+	/* State of UE */
+	uint64_t curr_state;
 
 	UeContext();
 	void init(uint64_t, uint32_t, uint32_t, uint64_t, uint16_t);
@@ -89,8 +99,11 @@ public:
 
 	Mme();
 	void handle_type1_attach(int, Packet&);
-	void add_ue_context(Packet);
-	void handle_autn(int, Packet&);
+	bool handle_autn(int, Packet&);
+	void setup_security_context(int, Packet&);
+	void setup_crypt_context(uint64_t);
+	void setup_integrity_context(uint64_t);
+	void update_ue_location();
 	bool check_table1_entry(uint32_t);
 	bool check_table2_entry(uint64_t);	
 	void rem_table1_entry(uint32_t);

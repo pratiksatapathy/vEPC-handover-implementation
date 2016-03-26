@@ -3,9 +3,6 @@
 
 #include "utils.h"
 
-#define GTPV1_HDR_LEN 12
-#define GTPV2_HDR_LEN 12
-
 /* Used in user plane */
 class Gtpv1 {
 public:
@@ -72,5 +69,8 @@ public:
 	void init(uint8_t, uint16_t, uint32_t);
 	~Gtpv2();
 };
+
+const int GTPV1_HDR_LEN = sizeof(Gtpv1);
+const int GTPV2_HDR_LEN = sizeof(Gtpv2);
 
 #endif /* GTP_H */

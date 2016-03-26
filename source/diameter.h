@@ -3,8 +3,6 @@
 
 #include "utils.h"
 
-#define DIAMETER_HDR_LEN 11
-
 class Diameter {
 public:
 	/* 0 - 7 Message Type */
@@ -17,5 +15,7 @@ public:
 	void init(uint8_t, uint16_t);
 	~Diameter();
 };
+
+const int DIAMETER_HDR_LEN = sizeof(Diameter);
 
 #endif /* DIAMETER_H */

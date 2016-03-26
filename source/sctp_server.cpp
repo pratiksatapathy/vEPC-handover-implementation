@@ -16,7 +16,7 @@ void SctpServer::clear_queue() {
 	}
 }
 
-void SctpServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_count, void serve_client(int)) {
+void SctpServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_count, int serve_client(int)) {
 	init(arg_ip_addr, arg_port, arg_workers_count, serve_client);
 	create_workers();
 	set_sock_reuse(listen_fd);
@@ -24,7 +24,7 @@ void SctpServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_coun
 	accept_clients();
 }
 
-void SctpServer::init(const char *arg_ip_addr, int arg_port, int arg_workers_count, void arg_serve_client(int)) {
+void SctpServer::init(const char *arg_ip_addr, int arg_port, int arg_workers_count, int arg_serve_client(int)) {
 	int status;
 
 	port = arg_port;
@@ -59,8 +59,19 @@ void SctpServer::worker_func() {
 			conn_q.pop();
 			cndsignal(qfull);
 			munlock(mux);
-			serve_client(conn_fd);
-			close(conn_fd);
+			status = serve_client(conn_fd);
+			if  (status == 1) {
+				mlock(mux);
+				while (conn_q.size() >= max_qsize) {
+					cndwait(qfull, mux);
+				}
+				conn_q.push(conn_fd);
+				cndsignal(qempty);
+				munlock(mux);
+			}
+			else if (status == 0) {
+				close(conn_fd);
+			}
 		}
 	}
 }
@@ -75,6 +86,7 @@ void SctpServer::accept_clients() {
 	while (1) {
 		conn_fd = accept(listen_fd, (struct sockaddr *)&client_sock_addr, &sock_addr_len);
 		handle_type1_error(conn_fd, "Accept error: sctpserver_acceptclient");
+		set_rcv_timeout(conn_fd);
 		mlock(mux);
 		while (conn_q.size() >= max_qsize) {
 			cndwait(qfull, mux);

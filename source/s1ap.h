@@ -3,8 +3,6 @@
 
 #include "utils.h"
 
-#define S1AP_HDR_LEN 11
-
 class S1ap {
 public:
 	/* 0 - 7 Message Type */
@@ -23,5 +21,7 @@ public:
 	void init(uint8_t, uint16_t, uint32_t, uint32_t);
 	~S1ap();
 };
+
+const int S1AP_HDR_LEN = sizeof(S1ap);
 
 #endif /* S1AP_H */

@@ -12,10 +12,10 @@
 #include "udp_client.h"
 #include "utils.h"
 
-extern int g_threads_count;
-extern vector<thread> g_threads;
-extern double g_req_duration;
 extern time_t g_start_time;
+extern int g_threads_count;
+extern double g_req_duration;
+extern vector<thread> g_threads;
 
 void simulate(int);
 void check_usage(int);

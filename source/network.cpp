@@ -35,9 +35,16 @@ void set_sock_reuse(int sock_fd) {
 	handle_type1_error(status, "Setsockopt reuse error: network_setsockreuse");
 }
 
-void set_timeout(int sock_fd) {
+void set_snd_timeout(int sock_fd) {
+	int status;
+
+	status = setsockopt(sock_fd, SOL_SOCKET, SO_SNDTIMEO, (struct timeval*)&g_timeout, sizeof(struct timeval));
+	handle_type1_error(status, "Setsockopt snd timeout error: network_setsndtimeout");
+}
+
+void set_rcv_timeout(int sock_fd) {
 	int status;
 
 	status = setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, (struct timeval*)&g_timeout, sizeof(struct timeval));
-	handle_type1_error(status, "Setsockopt rcv timeout error: network_settimeout");
+	handle_type1_error(status, "Setsockopt rcv timeout error: network_setrcvtimeout");
 }

@@ -12,7 +12,7 @@ uint64_t get_gummei(uint16_t plmn_id, uint32_t mmei) {
 	return stoull(to_string(plmn_id) + to_string(mmei));
 }
 
-uint64_t get_imsi(uint16_t plmn_id, uint32_t msisdn) {
+uint64_t get_imsi(uint16_t plmn_id, uint64_t msisdn) {
 	return stoull(to_string(plmn_id) + to_string(msisdn));
 }
 

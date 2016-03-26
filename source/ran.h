@@ -53,7 +53,7 @@ public:
 	uint16_t mcc; /* Mobile Country Code */
 	uint16_t mnc; /* Mobile Network Code */
 	uint16_t plmn_id; /* Public Land Mobile Network ID */	
-	uint32_t msisdn; /* Mobile Station International Subscriber Directory Number - Mobile number */
+	uint64_t msisdn; /* Mobile Station International Subscriber Directory Number - Mobile number */
 	uint16_t network_capability;
 
 	RanContext();

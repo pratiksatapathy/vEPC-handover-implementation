@@ -15,36 +15,51 @@ void init(char *argv[]) {
 }
 
 void run() {
+	cout << "MME server started" << endl;
 	g_mme.server.run(g_mme_ip_addr.c_str(), g_mme_port, g_workers_count, handle_ue);
 }
 
-void handle_ue(int conn_fd) {
+int handle_ue(int conn_fd) {
+	bool res;
 	Packet pkt;
 
 	g_mme.server.rcv(conn_fd, pkt);
+	if (pkt.len <= 0) {
+		cout << "mmeserver_handleue:" << " Connection closed" << endl;
+		return 0;
+	}
 	pkt.extract_s1ap_hdr();
-	if (pkt.s1ap_hdr.mme_s1ap_ue_id == -1) {
+	if (pkt.s1ap_hdr.mme_s1ap_ue_id == 0) {
 		switch (pkt.s1ap_hdr.msg_type) {
 			case 1: /* Attach request - Initial UE message */
+				cout << "mmeserver_handleue:" << " case 1:" << endl;
 				g_mme.handle_type1_attach(conn_fd, pkt);
 				break;
 			case 2:
 				break;
 			default:
+				cout << "mmeserver_handleue:" << " default case: new" << endl;
 				break;
 		}		
 	}
 	else if (pkt.s1ap_hdr.mme_s1ap_ue_id > 0) {
 		switch (pkt.s1ap_hdr.msg_type) {
 			case 2: /* Authentication response from UE */
-				g_mme.handle_autn(conn_fd, pkt);
+				cout << "mmeserver_handleue:" << " case 2:" << endl;
+				res = g_mme.handle_autn(conn_fd, pkt);
+				if (res) {
+					g_mme.setup_security_context(conn_fd, pkt);
+					g_mme.update_ue_location();
+				}
 				break;
 			case 3:
 				break;
 			default:
+				cout << "mmeserver_handleue:" << " default case: attached" << endl;
 				break;
 		}				
-	}
+	}		
+	return 1;
 }
 
 int main(int argc, char *argv[]) {

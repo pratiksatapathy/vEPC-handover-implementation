@@ -20,6 +20,6 @@ extern int g_workers_count;
 void check_usage(int);
 void init(char**);
 void run();
-void handle_ue(int);
+int handle_ue(int);
 
 #endif /* MME_SERVER_H */

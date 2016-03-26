@@ -4,7 +4,7 @@ ConnInfo::ConnInfo() {
 	server = "localhost";
 	user = "root";
 	passwd = "mysql";
-	db = "NFV";
+	db = "hss";
 }
 
 ConnInfo::~ConnInfo() {
@@ -21,16 +21,20 @@ void MySql::conn() {
 	}
 }
 
-void MySql::handle_query(const char *query, MYSQL_RES *result) {
+void MySql::handle_query(const char *query, MYSQL_RES **result) {
 	if (mysql_query(conn_fd, query)) {
 		handle_db_error();
 	}
-	result = mysql_store_result(conn_fd);
+	*result = mysql_store_result(conn_fd);
+	if (result == NULL) {
+		handle_db_error();
+	}
+
 }
 
 void MySql::handle_db_error() {
 	cout << mysql_error(conn_fd) << endl;
-	handle_type1_error(-1, "mysql_error: mysql: handle_db_error");
+	handle_type1_error(-1, "mysql error: mysql_handledberror");
 }
 
 MySql::~MySql() {

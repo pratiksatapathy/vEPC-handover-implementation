@@ -2,6 +2,9 @@
 
 UeContext::UeContext() {
 	nw_type = 0;
+	count = 1;
+	bearer = 0;
+	dir = 1;
 }
 
 void UeContext::init(uint64_t arg_imsi, uint32_t arg_enodeb_s1ap_ue_id, uint32_t arg_mme_s1ap_ue_id, uint64_t arg_tai, uint16_t arg_nw_capability) {
@@ -10,6 +13,7 @@ void UeContext::init(uint64_t arg_imsi, uint32_t arg_enodeb_s1ap_ue_id, uint32_t
 	mme_s1ap_ue_id = arg_mme_s1ap_ue_id;
 	tai = arg_tai;
 	nw_capability = arg_nw_capability;
+	curr_state = 1;
 }
 
 UeContext::~UeContext() {
@@ -52,12 +56,14 @@ void Mme::handle_type1_attach(int conn_fd, Packet &pkt) {
 	uint64_t guti;
 	uint64_t num_autn_vectors;
 
+	hss_client.conn(g_hss_ip_addr.c_str(), g_hss_port);
 	num_autn_vectors = 1;
 	pkt.extract_item(imsi);
 	pkt.extract_item(tai);
 	pkt.extract_item(ksi_asme); /* No use in this case */
 	pkt.extract_item(nw_capability); /* No use in this case */
 
+	cout << "mme_handletype1attach:" << " imsi:" << imsi << " tai:" << tai << " ksi_asme:" << ksi_asme << " nw_capability:" << nw_capability << endl;
 	enodeb_s1ap_ue_id = pkt.s1ap_hdr.enodeb_s1ap_ue_id;
 	
 
@@ -80,10 +86,13 @@ void Mme::handle_type1_attach(int conn_fd, Packet &pkt) {
 	pkt.append_item(num_autn_vectors);
 	pkt.append_item(nw_type);
 	pkt.prepend_diameter_hdr(1, pkt.len);
-	hss_client.conn(g_hss_ip_addr.c_str(), g_hss_port);
 	hss_client.snd(pkt);
+	
+	cout << "mme_handletype1attach:" << " request sent to hss" << endl;
+
 	hss_client.rcv(pkt);
 
+	pkt.extract_diameter_hdr();
 	pkt.extract_item(autn_num);
 	pkt.extract_item(rand_num);
 	pkt.extract_item(xres);
@@ -92,7 +101,11 @@ void Mme::handle_type1_attach(int conn_fd, Packet &pkt) {
 	mlock(table2_mux);
 	table2[guti].xres = xres;
 	table2[guti].k_asme = k_asme;
+	table2[guti].ksi_asme = 1;
+	ksi_asme = table2[guti].ksi_asme;
 	munlock(table2_mux);
+
+	cout << "mme_handletype1attach:" << " autn:" << autn_num <<" rand:" << rand_num << " xres:" << xres << " k_asme:" << k_asme << endl;
 
 	pkt.clear_pkt();
 	pkt.append_item(autn_num);
@@ -100,9 +113,11 @@ void Mme::handle_type1_attach(int conn_fd, Packet &pkt) {
 	pkt.append_item(ksi_asme);
 	pkt.prepend_s1ap_hdr(1, pkt.len, enodeb_s1ap_ue_id, mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
+	
+	cout << "mme_handletype1attach:" << " request sent to ran" << endl;	
 }
 
-void Mme::handle_autn(int conn_fd, Packet &pkt) {
+bool Mme::handle_autn(int conn_fd, Packet &pkt) {
 	uint32_t mme_s1ap_ue_id;
 	uint64_t guti;
 	uint64_t res;
@@ -122,11 +137,48 @@ void Mme::handle_autn(int conn_fd, Packet &pkt) {
 
 	if (res == xres) {
 		/* Success */
+		return true;
 	}
 	else {
 		rem_table1_entry(mme_s1ap_ue_id);
 		rem_table2_entry(guti);		
+		return false;
 	}
+}
+
+void Mme::setup_security_context(int conn_fd, Packet &pkt) {
+	uint32_t mme_s1ap_ue_id;
+	uint64_t guti;
+
+	mme_s1ap_ue_id = pkt.s1ap_hdr.mme_s1ap_ue_id;
+	mlock(table1_mux);
+	guti = table1[mme_s1ap_ue_id];
+	munlock(table1_mux);
+	setup_crypt_context(guti);
+	setup_integrity_context(guti);
+
+	
+	
+	
+		
+}
+
+void Mme::setup_crypt_context(uint64_t guti) {
+	mlock(table2_mux);
+	table2[guti].nas_enc_algo = 1;
+	table2[guti].k_nas_enc = table2[guti].k_asme + table2[guti].nas_enc_algo + table2[guti].count + table2[guti].bearer + table2[guti].dir;
+	munlock(table2_mux);
+}
+
+void Mme::setup_integrity_context(uint64_t guti) {
+	mlock(table2_mux);
+	table2[guti].nas_int_algo = 1;
+	table2[guti].k_nas_int = table2[guti].k_asme + table2[guti].nas_int_algo + table2[guti].count + table2[guti].bearer + table2[guti].dir;
+	munlock(table2_mux);
+}
+
+void Mme::update_ue_location() {
+
 }
 
 bool Mme::check_table1_entry(uint32_t arg_mme_s1ap_ue_id) {

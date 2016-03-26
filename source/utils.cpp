@@ -25,7 +25,7 @@ string g_pgw_ip_addr = "127.0.0.1";
 string g_pgw_dlink_ip_addr = "127.0.0.1";
 string g_public_sink_ip_addr = "127.0.0.1";
 string g_private_sink_ip_addr = "127.0.0.1";
-struct timeval g_timeout = {1, 0};
+struct timeval g_timeout = {20, 0};
 
 /* Action - Exit the program */
 void handle_type1_error(int arg, const char *msg) {
@@ -37,16 +37,17 @@ void handle_type1_error(int arg, const char *msg) {
 
 /* Action - Nothing */
 void handle_type2_error(int arg, const char *msg) {
-	if (arg < 0) {
+	if (arg < 0 && errno != EWOULDBLOCK && errno != EAGAIN) {
 		perror(msg);
-	}	
+		exit(EXIT_FAILURE);
+	}
 }
 
 char* allocate_str_mem(int len) {
 	char *tem;
 
 	if (len <= 0) {
-		handle_type1_error(-1, "Memory length error: allocate_str_mem");
+		handle_type1_error(-1, "Memory length error: utils_allocatestrmem");
 	}
 	tem = (char*)malloc(len * sizeof (char));
 	if (tem != NULL) {
@@ -54,7 +55,7 @@ char* allocate_str_mem(int len) {
 		return tem;
 	}
 	else {
-		handle_type1_error(-1, "Memory allocation error: allocate_str_mem");
+		handle_type1_error(-1, "Memory allocation error: utils_allocatestrmem");
 	}
 }
 
@@ -62,7 +63,7 @@ uint8_t* allocate_uint8_mem(int len) {
 	uint8_t *tem;
 
 	if (len <= 0) {
-		handle_type1_error(-1, "Memory length error: allocate_uint8_mem");
+		handle_type1_error(-1, "Memory length error: utils_allocateuint8mem");
 	}
 	tem = (uint8_t*)malloc(len * sizeof (uint8_t));
 	if (tem != NULL) {
@@ -70,11 +71,11 @@ uint8_t* allocate_uint8_mem(int len) {
 		return tem;
 	} 
 	else {
-		handle_type1_error(-1, "Memory allocation error: allocate_uint8_mem");
+		handle_type1_error(-1, "Memory allocation error: utils_allocateuint8mem");
 	}
 }
 
-void time_check(time_t start_time, double duration_time, bool time_exceeded) {
+void time_check(time_t start_time, double duration_time, bool &time_exceeded) {
 	double elapsed_time;
 
 	if ((elapsed_time = difftime(time(0), start_time)) > duration_time) {

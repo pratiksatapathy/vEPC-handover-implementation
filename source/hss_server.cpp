@@ -18,21 +18,29 @@ void init(char *argv[]) {
 }
 
 void run() {
+	cout << "HSS server started" << endl;
 	g_hss.server.run(g_hss_ip_addr.c_str(), g_hss_port, g_workers_count, handle_mme);
 }
 
-void handle_mme(int conn_fd) {
+int handle_mme(int conn_fd) {
 	Packet pkt;
 
 	g_hss.server.rcv(conn_fd, pkt);
+	if (pkt.len <= 0) {
+		cout << "hssserver_handlemme:" << " Connection closed" << endl;
+		return 0;
+	}		
 	pkt.extract_diameter_hdr();
 	switch (pkt.diameter_hdr.msg_type) {
 		case 1:
+			cout << "hssserver_handlemme:" << " case 1:" << endl;
 			g_hss.handle_autninfo_req(conn_fd, pkt);
 			break;
 		default:
+			cout << "hssserver_handlemme:" << " default case:" << endl;
 			break;
 	}
+	return 1;
 }
 
 void finish() {

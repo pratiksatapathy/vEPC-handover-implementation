@@ -12,6 +12,7 @@ Packet::Packet(const Packet &src_obj) {
 	s1ap_hdr = src_obj.s1ap_hdr;
 	diameter_hdr = src_obj.diameter_hdr;
 	data = allocate_uint8_mem(BUF_SIZE);
+	memmove(data, src_obj.data, src_obj.len);
 	data_ptr = src_obj.data_ptr;
 	len = src_obj.len;
 }
@@ -204,8 +205,8 @@ void Packet::clear_pkt() {
 	int data_len = BUF_SIZE;
 	
 	memset(data, 0, data_len * sizeof (uint8_t));	
-	len = 0;
 	data_ptr = 0;
+	len = 0;
 }
 
 Packet::~Packet() {	

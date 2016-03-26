@@ -11,7 +11,7 @@ void UdpClient::conn(const char *arg_server_ip_addr, int arg_server_port) {
 	init(arg_server_ip_addr, arg_server_port);
 	bind_sock(conn_fd, sock_addr);
 	set_port();
-	set_timeout(conn_fd);
+	set_rcv_timeout(conn_fd);
 }
 
 void UdpClient::init(const char *arg_server_ip_addr, int arg_server_port) {
