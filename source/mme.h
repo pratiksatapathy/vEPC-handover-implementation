@@ -103,9 +103,10 @@ public:
 	Mme();
 	void handle_type1_attach(int, Packet&);
 	bool handle_autn(int, Packet&);
-	void handle_security_setup(int, Packet&);
+	void handle_security_mode_cmd(int, Packet&);
 	void setup_crypt_context(uint64_t);
 	void setup_integrity_context(uint64_t);
+	bool handle_security_mode_complete(int, Packet&);
 	void handle_ue_location_update();
 	bool check_table1_entry(uint32_t);
 	bool check_table2_entry(uint64_t);	

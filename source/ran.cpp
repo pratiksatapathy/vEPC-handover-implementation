@@ -35,6 +35,7 @@ EpcAddrs::~EpcAddrs() {
 
 Ran::Ran(){
 	mme_client.conn(epc_addrs.mme_ip_addr.c_str(), epc_addrs.mme_port);
+	crypt.load();
 }
 
 void Ran::init(int arg) {
@@ -69,7 +70,7 @@ void Ran::authenticate() {
 	pkt.extract_item(rand_num);
 	pkt.extract_item(ran_context.ksi_asme);
 	
-	cout << "ran_authenticate: " << ran_context.key << " AUTN: " << xautn_num << " RAND: " << rand_num << " KSI_ASME: " << ran_context.ksi_asme << endl;
+	cout << "ran_authenticate: " << ran_context.key << " autn: " << xautn_num << " rand: " << rand_num << " ksiasme: " << ran_context.ksi_asme << endl;
 	sqn = rand_num + 1;
 	res = ran_context.key + sqn + rand_num;
 	autn_num = res + 1;
@@ -82,7 +83,8 @@ void Ran::authenticate() {
 	pkt.clear_pkt();
 	pkt.append_item(res);
 	pkt.prepend_s1ap_hdr(2, pkt.len, ran_context.enodeb_s1ap_ue_id, ran_context.mme_s1ap_ue_id);
-	cout << "Authentication sucessful for RAN - " << ran_context.key << endl;
+	mme_client.snd(pkt);
+	cout << "ran_authenticate:" << " Authentication sucessful for RAN - " << ran_context.key << endl;
 }
 
 void Ran::setup_security() {
@@ -93,6 +95,7 @@ void Ran::setup_security() {
 	hmac_res = allocate_uint8_mem(integrity.hmac_len);
 	hmac_xres = allocate_uint8_mem(integrity.hmac_len);
 	mme_client.rcv(pkt);
+	cout << "ran_setupsecurity: " << " received request for ran - " << ran_context.key << endl;
 	pkt.extract_s1ap_hdr();
 	integrity.rem_hmac(pkt, hmac_xres);
 	pkt.extract_item(ran_context.ksi_asme);
@@ -104,19 +107,27 @@ void Ran::setup_security() {
 	integrity.get_hmac(pkt.data, pkt.len, hmac_res, ran_context.k_nas_int);
 	res = integrity.cmp_hmacs(hmac_res, hmac_xres);
 	if (res == false) {
-		handle_type1_error(-1, "HMAC of initial security msg failedz: ran_setupsecurity");
+		handle_type1_error(-1, "HMAC of initial security msg failed: ran_setupsecurity");
 	}
-	cout << "ran_setupsecurity:" << " initial security success" << endl;
+	cout << "ran_setupsecurity:" << " security mode command success" << endl;
+
+	pkt.clear_pkt();
+	pkt.append_item(res);
+	crypt.enc(pkt, ran_context.k_nas_enc);
+	integrity.add_hmac(pkt, ran_context.k_nas_int);
+	pkt.prepend_s1ap_hdr(4, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+	mme_client.snd(pkt);
+	cout << "ran_setupsecurity:" << " security mode complete success" << endl;
 	free(hmac_res);
 	free(hmac_xres);
 }
 
 void Ran::setup_crypt_context() {
-	ran_context.k_nas_enc = ran_context.k_asme + ran_context.nas_enc_algo + ran_context.count + ran_context.bearer + ran_context.dir;
+	ran_context.k_nas_enc = ran_context.k_asme + ran_context.nas_enc_algo + ran_context.count + ran_context.bearer + ran_context.dir + 1;
 }
 
 void Ran::setup_integrity_context() {
-	ran_context.k_nas_int = ran_context.k_asme + ran_context.nas_int_algo + ran_context.count + ran_context.bearer + ran_context.dir;
+	ran_context.k_nas_int = ran_context.k_asme + ran_context.nas_int_algo + ran_context.count + ran_context.bearer + ran_context.dir + 1;
 }
 
 void Ran::setup_eps_session() {

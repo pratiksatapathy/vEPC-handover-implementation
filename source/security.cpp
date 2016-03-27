@@ -3,6 +3,7 @@
 Crypt::Crypt() {
 	key = (uint8_t *)"01234567890123456789012345678901";
 	iv = (uint8_t *)"01234567890123456";
+	load();
 }
 
 void Crypt::load() {	
@@ -11,7 +12,17 @@ void Crypt::load() {
 	OPENSSL_config(NULL);
 }
 
-int Crypt::enc(uint8_t *plain_text, int plain_text_len, uint8_t *cipher_text, uint64_t k_nas_enc) {
+void Crypt::enc(Packet &pkt, uint64_t k_nas_enc) {
+	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);
+	int new_len;
+
+	new_len = enc_data(pkt.data, pkt.len, tem_data, k_nas_enc);
+	pkt.clear_pkt();
+	pkt.append_item(tem_data, new_len);
+	free(tem_data);
+}
+
+int Crypt::enc_data(uint8_t *plain_text, int plain_text_len, uint8_t *cipher_text, uint64_t k_nas_enc) {
 	EVP_CIPHER_CTX *ctx;
 	int len;
 	int cipher_text_len;
@@ -34,7 +45,18 @@ int Crypt::enc(uint8_t *plain_text, int plain_text_len, uint8_t *cipher_text, ui
 	return cipher_text_len;
 }
 
-int Crypt::dec(uint8_t *cipher_text, int cipher_text_len, uint8_t *plain_text, uint64_t k_nas_enc) {
+void Crypt::dec(Packet &pkt, uint64_t k_nas_enc) {
+	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);
+	int new_len;
+
+	new_len = dec_data(pkt.data, pkt.len, tem_data, k_nas_enc);
+	swap(pkt.data, tem_data);
+	pkt.data_ptr = 0;
+	pkt.len = new_len;
+	free(tem_data);
+}
+
+int Crypt::dec_data(uint8_t *cipher_text, int cipher_text_len, uint8_t *plain_text, uint64_t k_nas_enc) {
 	EVP_CIPHER_CTX *ctx;
 	int len;
 	int plain_text_len;
@@ -84,8 +106,28 @@ void Integrity::add_hmac(Packet &pkt, uint64_t k_nas_int) {
 
 void Integrity::get_hmac(uint8_t *data, int data_len, uint8_t *result, uint64_t k_nas_int) {
 	HMAC_Init_ex(&ctx, key, strlen((const char*)key), EVP_sha1(), NULL);
-	HMAC_Update(&ctx, (const unsigned char*)&data, data_len);
+	HMAC_Update(&ctx, data, data_len);
 	HMAC_Final(&ctx, result, (unsigned int*)&hmac_len);
+}
+
+bool Integrity::hmac_check(Packet &pkt, uint64_t k_nas_int) {
+	uint8_t *hmac_res;
+	uint8_t *hmac_xres;
+	bool res;
+
+	hmac_res = allocate_uint8_mem(hmac_len);
+	hmac_xres = allocate_uint8_mem(hmac_len);
+	rem_hmac(pkt, hmac_xres);
+	get_hmac(pkt.data, pkt.len, hmac_res, k_nas_int);
+	res = cmp_hmacs(hmac_res, hmac_xres);
+	free(hmac_res);
+	free(hmac_xres);
+	return res;
+}
+
+void Integrity::rem_hmac(Packet &pkt, uint8_t *hmac) {
+	pkt.extract_item(hmac, hmac_len);
+	pkt.truncate();
 }
 
 bool Integrity::cmp_hmacs(uint8_t *hmac1, uint8_t *hmac2) {
@@ -99,9 +141,13 @@ bool Integrity::cmp_hmacs(uint8_t *hmac1, uint8_t *hmac2) {
 	return true;
 }
 
-void Integrity::rem_hmac(Packet &pkt, uint8_t *hmac) {
-	pkt.extract_item(hmac, hmac_len);
-	pkt.truncate();
+void Integrity::print_hmac(uint8_t *hmac) {
+	int i;
+
+	for (i = 0; i < hmac_len; i++) {
+		printf("%02x", (unsigned int)hmac[i]);
+	}
+	cout << endl;
 }
 
 Integrity::~Integrity() {

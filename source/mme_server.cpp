@@ -48,11 +48,15 @@ int handle_ue(int conn_fd) {
 				cout << "mmeserver_handleue:" << " case 2:" << endl;
 				res = g_mme.handle_autn(conn_fd, pkt);
 				if (res) {
-					g_mme.handle_security_setup(conn_fd, pkt);
-					g_mme.handle_ue_location_update();
+					g_mme.handle_security_mode_cmd(conn_fd, pkt);
 				}
 				break;
-			case 3:
+			case 4:
+				cout << "mmeserver_handleue:" << " case 4:" << endl;
+				res = g_mme.handle_security_mode_complete(conn_fd, pkt);
+				if (res) {
+					g_mme.handle_ue_location_update();
+				}
 				break;
 			default:
 				cout << "mmeserver_handleue:" << " default case: attached" << endl;

@@ -27,6 +27,7 @@ public:
 	friend void swap(Packet&, Packet&);
 	Packet& operator=(Packet);
 	Packet(Packet&&);
+	void append_item(bool);
 	void append_item(int);
 	void append_item(uint16_t);
 	void append_item(uint64_t);
@@ -38,6 +39,7 @@ public:
 	void prepend_gtpu_hdr(uint8_t, uint16_t, uint32_t);
 	void prepend_s1ap_hdr(uint8_t, uint16_t, uint32_t, uint32_t);
 	void prepend_diameter_hdr(uint8_t, uint16_t);
+	void extract_item(bool&);
 	void extract_item(int&);
 	void extract_item(uint16_t&);
 	void extract_item(uint64_t&);

@@ -27,10 +27,10 @@ private:
 public:
 	Crypt();
 	void load();
-	// void enc(Packet&, uint64_t);
-	int enc(uint8_t*, int, uint8_t*, uint64_t);
-	// void dec(Packet&, uint64_t);
-	int dec(uint8_t*, int, uint8_t*, uint64_t);
+	void enc(Packet&, uint64_t);
+	int enc_data(uint8_t*, int, uint8_t*, uint64_t);
+	void dec(Packet&, uint64_t);
+	int dec_data(uint8_t*, int, uint8_t*, uint64_t);
 	void handle_crypt_error();
 	~Crypt();
 };
@@ -47,7 +47,9 @@ public:
 	void add_hmac(Packet&, uint64_t);
 	void get_hmac(uint8_t*, int, uint8_t*, uint64_t);
 	void rem_hmac(Packet&, uint8_t*);
+	bool hmac_check(Packet&, uint64_t);
 	bool cmp_hmacs(uint8_t*, uint8_t*);
+	void print_hmac(uint8_t*);
 	~Integrity();
 };
 

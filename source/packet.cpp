@@ -39,6 +39,14 @@ Packet::Packet(Packet &&src_obj)
 	swap(*this, src_obj);	
 }
 
+void Packet::append_item(bool item) {
+	int item_len = sizeof(bool);
+
+	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
+	data_ptr += item_len;
+	len += item_len;
+}
+
 void Packet::append_item(int item) {
 	int item_len = sizeof(int);
 
@@ -146,6 +154,13 @@ void Packet::prepend_diameter_hdr(uint8_t msg_type, uint16_t msg_len) {
 	data_ptr += hdr_len;
 	len += hdr_len;
 	free(tem_data);
+}
+
+void Packet::extract_item(bool &item) {
+	int item_len = sizeof(bool);
+
+	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
+	data_ptr += item_len;
 }
 
 void Packet::extract_item(int &item){

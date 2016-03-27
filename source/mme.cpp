@@ -138,6 +138,7 @@ bool Mme::handle_autn(int conn_fd, Packet &pkt) {
 
 	if (res == xres) {
 		/* Success */
+		cout << "mme_handleautn:" << " Authentication successful" << endl;
 		return true;
 	}
 	else {
@@ -147,7 +148,7 @@ bool Mme::handle_autn(int conn_fd, Packet &pkt) {
 	}
 }
 
-void Mme::handle_security_setup(int conn_fd, Packet &pkt) {
+void Mme::handle_security_mode_cmd(int conn_fd, Packet &pkt) {
 	uint32_t enodeb_s1ap_ue_id;
 	uint32_t mme_s1ap_ue_id;
 	uint64_t guti;
@@ -182,6 +183,7 @@ void Mme::handle_security_setup(int conn_fd, Packet &pkt) {
 	integrity.add_hmac(pkt, k_nas_int);
 	pkt.prepend_s1ap_hdr(3, pkt.len, enodeb_s1ap_ue_id, mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
+	cout << "mme_handlesecuritymodecmd:" << " security mode command sent" << endl;
 }
 
 void Mme::setup_crypt_context(uint64_t guti) {
@@ -196,6 +198,41 @@ void Mme::setup_integrity_context(uint64_t guti) {
 	table2[guti].nas_int_algo = 1;
 	table2[guti].k_nas_int = table2[guti].k_asme + table2[guti].nas_int_algo + table2[guti].count + table2[guti].bearer + table2[guti].dir;
 	munlock(table2_mux);
+}
+
+bool Mme::handle_security_mode_complete(int conn_fd, Packet &pkt) {
+	uint32_t enodeb_s1ap_ue_id;
+	uint32_t mme_s1ap_ue_id;
+	uint64_t guti;
+	uint64_t k_nas_enc;
+	uint64_t k_nas_int;
+	bool res;
+
+	enodeb_s1ap_ue_id = pkt.s1ap_hdr.enodeb_s1ap_ue_id;
+	mme_s1ap_ue_id = pkt.s1ap_hdr.mme_s1ap_ue_id;
+	mlock(table1_mux);
+	guti = table1[mme_s1ap_ue_id];
+	munlock(table1_mux);
+
+	mlock(table2_mux);
+	k_nas_enc = table2[guti].k_nas_enc;
+	k_nas_int = table2[guti].k_nas_int;
+	munlock(table2_mux);
+
+	res = integrity.hmac_check(pkt, k_nas_int);
+	if (res == false) {
+		cout << "mme_handlesecuritymodecomplete:" << " hmac failure" << endl;
+	}
+	else {
+		crypt.dec(pkt, k_nas_enc);
+		pkt.extract_item(res);
+		if (res == false) {
+			cout << "mme_handlesecuritymodecomplete:" << " security mode complete failure" << endl;
+		}
+		else {
+			cout << "mme_handlesecuritymodecomplete:" << " security mode complete success" << endl;
+		}
+	}
 }
 
 void Mme::handle_ue_location_update() {
