@@ -6,7 +6,7 @@ int g_workers_count;
 void check_usage(int argc) {
 	if (argc < 2) {
 		cout << "Usage: ./<mme_server_exec> THREADS_COUNT" << endl;
-		handle_type1_error(-1, "Invalid usage error: mmserver_checkusage");
+		g_utils.handle_type1_error(-1, "Invalid usage error: mmserver_checkusage");
 	}
 }
 
@@ -31,12 +31,13 @@ int handle_ue(int conn_fd) {
 	pkt.extract_s1ap_hdr();
 	if (pkt.s1ap_hdr.mme_s1ap_ue_id == 0) {
 		switch (pkt.s1ap_hdr.msg_type) {
-			case 1: /* Attach request - Initial UE message */
+			/* Initial Attach request */
+			case 1: 
 				cout << "mmeserver_handleue:" << " case 1:" << endl;
 				g_mme.handle_type1_attach(conn_fd, pkt);
 				break;
-			case 2:
-				break;
+
+			/* For error handling */
 			default:
 				cout << "mmeserver_handleue:" << " default case: new" << endl;
 				break;
@@ -44,20 +45,32 @@ int handle_ue(int conn_fd) {
 	}
 	else if (pkt.s1ap_hdr.mme_s1ap_ue_id > 0) {
 		switch (pkt.s1ap_hdr.msg_type) {
-			case 2: /* Authentication response from UE */
+			/* Authentication response */
+			case 2: 
 				cout << "mmeserver_handleue:" << " case 2:" << endl;
 				res = g_mme.handle_autn(conn_fd, pkt);
 				if (res) {
 					g_mme.handle_security_mode_cmd(conn_fd, pkt);
 				}
 				break;
-			case 4:
+
+			/* Security Mode Complete */
+			case 4: 
 				cout << "mmeserver_handleue:" << " case 4:" << endl;
 				res = g_mme.handle_security_mode_complete(conn_fd, pkt);
 				if (res) {
-					g_mme.handle_ue_location_update();
+					g_mme.handle_location_update(pkt);
+					g_mme.handle_create_session(conn_fd, pkt);
 				}
 				break;
+
+			/* Attach Complete */
+			case 5: 
+				cout << "mmeserver_handleue:" << " case 5:" << endl;
+				g_mme.handle_modify_bearer(pkt);
+				break;
+
+			/* For error handling */	
 			default:
 				cout << "mmeserver_handleue:" << " default case: attached" << endl;
 				break;

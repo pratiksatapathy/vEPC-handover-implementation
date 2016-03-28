@@ -6,14 +6,14 @@ int g_workers_count;
 void check_usage(int argc) {
 	if (argc < 2) {
 		cout << "Usage: ./<hss_server_exec> THREADS_COUNT" << endl;
-		handle_type1_error(-1, "Invalid usage error: hssserver_checkusage");
+		g_utils.handle_type1_error(-1, "Invalid usage error: hssserver_checkusage");
 	}
 }
 
 void init(char *argv[]) {
 	g_workers_count = atoi(argv[1]);
 	if (mysql_library_init(0, NULL, NULL)) {
-		handle_type1_error(-1, "mysql_library_init error: hssserver_init");
+		g_utils.handle_type1_error(-1, "mysql_library_init error: hssserver_init");
 	}
 }
 
@@ -32,10 +32,19 @@ int handle_mme(int conn_fd) {
 	}		
 	pkt.extract_diameter_hdr();
 	switch (pkt.diameter_hdr.msg_type) {
+		/* Authentication info req */
 		case 1:
 			cout << "hssserver_handlemme:" << " case 1:" << endl;
 			g_hss.handle_autninfo_req(conn_fd, pkt);
 			break;
+
+		/* Location update */
+		case 2:
+			cout << "hssserver_handlemme:" << " case 2:" << endl;
+			g_hss.handle_location_update(conn_fd, pkt);
+			break;
+
+		/* For error handling */	
 		default:
 			cout << "hssserver_handlemme:" << " default case:" << endl;
 			break;

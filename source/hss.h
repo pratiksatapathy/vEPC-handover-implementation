@@ -18,8 +18,10 @@ public:
 	pthread_mutex_t mysql_client_mux;
 
 	Hss();
-	void get_ue_info(uint64_t, uint64_t&, uint64_t&);
+	void get_autn_info(uint64_t, uint64_t&, uint64_t&);
 	void handle_autninfo_req(int, Packet&);
+	void set_loc_info(uint64_t, uint32_t);
+	void handle_location_update(int, Packet&);
 	~Hss();
 };
 

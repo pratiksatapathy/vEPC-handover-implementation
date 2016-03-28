@@ -31,7 +31,7 @@ void simulate(int arg) {
 void check_usage(int argc) {
 	if (argc < 3) {
 		cout << "Usage: ./<ran_simulator_exec> THREADS_COUNT DURATION" << endl;
-		handle_type1_error(-1, "Invalid usage error: ransimulator_checkusage");
+		g_utils.handle_type1_error(-1, "Invalid usage error: ransimulator_checkusage");
 	}
 }
 

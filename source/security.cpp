@@ -13,7 +13,7 @@ void Crypt::load() {
 }
 
 void Crypt::enc(Packet &pkt, uint64_t k_nas_enc) {
-	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);
+	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);
 	int new_len;
 
 	new_len = enc_data(pkt.data, pkt.len, tem_data, k_nas_enc);
@@ -46,7 +46,7 @@ int Crypt::enc_data(uint8_t *plain_text, int plain_text_len, uint8_t *cipher_tex
 }
 
 void Crypt::dec(Packet &pkt, uint64_t k_nas_enc) {
-	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);
+	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);
 	int new_len;
 
 	new_len = dec_data(pkt.data, pkt.len, tem_data, k_nas_enc);
@@ -81,7 +81,7 @@ int Crypt::dec_data(uint8_t *cipher_text, int cipher_text_len, uint8_t *plain_te
 
 void Crypt::handle_crypt_error() {
 	ERR_print_errors_fp(stderr);	
-	handle_type1_error(-1, "Crypt error: security_handlecrypterror");
+	g_utils.handle_type1_error(-1, "Crypt error: security_handlecrypterror");
 }
 
 Crypt::~Crypt() {
@@ -98,7 +98,7 @@ Integrity::Integrity() {
 void Integrity::add_hmac(Packet &pkt, uint64_t k_nas_int) {
 	uint8_t *hmac;
 
-	hmac = allocate_uint8_mem(hmac_len);
+	hmac = g_utils.allocate_uint8_mem(hmac_len);
 	get_hmac(pkt.data, pkt.len, hmac, k_nas_int);
 	pkt.prepend_item(hmac, hmac_len);
 	free(hmac);
@@ -115,8 +115,8 @@ bool Integrity::hmac_check(Packet &pkt, uint64_t k_nas_int) {
 	uint8_t *hmac_xres;
 	bool res;
 
-	hmac_res = allocate_uint8_mem(hmac_len);
-	hmac_xres = allocate_uint8_mem(hmac_len);
+	hmac_res = g_utils.allocate_uint8_mem(hmac_len);
+	hmac_xres = g_utils.allocate_uint8_mem(hmac_len);
 	rem_hmac(pkt, hmac_xres);
 	get_hmac(pkt.data, pkt.len, hmac_res, k_nas_int);
 	res = cmp_hmacs(hmac_res, hmac_xres);

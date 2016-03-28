@@ -64,9 +64,6 @@ public:
 	uint16_t nw_type;
 	uint16_t nw_capability;
 
-	/* State of UE */
-	uint64_t curr_state;
-
 	UeContext();
 	void init(uint64_t, uint32_t, uint32_t, uint64_t, uint16_t);
 	~UeContext();
@@ -107,7 +104,10 @@ public:
 	void setup_crypt_context(uint64_t);
 	void setup_integrity_context(uint64_t);
 	bool handle_security_mode_complete(int, Packet&);
-	void handle_ue_location_update();
+	void handle_location_update(Packet&);
+	void handle_create_session(int, Packet&);
+	void handle_modify_bearer(Packet&);
+	uint64_t get_guti(Packet);
 	bool check_table1_entry(uint32_t);
 	bool check_table2_entry(uint64_t);	
 	void rem_table1_entry(uint32_t);

@@ -26,9 +26,10 @@ string g_pgw_dlink_ip_addr = "127.0.0.1";
 string g_public_sink_ip_addr = "127.0.0.1";
 string g_private_sink_ip_addr = "127.0.0.1";
 struct timeval g_timeout = {20, 0};
+Utils g_utils;
 
 /* Action - Exit the program */
-void handle_type1_error(int arg, const char *msg) {
+void Utils::handle_type1_error(int arg, const char *msg) {
 	if (arg < 0) {
 		perror(msg);
 		exit(EXIT_FAILURE);
@@ -36,14 +37,14 @@ void handle_type1_error(int arg, const char *msg) {
 }
 
 /* Action - Nothing */
-void handle_type2_error(int arg, const char *msg) {
+void Utils::handle_type2_error(int arg, const char *msg) {
 	if (arg < 0 && errno != EWOULDBLOCK && errno != EAGAIN) {
 		perror(msg);
 		exit(EXIT_FAILURE);
 	}
 }
 
-char* allocate_str_mem(int len) {
+char* Utils::allocate_str_mem(int len) {
 	char *tem;
 
 	if (len <= 0) {
@@ -59,7 +60,7 @@ char* allocate_str_mem(int len) {
 	}
 }
 
-uint8_t* allocate_uint8_mem(int len) {
+uint8_t* Utils::allocate_uint8_mem(int len) {
 	uint8_t *tem;
 
 	if (len <= 0) {
@@ -75,7 +76,7 @@ uint8_t* allocate_uint8_mem(int len) {
 	}
 }
 
-void time_check(time_t start_time, double duration_time, bool &time_exceeded) {
+void Utils::time_check(time_t start_time, double duration_time, bool &time_exceeded) {
 	double elapsed_time;
 
 	if ((elapsed_time = difftime(time(0), start_time)) > duration_time) {

@@ -1,22 +1,41 @@
 #include "ran.h"
 
 RanContext::RanContext() {
-	tai = 1;
-	ksi_asme = 7;
-	mcc = 1;
-	mnc = 1;
-	plmn_id = get_plmn_id(mcc, mnc);
-	nw_capability = 1;
+	emm_state = 0; 
+	ecm_state = 0; 
+	imsi = 0; 
+	guti = 0; 
+	string ip_addr = 0;
+	enodeb_s1ap_ue_id = 0; 
+	mme_s1ap_ue_id = 0; 
+	tai = 1; 
+	key = 0; 
+	k_asme = 0; 
+	ksi_asme = 7; 
+	k_nas_enc = 0; 
+	k_nas_int = 0; 
+	nas_enc_algo = 0; 
+	nas_int_algo = 0; 
 	count = 1;
 	bearer = 0;
-	dir = 0;	
+	dir = 0;
+	apn_in_use = 0; 
+	eps_bearer_id = 0; 
+	e_rab_id = 0; 
+	s1_teid_ul = 0; 
+	s1_teid_dl = 0; 
+	mcc = 1; 
+	mnc = 1; 
+	plmn_id = g_telecom.get_plmn_id(mcc, mnc);
+	msisdn = 0; 
+	nw_capability = 1;
 }
 
 void RanContext::init(uint32_t arg) {
 	enodeb_s1ap_ue_id = arg;
 	key = arg;
 	msisdn = 9000000000 + arg;
-	imsi = get_imsi(plmn_id, msisdn);
+	imsi = g_telecom.get_imsi(plmn_id, msisdn);
 }
 
 RanContext::~RanContext() {
@@ -25,7 +44,9 @@ RanContext::~RanContext() {
 
 EpcAddrs::EpcAddrs() {
 	mme_port = g_mme_port;
+	sgw_port = 0;
 	mme_ip_addr = g_mme_ip_addr;	
+	sgw_ip_addr = "";
 }
 
 EpcAddrs::~EpcAddrs() {
@@ -75,7 +96,7 @@ void Ran::authenticate() {
 	res = ran_context.key + sqn + rand_num;
 	autn_num = res + 1;
 	if (autn_num != xautn_num) {
-		handle_type1_error(-1, "Authentication of MME failed error: ran_authenticate");
+		g_utils.handle_type1_error(-1, "Authentication of MME failed error: ran_authenticate");
 	}
 	ck = res + 2;
 	ik = res + 3;
@@ -92,8 +113,8 @@ void Ran::setup_security() {
 	uint8_t *hmac_xres;
 	bool res;
 
-	hmac_res = allocate_uint8_mem(integrity.hmac_len);
-	hmac_xres = allocate_uint8_mem(integrity.hmac_len);
+	hmac_res = g_utils.allocate_uint8_mem(integrity.hmac_len);
+	hmac_xres = g_utils.allocate_uint8_mem(integrity.hmac_len);
 	mme_client.rcv(pkt);
 	cout << "ran_setupsecurity: " << " received request for ran - " << ran_context.key << endl;
 	pkt.extract_s1ap_hdr();
@@ -107,7 +128,7 @@ void Ran::setup_security() {
 	integrity.get_hmac(pkt.data, pkt.len, hmac_res, ran_context.k_nas_int);
 	res = integrity.cmp_hmacs(hmac_res, hmac_xres);
 	if (res == false) {
-		handle_type1_error(-1, "HMAC of initial security msg failed: ran_setupsecurity");
+		g_utils.handle_type1_error(-1, "HMAC of initial security msg failed: ran_setupsecurity");
 	}
 	cout << "ran_setupsecurity:" << " security mode command success" << endl;
 

@@ -1,15 +1,15 @@
 #include "hss.h"
 
 Hss::Hss() {
-	mux_init(mysql_client_mux);
+	g_sync.mux_init(mysql_client_mux);
 
 	/* Lock not necessary since this is called only once per object. Added for uniformity in locking */
-	mlock(mysql_client_mux);
+	g_sync.mlock(mysql_client_mux);
 	mysql_client.conn();
-	munlock(mysql_client_mux);
+	g_sync.munlock(mysql_client_mux);
 }
 
-void Hss::get_ue_info(uint64_t imsi, uint64_t &key, uint64_t &rand_num) {
+void Hss::get_autn_info(uint64_t imsi, uint64_t &key, uint64_t &rand_num) {
 	MYSQL_RES *query_res;
 	MYSQL_ROW query_res_row;
 	int i;
@@ -17,17 +17,17 @@ void Hss::get_ue_info(uint64_t imsi, uint64_t &key, uint64_t &rand_num) {
 	string query;
 
 	query_res = NULL;
-	query = "select key_id, rand_num from ue_info where imsi = " + to_string(imsi);
-	cout << "hss_getueinfo:" << query << endl;
-	mlock(mysql_client_mux);
+	query = "select key_id, rand_num from autn_info where imsi = " + to_string(imsi);
+	cout << "hss_getautninfo:" << query << endl;
+	g_sync.mlock(mysql_client_mux);
 	mysql_client.handle_query(query.c_str(), &query_res);
-	munlock(mysql_client_mux);
+	g_sync.munlock(mysql_client_mux);
 	num_fields = mysql_num_fields(query_res);
-	cout << "hss_getueinfo:" << " fetched" << endl;
+	cout << "hss_getautninfo:" << " fetched" << endl;
 	query_res_row = mysql_fetch_row(query_res);
-	cout << "hss_getueinfo:" << endl;
+	cout << "hss_getautninfo:" << endl;
 	if (query_res_row == 0) {
-		handle_type1_error(-1, "mysql_fetch_row error: hss_getueinfo");
+		g_utils.handle_type1_error(-1, "mysql_fetch_row error: hss_getautninfo");
 	}
 	for (i = 0; i < num_fields; i++) {
 		string query_res_field;
@@ -61,7 +61,7 @@ void Hss::handle_autninfo_req(int conn_fd, Packet &pkt) {
 	pkt.extract_item(plmn_id);
 	pkt.extract_item(num_autn_vectors);
 	pkt.extract_item(nw_type);
-	get_ue_info(imsi, key, rand_num);
+	get_autn_info(imsi, key, rand_num);
 	cout << "hss_handleautoinforeq:" << " retrieved from database" << endl;
 	sqn = rand_num + 1;
 	xres = key + sqn + rand_num;
@@ -78,6 +78,39 @@ void Hss::handle_autninfo_req(int conn_fd, Packet &pkt) {
 	pkt.prepend_diameter_hdr(1, pkt.len);
 	server.snd(conn_fd, pkt);
 	cout << "hss_handleautoinforeq:" << " response sent to mme" << endl;
+}
+
+void Hss::set_loc_info(uint64_t imsi, uint32_t mmei) {
+	MYSQL_RES *query_res;
+	string query;
+
+	query_res = NULL;
+	query = "delete from loc_info where imsi = " + to_string(imsi);
+	cout << "hss_setlocinfo:" << query << endl;
+	g_sync.mlock(mysql_client_mux);
+	mysql_client.handle_query(query.c_str(), &query_res);
+	g_sync.munlock(mysql_client_mux);
+	query = "insert into loc_info values(" + to_string(imsi) + ", " + to_string(mmei) + ")";
+	cout << "hss_setlocinfo:" << query << endl;
+	g_sync.mlock(mysql_client_mux);
+	mysql_client.handle_query(query.c_str(), &query_res);
+	g_sync.munlock(mysql_client_mux);
+	mysql_free_result(query_res);	
+}
+
+void Hss::handle_location_update(int conn_fd, Packet &pkt) {
+	uint64_t imsi;
+	uint64_t default_apn;
+	uint32_t mmei;
+
+	default_apn = 1;
+	pkt.extract_item(imsi);
+	pkt.extract_item(mmei);
+	set_loc_info(imsi, mmei);
+	pkt.clear_pkt();
+	pkt.append_item(default_apn);
+	pkt.prepend_diameter_hdr(2, pkt.len);
+	server.snd(conn_fd, pkt);
 }
 
 Hss::~Hss() {

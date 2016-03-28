@@ -1,7 +1,7 @@
 #include "packet.h"
 
 Packet::Packet() {
-	data = allocate_uint8_mem(BUF_SIZE);
+	data = g_utils.allocate_uint8_mem(BUF_SIZE);
 	data_ptr = 0;
 	len = 0;
 }
@@ -11,7 +11,7 @@ Packet::Packet(const Packet &src_obj) {
 	gtpu_hdr = src_obj.gtpu_hdr;
 	s1ap_hdr = src_obj.s1ap_hdr;
 	diameter_hdr = src_obj.diameter_hdr;
-	data = allocate_uint8_mem(BUF_SIZE);
+	data = g_utils.allocate_uint8_mem(BUF_SIZE);
 	memmove(data, src_obj.data, src_obj.len);
 	data_ptr = src_obj.data_ptr;
 	len = src_obj.len;
@@ -63,6 +63,14 @@ void Packet::append_item(uint16_t item) {
 	len += item_len;
 }
 
+void Packet::append_item(uint32_t item) {
+	int item_len = sizeof(uint32_t);
+	
+	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
+	data_ptr += item_len;
+	len += item_len;
+}
+
 void Packet::append_item(uint64_t item) {
 	int item_len = sizeof(uint64_t);
 
@@ -94,7 +102,7 @@ void Packet::append_item(string item) {
 }
 
 void Packet::prepend_item(uint8_t *item, int item_len) {
-	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);
+	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);
 
 	memmove(tem_data, item, item_len * sizeof(uint8_t));
 	memmove(tem_data + item_len, data, len * sizeof(uint8_t));
@@ -105,7 +113,7 @@ void Packet::prepend_item(uint8_t *item, int item_len) {
 }
 
 void Packet::prepend_gtpc_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
-	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);
+	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);
 	int hdr_len = GTPV2_HDR_LEN;
 
 	gtpc_hdr.init(msg_type, msg_len, teid);
@@ -118,7 +126,7 @@ void Packet::prepend_gtpc_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid)
 }
 
 void Packet::prepend_gtpu_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
-	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);	
+	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);	
 	int hdr_len = GTPV1_HDR_LEN;
 
 	gtpu_hdr.init(msg_type, msg_len, teid);
@@ -131,7 +139,7 @@ void Packet::prepend_gtpu_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid)
 }
 
 void Packet::prepend_s1ap_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t enodeb_s1ap_ue_id, uint32_t mme_s1ap_ue_id) {
-	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);	
+	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);	
 	int hdr_len = S1AP_HDR_LEN;
 
 	s1ap_hdr.init(msg_type, msg_len, enodeb_s1ap_ue_id, mme_s1ap_ue_id);
@@ -144,7 +152,7 @@ void Packet::prepend_s1ap_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t enode
 }
 
 void Packet::prepend_diameter_hdr(uint8_t msg_type, uint16_t msg_len) {
-	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);	
+	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);	
 	int hdr_len = DIAMETER_HDR_LEN;
 
 	diameter_hdr.init(msg_type, msg_len);
@@ -172,6 +180,13 @@ void Packet::extract_item(int &item){
 
 void Packet::extract_item(uint16_t &item){
 	int item_len = sizeof(uint16_t);
+
+	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
+	data_ptr += item_len;
+}
+
+void Packet::extract_item(uint32_t &item){
+	int item_len = sizeof(uint32_t);
 
 	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
@@ -228,7 +243,7 @@ void Packet::extract_diameter_hdr(){
 }
 
 void Packet::truncate() {
-	uint8_t *tem_data = allocate_uint8_mem(BUF_SIZE);
+	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);
 	int new_len = len - data_ptr;
 
 	memmove(tem_data, data + data_ptr, new_len * sizeof(uint8_t));
@@ -246,15 +261,11 @@ void Packet::clear_pkt() {
 	len = 0;
 }
 
-Packet::~Packet() {	
-	free(data);
-}
-
-struct ip* allocate_ip_hdr_mem(int len) {
+struct ip* Packet::allocate_ip_hdr_mem(int len) {
 	struct ip *ip_hdr;
 
 	if (len <= 0) {
-		handle_type1_error(-1, "Memory length error: packet_allocateiphdrmem");
+		g_utils.handle_type1_error(-1, "Memory length error: packet_allocateiphdrmem");
 	}
 	ip_hdr = (ip*)malloc(len * sizeof (uint8_t));
 	if (ip_hdr != NULL) {
@@ -262,6 +273,10 @@ struct ip* allocate_ip_hdr_mem(int len) {
 		return ip_hdr;
 	} 
 	else {
-		handle_type1_error(-1, "Memory allocation error: packet_allocateiphdrmem");
+		g_utils.handle_type1_error(-1, "Memory allocation error: packet_allocateiphdrmem");
 	}
+}
+
+Packet::~Packet() {	
+	free(data);
 }

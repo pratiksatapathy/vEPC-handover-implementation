@@ -2,7 +2,7 @@
 
 SctpClient::SctpClient() {
 	conn_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
-	handle_type1_error(conn_fd, "Socket error: sctpclient_sctpclient");
+	g_utils.handle_type1_error(conn_fd, "Socket error: sctpclient_sctpclient");
 }
 
 void SctpClient::conn(const char *arg_server_ip_addr, int arg_server_port) {
@@ -15,14 +15,14 @@ void SctpClient::init(const char *arg_server_ip_addr, int arg_server_port) {
 
 	server_port = arg_server_port;
 	server_ip_addr.assign(arg_server_ip_addr);
-	set_inet_sock_addr(server_ip_addr.c_str(), server_port, server_sock_addr);
+	g_nw.set_inet_sock_addr(server_ip_addr.c_str(), server_port, server_sock_addr);
 }
 
 void SctpClient::connect_with_server() {
 	int status;
 
 	status = connect(conn_fd, (struct sockaddr *)&server_sock_addr, sizeof(server_sock_addr));
-	handle_type2_error(status, "Connect error: sctpclient_connectwithserver");
+	g_utils.handle_type2_error(status, "Connect error: sctpclient_connectwithserver");
 }
 
 void SctpClient::snd(Packet pkt) {
@@ -39,7 +39,7 @@ void SctpClient::snd(Packet pkt) {
 			break;
 		}		
 	}
-	handle_type2_error(status, "Write error: sctpclient_snd");
+	g_utils.handle_type2_error(status, "Write error: sctpclient_snd");
 }
 
 void SctpClient::rcv(Packet &pkt) {
@@ -47,7 +47,7 @@ void SctpClient::rcv(Packet &pkt) {
 
 	pkt.clear_pkt();
 	status = read(conn_fd, pkt.data, BUF_SIZE);
-	handle_type2_error(status, "Read error: sctpclient_rcv");
+	g_utils.handle_type2_error(status, "Read error: sctpclient_rcv");
 	pkt.data_ptr = 0;
 	pkt.len = status;
 }

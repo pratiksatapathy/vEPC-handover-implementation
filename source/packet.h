@@ -30,6 +30,7 @@ public:
 	void append_item(bool);
 	void append_item(int);
 	void append_item(uint16_t);
+	void append_item(uint32_t);
 	void append_item(uint64_t);
 	void append_item(uint8_t*, int);	
 	void append_item(const char*);	
@@ -42,6 +43,7 @@ public:
 	void extract_item(bool&);
 	void extract_item(int&);
 	void extract_item(uint16_t&);
+	void extract_item(uint32_t&);
 	void extract_item(uint64_t&);
 	void extract_item(uint8_t*, int);	
 	void extract_item(char*, int);	
@@ -52,9 +54,9 @@ public:
 	void extract_diameter_hdr();
 	void truncate();
 	void clear_pkt();
+	struct ip* allocate_ip_hdr_mem(int);
 	~Packet();
 };
 
-struct ip* allocate_ip_hdr_mem(int);
 
 #endif /* PACKET_H */

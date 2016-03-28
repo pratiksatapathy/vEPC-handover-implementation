@@ -64,10 +64,15 @@ extern string g_public_sink_ip_addr;
 extern string g_private_sink_ip_addr;
 extern struct timeval g_timeout;
 
-void handle_type1_error(int, const char*);
-void handle_type2_error(int, const char*);
-char* allocate_str_mem(int);
-uint8_t* allocate_uint8_mem(int);
-void time_check(time_t, double, bool&);
+class Utils {
+public:
+	void handle_type1_error(int, const char*);
+	void handle_type2_error(int, const char*);
+	char* allocate_str_mem(int);
+	uint8_t* allocate_uint8_mem(int);
+	void time_check(time_t, double, bool&);
+};
+
+extern Utils g_utils;
 
 #endif /* UTILS_H */
