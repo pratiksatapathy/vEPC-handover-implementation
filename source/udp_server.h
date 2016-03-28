@@ -9,6 +9,9 @@
 #include "utils.h"
 
 class UdpServer {
+private:
+	void init(const char*, int);
+	
 public:
 	/* Address parameters */
 	int conn_fd;
@@ -18,7 +21,6 @@ public:
 	
 	UdpServer();
 	void run(const char*, int);
-	void init(const char*, int);
 	void snd(struct sockaddr_in, Packet);
 	void rcv(struct sockaddr_in, Packet&);
 	~UdpServer();

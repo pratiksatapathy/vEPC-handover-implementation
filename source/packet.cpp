@@ -55,6 +55,14 @@ void Packet::append_item(int item) {
 	len += item_len;
 }
 
+void Packet::append_item(uint8_t item) {
+	int item_len = sizeof(uint8_t);
+	
+	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
+	data_ptr += item_len;
+	len += item_len;
+}
+
 void Packet::append_item(uint16_t item) {
 	int item_len = sizeof(uint16_t);
 	
@@ -77,6 +85,18 @@ void Packet::append_item(uint64_t item) {
 	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 	len += item_len;
+}
+
+void Packet::append_item(vector<uint64_t> item) {
+	int i;
+	int item_size = item.size();
+	int item_ele_len = sizeof(uint64_t);
+
+	for (i = 0; i < item_size; i++) {
+		memmove(data + data_ptr, &item[i], item_ele_len * sizeof(uint8_t));
+		data_ptr += item_ele_len;
+		len += item_ele_len;	
+	}
 }
 
 void Packet::append_item(uint8_t *item, int item_len) {
@@ -178,6 +198,13 @@ void Packet::extract_item(int &item){
 	data_ptr += item_len;
 }
 
+void Packet::extract_item(uint8_t &item){
+	int item_len = sizeof(uint8_t);
+
+	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
+	data_ptr += item_len;
+}
+
 void Packet::extract_item(uint16_t &item){
 	int item_len = sizeof(uint16_t);
 
@@ -197,6 +224,20 @@ void Packet::extract_item(uint64_t &item){
 
 	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
+}
+
+void Packet::extract_item(vector<uint64_t> &item, int item_size){
+	int i;
+	int item_ele_len = sizeof(uint64_t);
+
+	item.clear();
+	for (i = 0; i < item_size; i++) {
+		uint64_t tem_item;
+	
+		memmove(&tem_item, data + data_ptr, item_ele_len * sizeof(uint8_t));
+		data_ptr += item_ele_len;
+		item.push_back(tem_item);
+	}
 }
 
 void Packet::extract_item(uint8_t *item, int item_len){

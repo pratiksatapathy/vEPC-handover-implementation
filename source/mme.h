@@ -14,6 +14,8 @@
 #include "udp_client.h"
 #include "utils.h"
 
+extern uint64_t g_timer;
+
 class UeContext {
 public:
 	/* EMM state 
@@ -36,10 +38,12 @@ public:
 	/* UE location info */
 	uint64_t tai; /* Tracking Area Identifier */
 	vector<uint64_t> tai_list; /* Tracking Area Identifier list */
+	uint64_t tau_timer; /* Tracking area update timer */
 
 	/* UE security context */
 	uint64_t ksi_asme; /* Key Selection Identifier for Access Security Management Entity */	
 	uint64_t k_asme; /* Key for Access Security Management Entity */	
+	uint64_t k_enodeb; /* Key for Access Stratum */	
 	uint64_t k_nas_enc; /* Key for NAS Encryption / Decryption */
 	uint64_t k_nas_int; /* Key for NAS Integrity check */
 	uint64_t nas_enc_algo; /* Idenitifier of NAS Encryption / Decryption */
@@ -52,17 +56,26 @@ public:
 	uint64_t default_apn; /* Default Access Point Name */
 	uint64_t apn_in_use; /* Access Point Name in Use */
 	uint8_t eps_bearer_id; /* Evolved Packet System Bearer ID */
-	uint32_t s1_teid_ul; /* S1 Tunnel Endpoint Identifier - Uplink */
-	uint32_t s1_teid_dl; /* S1 Tunnel Endpoint Identifier - Downlink */
-	uint32_t s5_teid_ul; /* S5 Tunnel Endpoint Identifier - Uplink */
-	uint32_t s5_teid_dl; /* S5 Tunnel Endpoint Identifier - Downlink */
+	uint8_t e_rab_id; /* Evolved Radio Access Bearer ID */	
+	uint32_t s1_uteid_ul; /* S1 Userplane Tunnel Endpoint Identifier - Uplink */
+	uint32_t s1_uteid_dl; /* S1 Userplane Tunnel Endpoint Identifier - Downlink */
+	uint32_t s5_uteid_ul; /* S5 Userplane Tunnel Endpoint Identifier - Uplink */
+	uint32_t s5_uteid_dl; /* S5 Userplane Tunnel Endpoint Identifier - Downlink */
 
-	/* Authentication Info */ 
+	/* Authentication info */ 
 	uint64_t xres;
 
 	/* UE Operator network info */
 	uint16_t nw_type;
 	uint16_t nw_capability;
+
+	/* PGW info */
+	uint64_t pgw_port;
+	string pgw_ip_addr;
+
+	/* Control plane info */
+	uint32_t s11_cteid_mme; /* S11 Controlplane Tunnel Endpoint Identifier - MME */
+	uint32_t s11_cteid_sgw; /* S11 Controlplane Tunnel Endpoint Identifier - SGW */
 
 	UeContext();
 	void init(uint64_t, uint32_t, uint32_t, uint64_t, uint16_t);
@@ -84,6 +97,16 @@ public:
 };
 
 class Mme {
+private:
+	void set_crypt_context(uint64_t);
+	void set_integrity_context(uint64_t);
+	void set_pgw_info(uint64_t);
+	uint64_t get_guti(Packet);
+	bool check_table1_entry(uint32_t);
+	bool check_table2_entry(uint64_t);	
+	void rem_table1_entry(uint32_t);
+	void rem_table2_entry(uint64_t);
+	
 public:
 	SctpServer server;
 	MmeIds mme_ids;
@@ -98,20 +121,14 @@ public:
 	pthread_mutex_t table2_mux; /* Handles table2 */
 
 	Mme();
-	void handle_type1_attach(int, Packet&);
-	bool handle_autn(int, Packet&);
-	void handle_security_mode_cmd(int, Packet&);
-	void setup_crypt_context(uint64_t);
-	void setup_integrity_context(uint64_t);
-	bool handle_security_mode_complete(int, Packet&);
-	void handle_location_update(Packet&);
-	void handle_create_session(int, Packet&);
-	void handle_modify_bearer(Packet&);
-	uint64_t get_guti(Packet);
-	bool check_table1_entry(uint32_t);
-	bool check_table2_entry(uint64_t);	
-	void rem_table1_entry(uint32_t);
-	void rem_table2_entry(uint64_t);
+	void handle_initial_attach(int, Packet);
+	bool handle_autn(int, Packet);
+	void handle_security_mode_cmd(int, Packet);
+	bool handle_security_mode_complete(int, Packet);
+	void handle_location_update(Packet);
+	void handle_create_session(int, Packet);
+	void handle_attach_complete(Packet);
+	void handle_modify_bearer(Packet);
 	~Mme();
 };
 

@@ -9,6 +9,10 @@
 #include "utils.h"
 
 class SctpClient {
+private:
+	void init(const char*, int);
+	void connect_with_server();
+	
 public:
 	/* Address parameters */
 	int conn_fd;
@@ -20,8 +24,6 @@ public:
 
 	SctpClient();
 	void conn(const char*, int);
-	void init(const char*, int);
-	void connect_with_server();
 	void snd(Packet);
 	void rcv(Packet&);
 	~SctpClient();

@@ -1,6 +1,6 @@
 #---------------Final Target----------------#
 
-all:	hss.out mme.out ransim.out
+all:	hss.out mme.out pgw.out ransim.out sgw.out
 
 #-------------------------------------------#
 
@@ -41,6 +41,12 @@ network.o:	network.cpp network.h utils.h
 packet.o:	diameter.h gtp.h packet.cpp packet.h s1ap.h utils.h
 	$(G++) -c -o packet.o packet.cpp
 
+pgw.o:	diameter.h gtp.h network.h packet.h pgw.cpp pgw.h s1ap.h sync.h udp_client.h udp_server.h utils.h
+	$(G++) -c -o pgw.o pgw.cpp
+
+pgw_server.o:	diameter.h gtp.h network.h packet.h pgw.h pgw_server.cpp pgw_server.h s1ap.h sync.h udp_client.h udp_server.h utils.h
+	$(G++) -c -o pgw_server.o pgw_server.cpp
+
 ran.o:	diameter.h gtp.h network.h packet.h ran.cpp ran.h s1ap.h security.h sctp_client.h telecom.h udp_client.h utils.h
 	$(G++) -c -o ran.o ran.cpp
 
@@ -58,6 +64,12 @@ sctp_client.o:	diameter.h gtp.h network.h packet.h s1ap.h sctp_client.cpp sctp_c
 
 sctp_server.o:	diameter.h gtp.h network.h packet.h s1ap.h sctp_server.cpp sctp_server.h sync.h utils.h
 	$(G++) -c -o sctp_server.o sctp_server.cpp	
+
+sgw.o:	diameter.h gtp.h network.h packet.h s1ap.h sgw.cpp sgw.h sync.h udp_client.h udp_server.h utils.h
+	$(G++) -c -o sgw.o sgw.cpp
+
+sgw_server.o:	diameter.h gtp.h network.h packet.h s1ap.h sgw.h sgw_server.cpp sgw_server.h sync.h udp_client.h udp_server.h utils.h
+	$(G++) -c -o sgw_server.o sgw_server.cpp
 
 sync.o:	sync.cpp sync.h utils.h
 	$(G++) -c -o sync.o sync.cpp
@@ -79,15 +91,20 @@ utils.o:	utils.cpp utils.h
 
 #---------Prerequisites and Recipes---------#
 
-
 HSS_P = diameter.o gtp.o hss.o hss_server.o mysql.o network.o packet.o s1ap.o sctp_server.o sync.o utils.o
 HSS_R = $(G++) -o hss.out $(HSS_P) -pthread `mysql_config --cflags --libs`
 
-MME_P = diameter.o gtp.o mme.o mme_server.o network.o packet.o s1ap.o sctp_client.o security.o sctp_server.o sync.o telecom.o udp_client.o utils.o
+PGW_P = diameter.o gtp.o network.o packet.o pgw.o pgw_server.o s1ap.o sync.o udp_client.o udp_server.o utils.o
+PGW_R = $(G++) -o pgw.out $(PGW_P) -pthread
+
+MME_P = diameter.o gtp.o mme.o mme_server.o network.o packet.o s1ap.o security.o sctp_client.o sctp_server.o sync.o telecom.o udp_client.o utils.o
 MME_R = $(G++) -o mme.out $(MME_P) -pthread -lcrypto
 
 RAN_P = diameter.o gtp.o network.o packet.o ran.o ran_simulator.o s1ap.o security.o sctp_client.o telecom.o udp_client.o utils.o
 RAN_R = $(G++) -o ransim.out $(RAN_P) -pthread -lcrypto
+
+SGW_P = diameter.o gtp.o network.o packet.o s1ap.o sgw.o sgw_server.o sync.o udp_client.o udp_server.o utils.o
+SGW_R = $(G++) -o sgw.out $(SGW_P) -pthread
 
 #-------------------------------------------#
 
@@ -100,8 +117,14 @@ hss.out:	$(HSS_P)
 mme.out:	$(MME_P)
 	$(MME_R)
 
+pgw.out:	$(PGW_P)
+	$(PGW_R)
+
 ransim.out:	$(RAN_P)
 	$(RAN_R)
+
+sgw.out:	$(SGW_P)
+	$(SGW_R)
 
 #-------------------------------------------#
 

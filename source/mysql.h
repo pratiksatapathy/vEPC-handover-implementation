@@ -18,6 +18,9 @@ public:
 };
 
 class MySql {
+private:
+	void handle_db_error();
+	
 public:
 	MYSQL *conn_fd;
 	ConnInfo conn_info;
@@ -25,7 +28,6 @@ public:
 	MySql();
 	void conn();
 	void handle_query(const char*, MYSQL_RES**);
-	void handle_db_error();
 	~MySql();
 };
 

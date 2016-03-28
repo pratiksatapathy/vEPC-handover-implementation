@@ -9,6 +9,10 @@
 #include "utils.h"
 
 class UdpClient {
+private:
+	void init(const char*, int);
+	void set_port();
+	
 public:
 	/* Address parameters */
 	int conn_fd;
@@ -22,8 +26,6 @@ public:
 
 	UdpClient();
 	void conn(const char*, int);
-	void init(const char*, int);
-	void set_port();
 	void snd(Packet);
 	void rcv(Packet&);
 	~UdpClient();		

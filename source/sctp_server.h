@@ -10,6 +10,13 @@
 #include "utils.h"
 
 class SctpServer {
+private:
+	void clear_queue();
+	void init(const char*, int, int, int (*)(int));
+	void create_workers();
+	void worker_func();
+	void accept_clients();
+	
 public:
 	/* Address parameters */
 	int port;
@@ -30,12 +37,7 @@ public:
 	pthread_cond_t qfull; /* arg for mwait/msignal - 2 */
 
 	SctpServer();
-	void clear_queue();
 	void run(const char*, int, int, int (*)(int));
-	void init(const char*, int, int, int (*)(int));
-	void create_workers();
-	void worker_func();
-	void accept_clients();
 	void snd(int, Packet);
 	void rcv(int, Packet&);
 	~SctpServer();

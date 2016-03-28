@@ -21,8 +21,8 @@ void simulate(int arg) {
 	// 	}	
 		ran.initial_attach();
 		ran.authenticate();
-		ran.setup_security();
-		ran.setup_eps_session();
+		ran.set_security();
+		ran.set_eps_session();
 		ran.transfer_data();
 		ran.detach();
 	// }

@@ -9,6 +9,7 @@ RanContext::RanContext() {
 	enodeb_s1ap_ue_id = 0; 
 	mme_s1ap_ue_id = 0; 
 	tai = 1; 
+	tau_timer = 0;
 	key = 0; 
 	k_asme = 0; 
 	ksi_asme = 7; 
@@ -22,8 +23,8 @@ RanContext::RanContext() {
 	apn_in_use = 0; 
 	eps_bearer_id = 0; 
 	e_rab_id = 0; 
-	s1_teid_ul = 0; 
-	s1_teid_dl = 0; 
+	s1_uteid_ul = 0; 
+	s1_uteid_dl = 0; 
 	mcc = 1; 
 	mnc = 1; 
 	plmn_id = g_telecom.get_plmn_id(mcc, mnc);
@@ -108,7 +109,7 @@ void Ran::authenticate() {
 	cout << "ran_authenticate:" << " Authentication sucessful for RAN - " << ran_context.key << endl;
 }
 
-void Ran::setup_security() {
+void Ran::set_security() {
 	uint8_t *hmac_res;
 	uint8_t *hmac_xres;
 	bool res;
@@ -116,21 +117,21 @@ void Ran::setup_security() {
 	hmac_res = g_utils.allocate_uint8_mem(integrity.hmac_len);
 	hmac_xres = g_utils.allocate_uint8_mem(integrity.hmac_len);
 	mme_client.rcv(pkt);
-	cout << "ran_setupsecurity: " << " received request for ran - " << ran_context.key << endl;
+	cout << "ran_setsecurity: " << " received request for ran - " << ran_context.key << endl;
 	pkt.extract_s1ap_hdr();
 	integrity.rem_hmac(pkt, hmac_xres);
 	pkt.extract_item(ran_context.ksi_asme);
 	pkt.extract_item(ran_context.nw_capability);
 	pkt.extract_item(ran_context.nas_enc_algo);
 	pkt.extract_item(ran_context.nas_int_algo);
-	setup_crypt_context();
-	setup_integrity_context();
+	set_crypt_context();
+	set_integrity_context();
 	integrity.get_hmac(pkt.data, pkt.len, hmac_res, ran_context.k_nas_int);
 	res = integrity.cmp_hmacs(hmac_res, hmac_xres);
 	if (res == false) {
-		g_utils.handle_type1_error(-1, "HMAC of initial security msg failed: ran_setupsecurity");
+		g_utils.handle_type1_error(-1, "HMAC of initial security msg failed: ran_setsecurity");
 	}
-	cout << "ran_setupsecurity:" << " security mode command success" << endl;
+	cout << "ran_setsecurity:" << " security mode command success" << endl;
 
 	pkt.clear_pkt();
 	pkt.append_item(res);
@@ -138,21 +139,57 @@ void Ran::setup_security() {
 	integrity.add_hmac(pkt, ran_context.k_nas_int);
 	pkt.prepend_s1ap_hdr(4, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
-	cout << "ran_setupsecurity:" << " security mode complete success" << endl;
+	cout << "ran_setsecurity:" << " security mode complete success" << endl;
 	free(hmac_res);
 	free(hmac_xres);
 }
 
-void Ran::setup_crypt_context() {
+void Ran::set_crypt_context() {
 	ran_context.k_nas_enc = ran_context.k_asme + ran_context.nas_enc_algo + ran_context.count + ran_context.bearer + ran_context.dir + 1;
 }
 
-void Ran::setup_integrity_context() {
+void Ran::set_integrity_context() {
 	ran_context.k_nas_int = ran_context.k_asme + ran_context.nas_int_algo + ran_context.count + ran_context.bearer + ran_context.dir + 1;
 }
 
-void Ran::setup_eps_session() {
+void Ran::set_eps_session() {
+	bool res;
+	int ip_addr_len;
+	int tai_list_size;
+	uint64_t k_enodeb;
 
+	ip_addr_len = sizeof(g_mme_ip_addr);
+	mme_client.rcv(pkt);
+	pkt.extract_s1ap_hdr();
+	res = integrity.hmac_check(pkt, ran_context.k_nas_int);
+	if (res == false) {
+		g_utils.handle_type1_error(-1, "HMAC of attach accept msg failed: ran_setepssession");
+	}
+	crypt.dec(pkt, ran_context.k_nas_enc);
+	pkt.extract_item(ran_context.eps_bearer_id);
+	pkt.extract_item(ran_context.e_rab_id);
+	pkt.extract_item(ran_context.s1_uteid_ul);
+	pkt.extract_item(k_enodeb);
+	pkt.extract_item(ran_context.nw_capability);
+	pkt.extract_item(tai_list_size);
+	pkt.extract_item(ran_context.tai_list, tai_list_size);
+	pkt.extract_item(ran_context.tau_timer);
+	pkt.extract_item(epc_addrs.sgw_ip_addr, ip_addr_len);
+	pkt.extract_item(epc_addrs.sgw_port);
+	pkt.extract_item(res);
+	if (res == false) {
+		g_utils.handle_type1_error(-1, "attach request failure: ran_setepssession");	
+	}
+	ran_context.s1_uteid_dl = ran_context.s1_uteid_ul;
+	pkt.clear_pkt();
+	pkt.append_item(ran_context.eps_bearer_id);
+	pkt.append_item(ran_context.s1_uteid_dl);
+	crypt.enc(pkt, ran_context.k_nas_enc);
+	integrity.add_hmac(pkt, ran_context.k_nas_int);
+	pkt.prepend_s1ap_hdr(6, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+	mme_client.snd(pkt);
+	ran_context.emm_state = 1;
+	ran_context.ecm_state = 1;
 }
 
 void Ran::transfer_data() {

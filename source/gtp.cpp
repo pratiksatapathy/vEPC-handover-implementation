@@ -18,7 +18,7 @@ Gtpv1::~Gtpv1() {
 }
 
 Gtpv2::Gtpv2() {
-	flags = (3 << 5); /* flags : Binary(01100000) */
+	flags = (2 << 5); /* flags : Binary(01000000) */
 	seq_num = 0;
 	spare = 0;
 }

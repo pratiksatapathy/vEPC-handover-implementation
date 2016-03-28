@@ -37,6 +37,7 @@ public:
 	/* UE location info */
 	uint64_t tai; /* Tracking Area Identifier */
 	vector<uint64_t> tai_list; /* Tracking Area Identifier list */
+	uint64_t tau_timer;
 
 	/* UE security context */
 	uint64_t key; /* Primary key used in generating secondary keys */
@@ -50,13 +51,12 @@ public:
 	uint64_t bearer;
 	uint64_t dir;
 
-
 	/* EPS info, EPS bearer info */
 	uint64_t apn_in_use; /* Access Point Name in Use */
 	uint8_t eps_bearer_id; /* Evolved Packet System Bearer ID */
 	uint8_t e_rab_id; /* Evolved Radio Access Bearer ID */
-	uint32_t s1_teid_ul; /* S1 Tunnel Endpoint Identifier - Uplink */
-	uint32_t s1_teid_dl; /* S1 Tunnel Endpoint Identifier - Downlink */
+	uint32_t s1_uteid_ul; /* S1 Userplane Tunnel Endpoint Identifier - Uplink */
+	uint32_t s1_uteid_dl; /* S1 Userplane Tunnel Endpoint Identifier - Downlink */
 
 	/* Network Operator info */
 	uint16_t mcc; /* Mobile Country Code */
@@ -72,8 +72,8 @@ public:
 
 class EpcAddrs {
 public:
-	int mme_port;
-	int sgw_port;
+	uint64_t mme_port;
+	uint64_t sgw_port;
 	string mme_ip_addr;
 	string sgw_ip_addr;
 
@@ -82,6 +82,10 @@ public:
 };
 
 class Ran {
+private:
+	void set_crypt_context();
+	void set_integrity_context();
+	
 public:
 	RanContext ran_context;
 	EpcAddrs epc_addrs;
@@ -94,10 +98,8 @@ public:
 	void init(int);
 	void initial_attach();
 	void authenticate();
-	void setup_security();
-	void setup_crypt_context();
-	void setup_integrity_context();
-	void setup_eps_session();
+	void set_security();
+	void set_eps_session();
 	void transfer_data();
 	void detach();	
 	~Ran();

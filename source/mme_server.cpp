@@ -6,7 +6,7 @@ int g_workers_count;
 void check_usage(int argc) {
 	if (argc < 2) {
 		cout << "Usage: ./<mme_server_exec> THREADS_COUNT" << endl;
-		g_utils.handle_type1_error(-1, "Invalid usage error: mmserver_checkusage");
+		g_utils.handle_type1_error(-1, "Invalid usage error: mmeserver_checkusage");
 	}
 }
 
@@ -34,7 +34,7 @@ int handle_ue(int conn_fd) {
 			/* Initial Attach request */
 			case 1: 
 				cout << "mmeserver_handleue:" << " case 1:" << endl;
-				g_mme.handle_type1_attach(conn_fd, pkt);
+				g_mme.handle_initial_attach(conn_fd, pkt);
 				break;
 
 			/* For error handling */
@@ -65,8 +65,9 @@ int handle_ue(int conn_fd) {
 				break;
 
 			/* Attach Complete */
-			case 5: 
+			case 6: 
 				cout << "mmeserver_handleue:" << " case 5:" << endl;
+				g_mme.handle_attach_complete(pkt);
 				g_mme.handle_modify_bearer(pkt);
 				break;
 

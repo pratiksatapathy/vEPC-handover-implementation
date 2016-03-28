@@ -29,9 +29,11 @@ public:
 	Packet(Packet&&);
 	void append_item(bool);
 	void append_item(int);
+	void append_item(uint8_t);
 	void append_item(uint16_t);
 	void append_item(uint32_t);
 	void append_item(uint64_t);
+	void append_item(vector<uint64_t>);
 	void append_item(uint8_t*, int);	
 	void append_item(const char*);	
 	void append_item(string);
@@ -42,9 +44,11 @@ public:
 	void prepend_diameter_hdr(uint8_t, uint16_t);
 	void extract_item(bool&);
 	void extract_item(int&);
+	void extract_item(uint8_t&);
 	void extract_item(uint16_t&);
 	void extract_item(uint32_t&);
 	void extract_item(uint64_t&);
+	void extract_item(vector<uint64_t>&, int);
 	void extract_item(uint8_t*, int);	
 	void extract_item(char*, int);	
 	void extract_item(string&, int);

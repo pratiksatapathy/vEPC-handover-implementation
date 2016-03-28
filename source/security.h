@@ -24,14 +24,15 @@ private:
 	uint8_t *key;
 	uint8_t *iv;
 
+	int enc_data(uint8_t*, int, uint8_t*, uint64_t);
+	int dec_data(uint8_t*, int, uint8_t*, uint64_t);
+	void handle_crypt_error();
+
 public:
 	Crypt();
 	void load();
 	void enc(Packet&, uint64_t);
-	int enc_data(uint8_t*, int, uint8_t*, uint64_t);
 	void dec(Packet&, uint64_t);
-	int dec_data(uint8_t*, int, uint8_t*, uint64_t);
-	void handle_crypt_error();
 	~Crypt();
 };
 
