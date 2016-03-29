@@ -73,9 +73,9 @@ public:
 class EpcAddrs {
 public:
 	uint64_t mme_port;
-	uint64_t sgw_port;
+	uint64_t sgw_s1_port;
 	string mme_ip_addr;
-	string sgw_ip_addr;
+	string sgw_s1_ip_addr;
 
 	EpcAddrs();
 	~EpcAddrs();

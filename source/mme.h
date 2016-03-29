@@ -70,8 +70,8 @@ public:
 	uint16_t nw_capability;
 
 	/* PGW info */
-	uint64_t pgw_port;
-	string pgw_ip_addr;
+	string pgw_s5_ip_addr;
+	uint64_t pgw_s5_port;
 
 	/* Control plane info */
 	uint32_t s11_cteid_mme; /* S11 Controlplane Tunnel Endpoint Identifier - MME */
@@ -113,8 +113,8 @@ public:
 	Crypt crypt;
 	Integrity integrity;
 	int ue_count;
-	unordered_map<uint32_t, uint64_t> table1; /* UE Identification table */
-	unordered_map<uint64_t, UeContext> table2; /* UE Context table */
+	unordered_map<uint32_t, uint64_t> table1; /* UE identification table: mme_s1ap_ue_id -> guti */
+	unordered_map<uint64_t, UeContext> table2; /* UE context table: guti -> UeContext */
 
 	/* Lock parameters */
 	pthread_mutex_t table1_mux; /* Handles table1 and ue_count */

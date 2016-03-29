@@ -35,8 +35,6 @@ public:
 
 class Pgw {
 private:
-	bool check_table1_entry(uint8_t);
-	void rem_table1_entry(uint8_t);
 
 public:
 	UdpServer s5_server;

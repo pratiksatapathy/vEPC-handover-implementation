@@ -5,7 +5,7 @@ RanContext::RanContext() {
 	ecm_state = 0; 
 	imsi = 0; 
 	guti = 0; 
-	string ip_addr = 0;
+	ip_addr = "";
 	enodeb_s1ap_ue_id = 0; 
 	mme_s1ap_ue_id = 0; 
 	tai = 1; 
@@ -45,9 +45,9 @@ RanContext::~RanContext() {
 
 EpcAddrs::EpcAddrs() {
 	mme_port = g_mme_port;
-	sgw_port = 0;
+	sgw_s1_port = 0;
 	mme_ip_addr = g_mme_ip_addr;	
-	sgw_ip_addr = "";
+	sgw_s1_ip_addr = "";
 }
 
 EpcAddrs::~EpcAddrs() {
@@ -158,7 +158,7 @@ void Ran::set_eps_session() {
 	int tai_list_size;
 	uint64_t k_enodeb;
 
-	ip_addr_len = sizeof(g_mme_ip_addr);
+	ip_addr_len = g_mme_ip_addr.size();
 	mme_client.rcv(pkt);
 	pkt.extract_s1ap_hdr();
 	res = integrity.hmac_check(pkt, ran_context.k_nas_int);
@@ -174,8 +174,9 @@ void Ran::set_eps_session() {
 	pkt.extract_item(tai_list_size);
 	pkt.extract_item(ran_context.tai_list, tai_list_size);
 	pkt.extract_item(ran_context.tau_timer);
-	pkt.extract_item(epc_addrs.sgw_ip_addr, ip_addr_len);
-	pkt.extract_item(epc_addrs.sgw_port);
+	pkt.extract_item(ran_context.ip_addr, ip_addr_len);
+	pkt.extract_item(epc_addrs.sgw_s1_ip_addr, ip_addr_len);
+	pkt.extract_item(epc_addrs.sgw_s1_port);
 	pkt.extract_item(res);
 	if (res == false) {
 		g_utils.handle_type1_error(-1, "attach request failure: ran_setepssession");	

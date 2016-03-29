@@ -21,7 +21,7 @@ extern vector<thread> g_sgi_server_threads;
 void check_usage(int);
 void init(char**);
 void run();
-void handle_s5_server();
-void handle_sgi_server();
+void handle_s5_traffic();
+void handle_sgi_traffic();
 
 #endif /* PGW_SERVER_H */

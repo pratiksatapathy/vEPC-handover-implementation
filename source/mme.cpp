@@ -31,8 +31,8 @@ UeContext::UeContext() {
 	xres = 0;
 	nw_type = 0;
 	nw_capability = 0;	
-	pgw_port = 0;
-	string pgw_ip_addr = "";	
+	pgw_s5_ip_addr = "";	
+	pgw_s5_port = 0;
 	s11_cteid_mme = 0;
 	s11_cteid_sgw = 0;	
 }
@@ -273,7 +273,7 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	vector<uint64_t> tai_list;
 	uint64_t guti;
 	uint64_t imsi;
-	uint64_t pgw_port;
+	uint64_t pgw_s5_port;
 	uint64_t apn_in_use;
 	uint64_t tai;
 	uint64_t k_enodeb;
@@ -289,10 +289,12 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	uint8_t eps_bearer_id;
 	uint8_t e_rab_id;
 	int tai_list_size;
-	string pgw_ip_addr;
+	int ip_addr_size;
+	string pgw_s5_ip_addr;
+	string ue_ip_addr;
 	bool res;
 
-	sgw_client.conn(g_sgw_ip_addr.c_str(), g_sgw_port);
+	sgw_client.conn(g_sgw_s11_ip_addr.c_str(), g_sgw_s11_port);
 	guti = get_guti(pkt);
 	eps_bearer_id = 5;
 	set_pgw_info(guti);
@@ -301,18 +303,19 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	s11_cteid_mme = table2[guti].s11_cteid_mme;
 	imsi = table2[guti].imsi;
 	eps_bearer_id = table2[guti].eps_bearer_id;
-	pgw_ip_addr = table2[guti].pgw_ip_addr;
-	pgw_port = table2[guti].pgw_port;
+	pgw_s5_ip_addr = table2[guti].pgw_s5_ip_addr;
+	pgw_s5_port = table2[guti].pgw_s5_port;
 	apn_in_use = table2[guti].apn_in_use;
 	tai = table2[guti].tai;
 	g_sync.munlock(table2_mux);
 
+	ip_addr_size = g_mme_ip_addr.size();
 	pkt.clear_pkt();
 	pkt.append_item(s11_cteid_mme);
 	pkt.append_item(imsi);
 	pkt.append_item(eps_bearer_id);
-	pkt.append_item(pgw_ip_addr);
-	pkt.append_item(pgw_port);
+	pkt.append_item(pgw_s5_ip_addr);
+	pkt.append_item(pgw_s5_port);
 	pkt.append_item(apn_in_use);
 	pkt.append_item(tai);
 	pkt.prepend_gtpc_hdr(1, pkt.len, 0);
@@ -320,11 +323,13 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	sgw_client.rcv(pkt);
 	pkt.extract_gtpc_hdr();
 	pkt.extract_item(s11_cteid_sgw);
+	pkt.extract_item(ue_ip_addr, ip_addr_size);
 	pkt.extract_item(s1_uteid_ul);
 	pkt.extract_item(s5_uteid_ul);
 	pkt.extract_item(s5_uteid_dl);
 
 	g_sync.mlock(table2_mux);
+	table2[guti].ip_addr = ue_ip_addr;
 	table2[guti].s11_cteid_sgw = s11_cteid_sgw;
 	table2[guti].s1_uteid_ul = s1_uteid_ul;
 	table2[guti].s5_uteid_ul = s5_uteid_ul;
@@ -353,8 +358,9 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	pkt.append_item(tai_list_size);
 	pkt.append_item(tai_list);
 	pkt.append_item(tau_timer);
-	pkt.append_item(g_sgw_ip_addr);
-	pkt.append_item(g_sgw_port);
+	pkt.append_item(ue_ip_addr);
+	pkt.append_item(g_sgw_s1_ip_addr);
+	pkt.append_item(g_sgw_s1_port);
 	pkt.append_item(res);
 	crypt.enc(pkt, k_nas_enc);
 	integrity.add_hmac(pkt, k_nas_int);
@@ -397,7 +403,7 @@ void Mme::handle_modify_bearer(Packet pkt) {
 	uint8_t eps_bearer_id;
 	bool res;
 
-	sgw_client.conn(g_sgw_ip_addr.c_str(), g_sgw_port);
+	sgw_client.conn(g_sgw_s11_ip_addr.c_str(), g_sgw_s11_port);
 	guti = get_guti(pkt);
 	g_sync.mlock(table2_mux);
 	eps_bearer_id = table2[guti].eps_bearer_id;
@@ -420,8 +426,8 @@ void Mme::handle_modify_bearer(Packet pkt) {
 
 void Mme::set_pgw_info(uint64_t guti) {
 	g_sync.mlock(table2_mux);
-	table2[guti].pgw_port = g_pgw_port;
-	table2[guti].pgw_ip_addr = g_pgw_ip_addr;
+	table2[guti].pgw_s5_port = g_pgw_s5_port;
+	table2[guti].pgw_s5_ip_addr = g_pgw_s5_ip_addr;
 	g_sync.munlock(table2_mux);
 }
 

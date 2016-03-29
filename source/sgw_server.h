@@ -23,8 +23,8 @@ extern vector<thread> g_s5_server_threads;
 void check_usage(int);
 void init(char**);
 void run();
-void handle_s11_server();
-void handle_s1_server();
-void handle_s5_server();
+void handle_s11_traffic();
+void handle_s1_traffic();
+void handle_s5_traffic();
 
 #endif /* SGW_SERVER_H */
