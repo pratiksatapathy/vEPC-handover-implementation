@@ -318,10 +318,10 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	pkt.append_item(pgw_s5_port);
 	pkt.append_item(apn_in_use);
 	pkt.append_item(tai);
-	pkt.prepend_gtpc_hdr(1, pkt.len, 0);
+	pkt.prepend_gtp_hdr(2, 1, pkt.len, 0);
 	sgw_client.snd(pkt);
 	sgw_client.rcv(pkt);
-	pkt.extract_gtpc_hdr();
+	pkt.extract_gtp_hdr();
 	pkt.extract_item(s11_cteid_sgw);
 	pkt.extract_item(ue_ip_addr, ip_addr_size);
 	pkt.extract_item(s1_uteid_ul);
@@ -413,10 +413,10 @@ void Mme::handle_modify_bearer(Packet pkt) {
 	pkt.clear_pkt();
 	pkt.append_item(eps_bearer_id);
 	pkt.append_item(s1_uteid_dl);
-	pkt.prepend_gtpc_hdr(2, pkt.len, s11_cteid_sgw);
+	pkt.prepend_gtp_hdr(2, 2, pkt.len, s11_cteid_sgw);
 	sgw_client.snd(pkt);
 	sgw_client.rcv(pkt);
-	pkt.extract_gtpc_hdr();
+	pkt.extract_gtp_hdr();
 	pkt.extract_item(res);
 	if (res == false) {
 		cout << "mme_handlemodifybearer:" << " modify bearer failure" << endl;

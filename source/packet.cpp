@@ -7,8 +7,7 @@ Packet::Packet() {
 }
 
 Packet::Packet(const Packet &src_obj) {
-	gtpc_hdr = src_obj.gtpc_hdr;
-	gtpu_hdr = src_obj.gtpu_hdr;
+	gtp_hdr = src_obj.gtp_hdr;
 	s1ap_hdr = src_obj.s1ap_hdr;
 	diameter_hdr = src_obj.diameter_hdr;
 	data = g_utils.allocate_uint8_mem(BUF_SIZE);
@@ -20,8 +19,7 @@ Packet::Packet(const Packet &src_obj) {
 void swap(Packet &src_obj, Packet &dst_obj) {
 	using std::swap;
 
-	swap(src_obj.gtpc_hdr, dst_obj.gtpc_hdr);
-	swap(src_obj.gtpu_hdr, dst_obj.gtpu_hdr);
+	swap(src_obj.gtp_hdr, dst_obj.gtp_hdr);
 	swap(src_obj.s1ap_hdr, dst_obj.s1ap_hdr);
 	swap(src_obj.diameter_hdr, dst_obj.diameter_hdr);
 	swap(src_obj.data, dst_obj.data);
@@ -132,25 +130,12 @@ void Packet::prepend_item(uint8_t *item, int item_len) {
 	free(tem_data);
 }
 
-void Packet::prepend_gtpc_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
+void Packet::prepend_gtp_hdr(uint8_t protocol, uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
 	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);
-	int hdr_len = GTPV2_HDR_LEN;
+	int hdr_len = GTP_HDR_LEN;
 
-	gtpc_hdr.init(msg_type, msg_len, teid);
-	memmove(tem_data, &gtpc_hdr, hdr_len * sizeof(uint8_t));
-	memmove(tem_data + hdr_len, data, len * sizeof(uint8_t));
-	swap(data, tem_data);
-	data_ptr += hdr_len;
-	len += hdr_len;
-	free(tem_data);
-}
-
-void Packet::prepend_gtpu_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
-	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);	
-	int hdr_len = GTPV1_HDR_LEN;
-
-	gtpu_hdr.init(msg_type, msg_len, teid);
-	memmove(tem_data, &gtpu_hdr, hdr_len * sizeof(uint8_t));
+	gtp_hdr.init(protocol, msg_type, msg_len, teid);
+	memmove(tem_data, &gtp_hdr, hdr_len * sizeof(uint8_t));
 	memmove(tem_data + hdr_len, data, len * sizeof(uint8_t));
 	swap(data, tem_data);
 	data_ptr += hdr_len;
@@ -255,17 +240,10 @@ void Packet::extract_item(string &item, int item_len){
 	data_ptr += item_len;
 }
 
-void Packet::extract_gtpc_hdr(){
-	int hdr_len = GTPV2_HDR_LEN;
+void Packet::extract_gtp_hdr(){
+	int hdr_len = GTP_HDR_LEN;
 
-	memmove(&gtpc_hdr, data + data_ptr, hdr_len * sizeof(uint8_t));
-	data_ptr += hdr_len;
-}
-
-void Packet::extract_gtpu_hdr(){
-	int hdr_len = GTPV1_HDR_LEN;
-
-	memmove(&gtpu_hdr, data + data_ptr, hdr_len * sizeof(uint8_t));
+	memmove(&gtp_hdr, data + data_ptr, hdr_len * sizeof(uint8_t));
 	data_ptr += hdr_len;
 }
 

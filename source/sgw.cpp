@@ -85,10 +85,10 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(s5_uteid_dl);
 	pkt.append_item(apn_in_use);
 	pkt.append_item(tai);
-	pkt.prepend_gtpc_hdr(1, pkt.len, 0);
+	pkt.prepend_gtp_hdr(2, 1, pkt.len, 0);
 	pgw_client.snd(pkt);
 	pgw_client.rcv(pkt);
-	pkt.extract_gtpc_hdr();
+	pkt.extract_gtp_hdr();
 	pkt.extract_item(s5_cteid_ul);
 	pkt.extract_item(ue_ip_addr, ip_addr_len);
 	pkt.extract_item(eps_bearer_id);
@@ -105,7 +105,7 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(s1_uteid_ul);
 	pkt.append_item(s5_uteid_ul);
 	pkt.append_item(s5_uteid_dl);
-	pkt.prepend_gtpc_hdr(1, pkt.len, s11_cteid_mme);
+	pkt.prepend_gtp_hdr(2, 1, pkt.len, s11_cteid_mme);
 	s11_server.snd(src_sock_addr, pkt);
 }
 
@@ -126,7 +126,7 @@ void Sgw::handle_modify_bearer(struct sockaddr_in src_sock_addr, Packet pkt) {
 	res = true;
 	pkt.clear_pkt();
 	pkt.append_item(res);
-	pkt.prepend_gtpc_hdr(2, pkt.len, s11_cteid_mme);
+	pkt.prepend_gtp_hdr(2, 2, pkt.len, s11_cteid_mme);
 	s11_server.snd(src_sock_addr, pkt);
 }
 
@@ -134,7 +134,7 @@ uint64_t Sgw::get_imsi(Packet pkt) {
 	uint64_t imsi;
 
 	g_sync.mlock(table1_mux);
-	imsi = table1[pkt.gtpc_hdr.teid];
+	imsi = table1[pkt.gtp_hdr.teid];
 	g_sync.munlock(table1_mux);
 	return imsi;
 }

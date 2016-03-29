@@ -72,8 +72,8 @@ void handle_s11_traffic() {
 
 	while (1) {
 		g_sgw.s11_server.rcv(src_sock_addr, pkt);
-		pkt.extract_gtpc_hdr();
-		switch(pkt.gtpc_hdr.msg_type) {
+		pkt.extract_gtp_hdr();
+		switch(pkt.gtp_hdr.msg_type) {
 			/* Create session */
 			case 1:
 				g_sgw.handle_create_session(src_sock_addr, pkt);

@@ -1,37 +1,29 @@
 #include "gtp.h"
 
-Gtpv1::Gtpv1() {
-	flags = (3 << 4); /* flags : Binary(00110000) */
-	seq_num = 0;
-	npdu_num = 0;
-	next_ext_header_type = 0;
+Gtp::Gtp() {
+	field_1 = 0;
+	field_2 = 0;
+	field_3 = 0;
 }
 
-void Gtpv1::init(uint8_t arg_msg_type, uint16_t arg_msg_len, uint32_t arg_teid) {
+void Gtp::init(uint8_t protocol, uint8_t arg_msg_type, uint16_t arg_msg_len, uint32_t arg_teid) {
 	msg_type = arg_msg_type;
 	msg_len = arg_msg_len;
 	teid = arg_teid;
-}
+	switch (protocol) {
+		case 1:
+			flags = 48;
+			break;
 
-Gtpv1::~Gtpv1() {
+		case 2:
+			flags = (teid > 0) ? (72) : (64);
+			break;
 
-}
-
-Gtpv2::Gtpv2() {
-	flags = (2 << 5); /* flags : Binary(01000000) */
-	seq_num = 0;
-	spare = 0;
-}
-
-void Gtpv2::init(uint8_t arg_msg_type, uint16_t arg_msg_len, uint32_t arg_teid) {
-	msg_type = arg_msg_type;
-	msg_len = arg_msg_len;
-	teid = arg_teid;
-	if (teid > 0) {
-		flags += 8;
+		default: 
+			g_utils.handle_type1_error(-1, "gtp protocol error: gtp_init");
 	}
 }
 
-Gtpv2::~Gtpv2() {
+Gtp::~Gtp() {
 
 }
