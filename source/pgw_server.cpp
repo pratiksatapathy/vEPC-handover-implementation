@@ -51,11 +51,40 @@ void run() {
 }
 
 void handle_s5_traffic() {
+	struct sockaddr_in src_sock_addr;
+	Packet pkt;
 
+	while (1) {
+		g_pgw.s5_server.rcv(src_sock_addr, pkt);
+		pkt.extract_gtp_hdr();
+		switch(pkt.gtp_hdr.msg_type) {
+			/* Create session */
+			case 1:
+				g_pgw.handle_create_session(src_sock_addr, pkt);
+				break;
+
+			/* Uplink userplane data */
+			case 2:
+				g_pgw.handle_uplink_udata(pkt);
+				break;
+
+			/* For error handling */
+			default:
+				break;
+		}		
+	}
 }
 
 void handle_sgi_traffic() {
-	
+	struct sockaddr_in src_sock_addr;
+	Packet pkt;
+
+	while (1) {
+		g_pgw.sgi_server.rcv(src_sock_addr, pkt);
+
+		/* Downlink userplane data */
+		g_pgw.handle_downlink_udata(pkt);
+	}	
 }
 
 int main(int argc, char *argv[]) {

@@ -25,6 +25,10 @@
 /* (C) read, write, close */
 #include <unistd.h>
 
+#include "diameter.h"
+#include "gtp.h"
+#include "packet.h"
+#include "s1ap.h"
 #include "utils.h"
 
 extern socklen_t g_sock_addr_len;
@@ -37,6 +41,7 @@ public:
 	void set_sock_reuse(int);
 	void set_snd_timeout(int);
 	void set_rcv_timeout(int);
+	string get_dst_ip_addr(Packet);
 };
 
 extern Network g_nw;

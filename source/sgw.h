@@ -34,6 +34,10 @@ public:
 	string pgw_s5_ip_addr;
 	uint64_t pgw_s5_port;
 
+	/* eNodeB info */
+	string enodeb_ip_addr;
+	uint64_t enodeb_port;
+
 	UeContext();
 	void init(uint64_t, uint64_t, uint8_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, string, int);
 	~UeContext();
@@ -41,24 +45,31 @@ public:
 
 class Sgw {
 private:
-	uint64_t get_imsi(Packet);
+	void update_itfid(uint64_t, uint32_t, uint64_t);
+	uint64_t get_imsi(uint64_t, uint32_t);
+	bool get_uplink_info(uint64_t, uint32_t&, string&, uint64_t&);
+	bool get_downlink_info(uint64_t, uint32_t&, string&, uint64_t&);
 
 public:
 	UdpServer s11_server;
 	UdpServer s1_server;
 	UdpServer s5_server;
-	unordered_map<uint32_t, uint64_t> table1; /* UE identification table: s11_cteid_sgw -> imsi */
-	unordered_map<uint32_t, UeContext> table2; /* UE context table: imsi -> UeContext */
-	unordered_map<uint32_t, uint32_t> table3; /* SGW -> eNodeB TEID mapping table */
-	unordered_map<uint32_t, uint32_t> table4; /* SGW -> PGW TEID mapping table */
+	unordered_map<uint32_t, UeContext> ue_ctx; /* UE context table: imsi -> UeContext */
+	unordered_map<uint32_t, uint64_t> s11_id; /* S11 UE identification table: s11_cteid_sgw -> imsi */
+	unordered_map<uint32_t, uint64_t> s1_id; /* S1 UE identification table: s1_uteid_ul -> imsi */
+	unordered_map<uint32_t, uint64_t> s5_id; /* S5 UE identification table: s5_uteid_dl -> imsi */
 
-	/* Lock parameter */
-	pthread_mutex_t table1_mux; /* Handles table1 */
-	pthread_mutex_t table234_mux; /* Handles table2, table3, table4 */
+	/* Lock parameters */
+	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
+	pthread_mutex_t s11id_mux; /* Handles s11_id */
+	pthread_mutex_t s1id_mux; /* Handles s1_id */
+	pthread_mutex_t s5id_mux; /* Handles s5_id */
 
 	Sgw();
 	void handle_create_session(struct sockaddr_in, Packet);
 	void handle_modify_bearer(struct sockaddr_in, Packet);
+	void handle_uplink_udata(Packet);
+	void handle_downlink_udata(Packet);
 	~Sgw();
 };
 

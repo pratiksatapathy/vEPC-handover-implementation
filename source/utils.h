@@ -45,6 +45,7 @@
 
 using namespace std;
 
+const uint64_t MAX_UE_COUNT = 10000;
 extern int g_reuse;
 extern int g_freeport;
 extern int g_enodeb_port;
@@ -55,8 +56,7 @@ extern int g_sgw_s1_port;
 extern int g_sgw_s5_port;
 extern int g_pgw_s5_port;
 extern int g_pgw_sgi_port;
-extern int g_pgw_dlink_port;
-extern int g_public_sink_port;
+extern int g_pub_sink_port;
 extern string g_enodeb_ip_addr;
 extern string g_mme_ip_addr;
 extern string g_hss_ip_addr;
@@ -65,9 +65,8 @@ extern string g_sgw_s1_ip_addr;
 extern string g_sgw_s5_ip_addr;
 extern string g_pgw_s5_ip_addr;
 extern string g_pgw_sgi_ip_addr;
-extern string g_pgw_dlink_ip_addr;
-extern string g_public_sink_ip_addr;
-extern string g_private_sink_ip_addr;
+extern string g_pub_sink_ip_addr;
+extern string g_pvt_sink_ip_addr;
 extern struct timeval g_timeout;
 
 class Utils {

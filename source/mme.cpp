@@ -289,7 +289,6 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	uint8_t eps_bearer_id;
 	uint8_t e_rab_id;
 	int tai_list_size;
-	int ip_addr_size;
 	string pgw_s5_ip_addr;
 	string ue_ip_addr;
 	bool res;
@@ -309,7 +308,6 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	tai = table2[guti].tai;
 	g_sync.munlock(table2_mux);
 
-	ip_addr_size = g_mme_ip_addr.size();
 	pkt.clear_pkt();
 	pkt.append_item(s11_cteid_mme);
 	pkt.append_item(imsi);
@@ -323,7 +321,7 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	sgw_client.rcv(pkt);
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(s11_cteid_sgw);
-	pkt.extract_item(ue_ip_addr, ip_addr_size);
+	pkt.extract_item(ue_ip_addr);
 	pkt.extract_item(s1_uteid_ul);
 	pkt.extract_item(s5_uteid_ul);
 	pkt.extract_item(s5_uteid_dl);
@@ -413,6 +411,8 @@ void Mme::handle_modify_bearer(Packet pkt) {
 	pkt.clear_pkt();
 	pkt.append_item(eps_bearer_id);
 	pkt.append_item(s1_uteid_dl);
+	pkt.append_item(g_enodeb_ip_addr);
+	pkt.append_item(g_enodeb_port);
 	pkt.prepend_gtp_hdr(2, 2, pkt.len, s11_cteid_sgw);
 	sgw_client.snd(pkt);
 	sgw_client.rcv(pkt);

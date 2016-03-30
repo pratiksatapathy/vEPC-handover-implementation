@@ -114,6 +114,7 @@ void Packet::append_item(const char *item) {
 void Packet::append_item(string item) {
 	int item_len = item.size();
 
+	append_item(item_len);
 	memmove(data + data_ptr, item.c_str(), item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 	len += item_len;
@@ -235,7 +236,10 @@ void Packet::extract_item(char *item, int item_len){
 	data_ptr += item_len;
 }
 
-void Packet::extract_item(string &item, int item_len){
+void Packet::extract_item(string &item){
+	int item_len;
+
+	extract_item(item_len);
 	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 }

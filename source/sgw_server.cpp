@@ -92,11 +92,43 @@ void handle_s11_traffic() {
 }
 
 void handle_s1_traffic() {
-	
+	struct sockaddr_in src_sock_addr;
+	Packet pkt;
+
+	while (1) {
+		g_sgw.s1_server.rcv(src_sock_addr, pkt);
+		pkt.extract_gtp_hdr();
+		switch(pkt.gtp_hdr.msg_type) {
+			/* Uplink userplane data */
+			case 1:
+				g_sgw.handle_uplink_udata(pkt);
+				break;
+
+			/* For error handling */
+			default:
+				break;
+		}		
+	}		
 }
 
 void handle_s5_traffic() {
-	
+	struct sockaddr_in src_sock_addr;
+	Packet pkt;
+
+	while (1) {
+		g_sgw.s5_server.rcv(src_sock_addr, pkt);
+		pkt.extract_gtp_hdr();
+		switch(pkt.gtp_hdr.msg_type) {
+			/* Downlink userplane data */
+			case 1:
+				g_sgw.handle_downlink_udata(pkt);
+				break;
+
+			/* For error handling */
+			default:
+				break;
+		}		
+	}			
 }
 
 int main(int argc, char *argv[]) {

@@ -49,7 +49,7 @@ public:
 	void extract_item(vector<uint64_t>&, int);
 	void extract_item(uint8_t*, int);	
 	void extract_item(char*, int);	
-	void extract_item(string&, int);
+	void extract_item(string&);
 	void extract_gtp_hdr();
 	void extract_s1ap_hdr();
 	void extract_diameter_hdr();
@@ -58,6 +58,5 @@ public:
 	struct ip* allocate_ip_hdr_mem(int);
 	~Packet();
 };
-
 
 #endif /* PACKET_H */

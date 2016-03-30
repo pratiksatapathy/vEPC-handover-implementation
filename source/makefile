@@ -35,7 +35,7 @@ mme_server.o:	diameter.h gtp.h mme.h mme_server.cpp mme_server.h network.h packe
 mysql.o:	mysql.cpp mysql.h utils.h
 	$(G++) -c -o mysql.o mysql.cpp
 
-network.o:	network.cpp network.h utils.h 
+network.o:	diameter.h gtp.h network.cpp network.h packet.h s1ap.h utils.h 
 	$(G++) -c -o network.o network.cpp
 
 packet.o:	diameter.h gtp.h packet.cpp packet.h s1ap.h utils.h

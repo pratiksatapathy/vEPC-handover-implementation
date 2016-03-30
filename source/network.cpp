@@ -49,3 +49,20 @@ void Network::set_rcv_timeout(int sock_fd) {
 	status = setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, (struct timeval*)&g_timeout, sizeof(struct timeval));
 	g_utils.handle_type1_error(status, "Setsockopt rcv timeout error: network_setrcvtimeout");
 }
+
+string Network::get_dst_ip_addr(Packet pkt) {
+	struct ip *ip_hdr;
+	string str_ip_addr;
+	char *cstr_ip_addr;
+
+	ip_hdr = pkt.allocate_ip_hdr_mem(IP_HDR_LEN);
+	cstr_ip_addr = g_utils.allocate_str_mem(INET_ADDRSTRLEN);
+	memmove(ip_hdr, pkt.data, IP_HDR_LEN * sizeof(uint8_t));
+	if (inet_ntop(AF_INET, &(ip_hdr->ip_dst), cstr_ip_addr, INET_ADDRSTRLEN) == NULL) {
+		g_utils.handle_type1_error(-1, "inet_ntop error: network_getdstipaddr");
+	}
+	str_ip_addr.assign(cstr_ip_addr);
+	free(ip_hdr);
+	free(cstr_ip_addr);
+	return str_ip_addr;
+}

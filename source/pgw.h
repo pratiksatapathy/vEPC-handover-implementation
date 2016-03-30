@@ -14,37 +14,50 @@
 class UeContext {
 public:
 	/* UE id */
-	uint64_t imsi; /* International Mobile Subscriber Identity */
 	string ip_addr;	
 
 	/* UE location info */
 	uint64_t tai; /* Tracking Area Identifier */
 
-	/* EPS info, EPS bearer info */
+	/* EPS session info */
 	uint64_t apn_in_use; /* Access Point Name in Use */
+
+	/* EPS bearer info */
+	uint8_t eps_bearer_id;
 	uint32_t s5_uteid_ul; /* S5 Userplane Tunnel Endpoint Identifier - Uplink */
 	uint32_t s5_uteid_dl; /* S5 Userplane Tunnel Endpoint Identifier - Downlink */
-
-	/* Control plane info */
 	uint32_t s5_cteid_ul; /* S5 Controlplane Tunnel Endpoint Identifier - Uplink */
 	uint32_t s5_cteid_dl; /* S5 Controlplane Tunnel Endpoint Identifier - Downlink */
 
 	UeContext();
+	void init(string, uint64_t, uint64_t, uint8_t, uint32_t, uint32_t, uint32_t, uint32_t);
 	~UeContext();
 };
 
 class Pgw {
 private:
+	void set_ip_addrs();
+	void update_itfid(uint64_t, string, uint64_t);
+	uint64_t get_imsi(uint64_t, string);
+	bool get_downlink_info(uint64_t, uint32_t&);	
 
 public:
 	UdpServer s5_server;
 	UdpServer sgi_server;
-	unordered_map<uint8_t, UeContext> table1; /* UE Context table */
+	unordered_map<uint32_t, UeContext> ue_ctx; /* UE context table: imsi -> UeContext */
+	unordered_map<string, uint32_t> sgi_id; /* SGI UE identification table: ue_ip_addr -> imsi */
 
-	/* Lock parameter */
-	pthread_mutex_t table1_mux; /* Handles table1 */
+	/* IP addresses table - Write once, Read always table - No need to put mlock */ 
+	unordered_map<uint64_t, string> ip_addrs; 
+
+	/* Lock parameters */
+	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
+	pthread_mutex_t sgiid_mux; /* Handles sgi_id */
 
 	Pgw();
+	void handle_create_session(struct sockaddr_in, Packet);
+	void handle_uplink_udata(Packet);
+	void handle_downlink_udata(Packet);
 	~Pgw();
 };
 
