@@ -174,6 +174,55 @@ void Sgw::handle_downlink_udata(Packet pkt) {
 	}
 }
 
+void Sgw::handle_detach(struct sockaddr_in src_sock_addr, Packet pkt) {
+	UdpClient pgw_s5_client;
+	uint64_t imsi;
+	uint64_t tai;
+	uint32_t s1_uteid_ul;
+	uint32_t s5_uteid_dl;
+	uint32_t s11_cteid_mme;
+	uint32_t s11_cteid_sgw;
+	uint64_t s5_cteid_ul;
+	uint8_t eps_bearer_id;
+	string pgw_s5_ip_addr;
+	uint64_t pgw_s5_port;
+	bool res;
+
+	imsi = get_imsi(11, pkt.gtp_hdr.teid);
+	pkt.extract_item(eps_bearer_id);
+	pkt.extract_item(tai);
+	g_sync.mlock(uectx_mux);
+	pgw_s5_ip_addr = ue_ctx[imsi].pgw_s5_ip_addr;
+	pgw_s5_port = ue_ctx[imsi].pgw_s5_port;
+	s5_cteid_ul = ue_ctx[imsi].s5_cteid_ul;
+	s11_cteid_mme = ue_ctx[imsi].s11_cteid_mme;
+	s11_cteid_sgw = ue_ctx[imsi].s11_cteid_sgw;
+	s1_uteid_ul = ue_ctx[imsi].s1_uteid_ul;
+	s5_uteid_dl = ue_ctx[imsi].s5_uteid_dl;
+	g_sync.munlock(uectx_mux);
+	pgw_s5_client.conn(pgw_s5_ip_addr.c_str(), pgw_s5_port);
+	pkt.clear_pkt();
+	pkt.append_item(eps_bearer_id);
+	pkt.append_item(tai);
+	pkt.prepend_gtp_hdr(2, 4, pkt.len, s5_cteid_ul);
+	pgw_s5_client.snd(pkt);
+	pgw_s5_client.rcv(pkt);
+	pkt.extract_gtp_hdr();
+	pkt.extract_item(res);
+	if (res == false) {
+		cout << "sgw_handledetach:" << " pgw detach failure" << endl;
+		return;
+	}
+	pkt.clear_pkt();
+	pkt.append_item(res);
+	pkt.prepend_gtp_hdr(2, 3, pkt.len, s11_cteid_mme);
+	s11_server.snd(src_sock_addr, pkt);
+	rem_itfid(11, s11_cteid_sgw);
+	rem_itfid(1, s1_uteid_ul);
+	rem_itfid(5, s5_uteid_dl);
+	rem_uectx(imsi);
+}
+
 void Sgw::update_itfid(uint64_t itf_id_no, uint32_t teid, uint64_t imsi) {
 	switch (itf_id_no) {
 		case 11:
@@ -254,6 +303,34 @@ bool Sgw::get_downlink_info(uint64_t imsi, uint32_t &s1_uteid_dl, string &enodeb
 	}
 	g_sync.munlock(uectx_mux);
 	return res;
+}
+
+void Sgw::rem_itfid(uint64_t itf_id_no, uint32_t teid) {
+	switch (itf_id_no) {
+		case 11:
+			g_sync.mlock(s11id_mux);
+			s11_id.erase(teid);
+			g_sync.mlock(s11id_mux);
+			break;
+		case 1:
+			g_sync.mlock(s1id_mux);
+			s1_id.erase(teid);
+			g_sync.mlock(s1id_mux);		
+			break;
+		case 5:
+			g_sync.mlock(s5id_mux);
+			s5_id.erase(teid);
+			g_sync.mlock(s5id_mux);		
+			break;
+		default:
+			g_utils.handle_type1_error(-1, "incorrect itf_id_no: sgw_remitfid");
+	}
+}
+
+void Sgw::rem_uectx(uint64_t imsi) {
+	g_sync.mlock(uectx_mux);	
+	ue_ctx.erase(imsi);
+	g_sync.munlock(uectx_mux);	
 }
 
 Sgw::~Sgw() {

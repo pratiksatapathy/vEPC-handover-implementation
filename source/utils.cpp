@@ -35,17 +35,17 @@ struct timeval g_timeout = {20, 0};
 Utils g_utils;
 
 /* Action - Exit the program */
-void Utils::handle_type1_error(int arg, const char *msg) {
+void Utils::handle_type1_error(int arg, string msg) {
 	if (arg < 0) {
-		perror(msg);
+		perror(msg.c_str());
 		exit(EXIT_FAILURE);
 	}	
 }
 
 /* Action - Nothing */
-void Utils::handle_type2_error(int arg, const char *msg) {
+void Utils::handle_type2_error(int arg, string msg) {
 	if (arg < 0 && errno != EWOULDBLOCK && errno != EAGAIN) {
-		perror(msg);
+		perror(msg.c_str());
 		exit(EXIT_FAILURE);
 	}
 }

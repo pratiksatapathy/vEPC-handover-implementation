@@ -8,9 +8,11 @@
 #include "s1ap.h"
 #include "security.h"
 #include "sctp_client.h"
+#include "sync.h"
 #include "telecom.h"
 #include "tun.h"
 #include "udp_client.h"
+#include "udp_server.h"
 #include "utils.h"
 
 class RanContext {
@@ -82,6 +84,33 @@ public:
 	~EpcAddrs();
 };
 
+class UplinkInfo {
+public:
+	uint32_t s1_uteid_ul;
+	string sgw_s1_ip_addr;
+	uint64_t sgw_s1_port;
+
+	void init(uint32_t, string, uint64_t);
+};
+
+class TrafficMonitor {
+	bool get_uplink_info(string, uint32_t&, string&, uint64_t&);
+
+public:
+	UdpServer server;
+	Tun tun;
+	unordered_map<string, UplinkInfo> uplink_info;
+	
+	/* Lock parameter */
+	pthread_mutex_t uplinkinfo_mux; /* Handles uplink_info */
+
+	TrafficMonitor();
+	void handle_uplink_udata();
+	void handle_downlink_udata();
+	void update_uplink_info(string, uint32_t, string, uint64_t);
+	~TrafficMonitor();
+};
+
 class Ran {
 private:
 	void set_crypt_context();
@@ -100,30 +129,10 @@ public:
 	void initial_attach();
 	void authenticate();
 	void set_security();
-	void set_eps_session();
+	void set_eps_session(TrafficMonitor&);
 	void transfer_data();
 	void detach();	
 	~Ran();
-};
-
-class UplinkInfo {
-public:
-	uint32_t s1_uteid_ul;
-	string sgw_s1_ip_addr;
-	uint64_t sgw_s1_port;
-
-	void init(uint32_t, string, uint64_t);
-};
-
-class TrafficMonitor {
-	void get_uplink_info(uint32_t, uint32_t&, string&, uint32_t&);
-
-public:
-	unordered_map<uint32_t, UplinkInfo> uplink_info;
-	pthread_mutex_t uplinkinfo_mux;
-
-	TrafficMonitor();
-	~TrafficMonitor();
 };
 
 #endif /* RAN_H */

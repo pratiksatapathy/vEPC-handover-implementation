@@ -102,10 +102,8 @@ private:
 	void set_integrity_context(uint64_t);
 	void set_pgw_info(uint64_t);
 	uint64_t get_guti(Packet);
-	bool check_table1_entry(uint32_t);
-	bool check_table2_entry(uint64_t);	
-	void rem_table1_entry(uint32_t);
-	void rem_table2_entry(uint64_t);
+	void rem_itfid(uint32_t);
+	void rem_uectx(uint64_t);
 	
 public:
 	SctpServer server;
@@ -113,12 +111,12 @@ public:
 	Crypt crypt;
 	Integrity integrity;
 	int ue_count;
-	unordered_map<uint32_t, uint64_t> table1; /* UE identification table: mme_s1ap_ue_id -> guti */
-	unordered_map<uint64_t, UeContext> table2; /* UE context table: guti -> UeContext */
+	unordered_map<uint32_t, uint64_t> s1mme_id; /* S1_MME UE identification table: mme_s1ap_ue_id -> guti */
+	unordered_map<uint64_t, UeContext> ue_ctx; /* UE context table: guti -> UeContext */
 
 	/* Lock parameters */
-	pthread_mutex_t table1_mux; /* Handles table1 and ue_count */
-	pthread_mutex_t table2_mux; /* Handles table2 */
+	pthread_mutex_t s1mmeid_mux; /* Handles table1 and ue_count */
+	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
 
 	Mme();
 	void handle_initial_attach(int, Packet);
@@ -129,6 +127,7 @@ public:
 	void handle_create_session(int, Packet);
 	void handle_attach_complete(Packet);
 	void handle_modify_bearer(Packet);
+	void handle_detach(int, Packet);
 	~Mme();
 };
 

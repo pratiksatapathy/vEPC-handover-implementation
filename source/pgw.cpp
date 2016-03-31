@@ -51,7 +51,8 @@ void Pgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	s5_cteid_ul = s5_cteid_dl;
 	s5_uteid_ul = s5_cteid_dl;
 	ue_ip_addr = ip_addrs[imsi];
-	update_itfid(0, ue_ip_addr, imsi);
+	update_itfid(5, s5_uteid_ul, "", imsi);
+	update_itfid(0, 0, ue_ip_addr, imsi);
 	g_sync.mlock(uectx_mux);
 	ue_ctx[imsi].init(ue_ip_addr, tai, apn_in_use, eps_bearer_id, s5_uteid_ul, s5_uteid_dl, s5_cteid_ul, s5_cteid_dl);
 	g_sync.munlock(uectx_mux);	
@@ -78,7 +79,7 @@ void Pgw::handle_downlink_udata(Packet pkt) {
 	bool res;
 
 	ue_ip_addr = g_nw.get_dst_ip_addr(pkt);
-	imsi = get_imsi(0, ue_ip_addr);
+	imsi = get_imsi(0, 0, ue_ip_addr);
 	res = get_downlink_info(imsi, s5_uteid_dl);
 	if (res) {
 		UdpClient sgw_s5_client;
@@ -87,6 +88,33 @@ void Pgw::handle_downlink_udata(Packet pkt) {
 		pkt.prepend_gtp_hdr(1, 3, pkt.len, s5_uteid_dl);
 		sgw_s5_client.snd(pkt);
 	}
+}
+
+void Pgw::handle_detach(struct sockaddr_in src_sock_addr, Packet pkt) {
+	uint64_t imsi;
+	uint64_t tai;
+	uint32_t s5_cteid_ul;
+	uint32_t s5_cteid_dl;
+	uint8_t eps_bearer_id;
+	string ue_ip_addr;
+	bool res;
+
+	res = true;
+	imsi = get_imsi(5, pkt.gtp_hdr.teid, "");
+	pkt.extract_item(eps_bearer_id);
+	pkt.extract_item(tai);
+	g_sync.mlock(uectx_mux);
+	s5_cteid_ul = ue_ctx[imsi].s5_cteid_ul;
+	s5_cteid_dl = ue_ctx[imsi].s5_cteid_dl;
+	ue_ip_addr = ue_ctx[imsi].ip_addr;
+	g_sync.munlock(uectx_mux);
+	pkt.clear_pkt();
+	pkt.append_item(res);
+	pkt.prepend_gtp_hdr(2, 4, pkt.len, s5_cteid_dl);
+	s5_server.snd(src_sock_addr, pkt);
+	rem_itfid(5, s5_cteid_ul, "");
+	rem_itfid(0, 0, ue_ip_addr);
+	rem_uectx(imsi);
 }
 
 void Pgw::set_ip_addrs() {
@@ -114,8 +142,13 @@ void Pgw::set_ip_addrs() {
 	}
 }
 
-void Pgw::update_itfid(uint64_t itf_id_no, string ue_ip_addr, uint64_t imsi) {
+void Pgw::update_itfid(uint64_t itf_id_no, uint32_t teid, string ue_ip_addr, uint64_t imsi) {
 	switch (itf_id_no) {
+		case 5:
+			g_sync.mlock(s5id_mux);
+			s5_id[teid] = imsi;
+			g_sync.mlock(s5id_mux);
+			break;
 		case 0:
 			g_sync.mlock(sgiid_mux);
 			sgi_id[ue_ip_addr] = imsi;
@@ -126,11 +159,18 @@ void Pgw::update_itfid(uint64_t itf_id_no, string ue_ip_addr, uint64_t imsi) {
 	}
 }
 
-uint64_t Pgw::get_imsi(uint64_t itf_id_no, string ue_ip_addr) {
+uint64_t Pgw::get_imsi(uint64_t itf_id_no, uint32_t teid, string ue_ip_addr) {
 	uint64_t imsi;
 
 	imsi = 0;
 	switch (itf_id_no) {
+		case 5:
+			g_sync.mlock(s5id_mux);
+			if (s5_id.find(teid) != s5_id.end()) {
+				imsi = s5_id[teid];
+			}
+			g_sync.mlock(s5id_mux);		
+			break;
 		case 0:
 			g_sync.mlock(sgiid_mux);
 			if (sgi_id.find(ue_ip_addr) != sgi_id.end()) {
@@ -154,6 +194,29 @@ bool Pgw::get_downlink_info(uint64_t imsi, uint32_t &s5_uteid_dl) {
 	}
 	g_sync.munlock(uectx_mux);
 	return res;
+}
+
+void Pgw::rem_itfid(uint64_t itf_id_no, uint32_t teid, string ue_ip_addr) {
+	switch (itf_id_no) {
+		case 5:
+			g_sync.mlock(s5id_mux);
+			s5_id.erase(teid);
+			g_sync.mlock(s5id_mux);
+			break;
+		case 0:
+			g_sync.mlock(sgiid_mux);
+			sgi_id.erase(ue_ip_addr);
+			g_sync.mlock(sgiid_mux);		
+			break;
+		default:
+			g_utils.handle_type1_error(-1, "incorrect itf_id_no: pgw_remitfid");
+	}
+}
+
+void Pgw::rem_uectx(uint64_t imsi) {
+	g_sync.mlock(uectx_mux);	
+	ue_ctx.erase(imsi);
+	g_sync.munlock(uectx_mux);	
 }
 
 Pgw::~Pgw() {

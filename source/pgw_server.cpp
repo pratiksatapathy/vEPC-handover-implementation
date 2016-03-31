@@ -68,6 +68,11 @@ void handle_s5_traffic() {
 				g_pgw.handle_uplink_udata(pkt);
 				break;
 
+			/* Detach */
+			case 4:
+				g_pgw.handle_detach(src_sock_addr, pkt);
+				break;
+
 			/* For error handling */
 			default:
 				break;

@@ -84,6 +84,11 @@ void handle_s11_traffic() {
 				g_sgw.handle_modify_bearer(src_sock_addr, pkt);
 				break;
 
+			/* Detach */
+			case 3:
+				g_sgw.handle_detach(src_sock_addr, pkt);
+				break;
+
 			/* For error handling */
 			default:
 				break;

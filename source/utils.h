@@ -71,8 +71,8 @@ extern struct timeval g_timeout;
 
 class Utils {
 public:
-	void handle_type1_error(int, const char*);
-	void handle_type2_error(int, const char*);
+	void handle_type1_error(int, string);
+	void handle_type2_error(int, string);
 	char* allocate_str_mem(int);
 	uint8_t* allocate_uint8_mem(int);
 	void time_check(time_t, double, bool&);

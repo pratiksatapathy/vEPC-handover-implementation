@@ -66,9 +66,15 @@ int handle_ue(int conn_fd) {
 
 			/* Attach Complete */
 			case 6: 
-				cout << "mmeserver_handleue:" << " case 5:" << endl;
+				cout << "mmeserver_handleue:" << " case 6:" << endl;
 				g_mme.handle_attach_complete(pkt);
 				g_mme.handle_modify_bearer(pkt);
+				break;
+
+			/* Detach request */
+			case 7: 
+				cout << "mmeserver_handleue:" << " case 7:" << endl;
+				g_mme.handle_detach(conn_fd, pkt);
 				break;
 
 			/* For error handling */	

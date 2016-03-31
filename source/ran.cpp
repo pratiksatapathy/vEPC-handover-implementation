@@ -54,6 +54,70 @@ EpcAddrs::~EpcAddrs() {
 
 }
 
+void UplinkInfo::init(uint32_t arg_s1_uteid_ul, string arg_sgw_s1_ip_addr, uint64_t arg_sgw_s1_port) {
+	s1_uteid_ul = arg_s1_uteid_ul;
+	sgw_s1_ip_addr = arg_sgw_s1_ip_addr;
+	sgw_s1_port = arg_sgw_s1_port;
+}
+
+TrafficMonitor::TrafficMonitor() {
+	server.run(g_enodeb_ip_addr.c_str(), g_enodeb_port);
+	g_sync.mux_init(uplinkinfo_mux);
+}
+
+void TrafficMonitor::handle_uplink_udata() {	
+	Packet pkt;
+	string ip_addr;
+	uint32_t s1_uteid_ul;
+	string sgw_s1_ip_addr;
+	uint64_t sgw_s1_port;
+	bool res;
+
+	tun.rcv(pkt);
+	ip_addr = g_nw.get_src_ip_addr(pkt);
+	res = get_uplink_info(ip_addr, s1_uteid_ul, sgw_s1_ip_addr, sgw_s1_port);
+	if (res == true) {
+		UdpClient sgw_s1_client;
+
+		sgw_s1_client.conn(sgw_s1_ip_addr.c_str(), sgw_s1_port);
+		pkt.prepend_s1ap_hdr(1, 1, pkt.len, s1_uteid_ul);
+		sgw_s1_client.snd(pkt);
+	}
+}
+
+void TrafficMonitor::handle_downlink_udata() {
+	Packet pkt;
+	struct sockaddr_in src_sock_addr;
+
+	server.rcv(src_sock_addr, pkt);
+	pkt.extract_gtp_hdr();
+	pkt.truncate();
+	tun.snd(pkt);
+}
+
+void TrafficMonitor::update_uplink_info(string ip_addr, uint32_t s1_uteid_ul, string sgw_s1_ip_addr, uint64_t sgw_s1_port) {
+	g_sync.mlock(uplinkinfo_mux);
+	uplink_info[ip_addr].init(s1_uteid_ul, sgw_s1_ip_addr, sgw_s1_port);
+	g_sync.munlock(uplinkinfo_mux);
+}
+
+bool TrafficMonitor::get_uplink_info(string ip_addr, uint32_t &s1_uteid_ul, string &sgw_s1_ip_addr, uint64_t &sgw_s1_port) {
+	bool res = false;
+
+	g_sync.mlock(uplinkinfo_mux);
+	if (uplink_info.find(ip_addr) != uplink_info.end()) {
+		res = true;
+		s1_uteid_ul = uplink_info[ip_addr].s1_uteid_ul;
+		sgw_s1_ip_addr = uplink_info[ip_addr].sgw_s1_ip_addr;
+		sgw_s1_port = uplink_info[ip_addr].sgw_s1_port;
+	}
+	g_sync.munlock(uplinkinfo_mux);
+	return res;
+}
+
+TrafficMonitor::~TrafficMonitor() {
+
+}
 
 Ran::Ran(){
 	mme_client.conn(epc_addrs.mme_ip_addr.c_str(), epc_addrs.mme_port);
@@ -129,7 +193,7 @@ void Ran::set_security() {
 	integrity.get_hmac(pkt.data, pkt.len, hmac_res, ran_ctx.k_nas_int);
 	res = integrity.cmp_hmacs(hmac_res, hmac_xres);
 	if (res == false) {
-		g_utils.handle_type1_error(-1, "HMAC of initial security msg failed: ran_setsecurity");
+		g_utils.handle_type1_error(-1, "HMAC initial security failure error: ran_setsecurity");
 	}
 	cout << "ran_setsecurity:" << " security mode command success" << endl;
 
@@ -152,7 +216,7 @@ void Ran::set_integrity_context() {
 	ran_ctx.k_nas_int = ran_ctx.k_asme + ran_ctx.nas_int_algo + ran_ctx.count + ran_ctx.bearer + ran_ctx.dir + 1;
 }
 
-void Ran::set_eps_session() {
+void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	bool res;
 	int tai_list_size;
 	uint64_t k_enodeb;
@@ -161,7 +225,7 @@ void Ran::set_eps_session() {
 	pkt.extract_s1ap_hdr();
 	res = integrity.hmac_check(pkt, ran_ctx.k_nas_int);
 	if (res == false) {
-		g_utils.handle_type1_error(-1, "HMAC of attach accept msg failed: ran_setepssession");
+		g_utils.handle_type1_error(-1, "HMAC attach accept failure error: ran_setepssession");
 	}
 	crypt.dec(pkt, ran_ctx.k_nas_enc);
 	pkt.extract_item(ran_ctx.eps_bearer_id);
@@ -177,8 +241,9 @@ void Ran::set_eps_session() {
 	pkt.extract_item(epc_addrs.sgw_s1_port);
 	pkt.extract_item(res);
 	if (res == false) {
-		g_utils.handle_type1_error(-1, "attach request failure: ran_setepssession");	
-	}
+		g_utils.handle_type1_error(-1, "attach request failure error: ran_setepssession");	
+	}	
+	traf_mon.update_uplink_info(ran_ctx.ip_addr, ran_ctx.s1_uteid_ul, epc_addrs.sgw_s1_ip_addr, epc_addrs.sgw_s1_port);
 	ran_ctx.s1_uteid_dl = ran_ctx.s1_uteid_ul;
 	pkt.clear_pkt();
 	pkt.append_item(ran_ctx.eps_bearer_id);
@@ -196,24 +261,33 @@ void Ran::transfer_data() {
 }
 
 void Ran::detach() {
+	uint64_t detach_type;
+	bool res;
 
+	detach_type = 1;
+	pkt.clear_pkt();
+	pkt.append_item(ran_ctx.guti);
+	pkt.append_item(ran_ctx.ksi_asme);
+	pkt.append_item(detach_type);
+	crypt.enc(pkt, ran_ctx.k_nas_enc);
+	integrity.add_hmac(pkt, ran_ctx.k_nas_int);
+	pkt.prepend_s1ap_hdr(7, pkt.len, ran_ctx.enodeb_s1ap_ue_id, ran_ctx.mme_s1ap_ue_id);
+	mme_client.snd(pkt);
+	mme_client.rcv(pkt);
+	pkt.extract_s1ap_hdr();
+	res = integrity.hmac_check(pkt, ran_ctx.k_nas_int);
+	if (res == false) {
+		g_utils.handle_type1_error(-1, "HMAC detach failure error: ran_detach");
+	}
+	crypt.dec(pkt, ran_ctx.k_nas_enc);
+	pkt.extract_item(res);
+	if (res == false) {
+		g_utils.handle_type1_error(-1, "detach failure error: ran_detach");	
+	}
 }
 
 Ran::~Ran(){
 
 }
 
-void UplinkInfo::init(uint32_t arg_s1_uteid_ul, string arg_sgw_s1_ip_addr, uint64_t arg_sgw_s1_port) {
-	s1_uteid_ul = arg_s1_uteid_ul;
-	sgw_s1_ip_addr = arg_sgw_s1_ip_addr;
-	sgw_s1_port = arg_sgw_s1_port;
-}
-
-TrafficMonitor::TrafficMonitor() {
-	g_sync.mux_init(uplinkinfo_mux);
-}
-
-TrafficMonitor::~TrafficMonitor() {
-
-}
 

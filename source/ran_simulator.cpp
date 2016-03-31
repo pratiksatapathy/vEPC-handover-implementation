@@ -5,9 +5,27 @@ int g_threads_count;
 double g_req_duration;
 vector<thread> g_threads;
 thread g_mon_thread;
+TrafficMonitor g_traf_mon;
 
 void traffic_monitor() {
+	fd_set rcv_set;
+	int max_fd;
+	int status;
 
+	max_fd = max(g_traf_mon.tun.conn_fd, g_traf_mon.server.conn_fd);
+	while (1) {
+		FD_ZERO(&rcv_set);
+		FD_SET(g_traf_mon.tun.conn_fd, &rcv_set); 
+		FD_SET(g_traf_mon.server.conn_fd, &rcv_set); 
+		status = select(max_fd + 1, &rcv_set, NULL, NULL, NULL);
+		g_utils.handle_type1_error(status, "select error: ransimulator_trafficmonitor");
+		if (FD_ISSET(g_traf_mon.tun.conn_fd, &rcv_set)) {
+			g_traf_mon.handle_uplink_udata();
+		}
+		else if (FD_ISSET(g_traf_mon.server.conn_fd, &rcv_set)) {
+			g_traf_mon.handle_downlink_udata();	
+		}
+	}
 }
 
 void simulate(int arg) {
@@ -27,7 +45,7 @@ void simulate(int arg) {
 		ran.initial_attach();
 		ran.authenticate();
 		ran.set_security();
-		ran.set_eps_session();
+		ran.set_eps_session(g_traf_mon);
 		ran.transfer_data();
 		ran.detach();
 	// }
@@ -45,6 +63,8 @@ void init(char *argv[]) {
 	g_threads_count = atoi(argv[1]);
 	g_req_duration = atof(argv[2]);
 	g_threads.resize(g_threads_count);
+	g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");
+	g_traf_mon.tun.conn("tun1");
 }
 
 void run() {

@@ -9,9 +9,11 @@
 #include "s1ap.h"
 #include "security.h"
 #include "sctp_client.h"
+#include "sync.h"
 #include "telecom.h"
 #include "tun.h"
 #include "udp_client.h"
+#include "udp_server.h"
 #include "utils.h"
 
 extern time_t g_start_time;
@@ -19,6 +21,7 @@ extern int g_threads_count;
 extern double g_req_duration;
 extern vector<thread> g_threads;
 extern thread g_mon_thread;
+extern TrafficMonitor g_traf_mon;
 
 void simulate(int);
 void check_usage(int);
