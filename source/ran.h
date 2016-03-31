@@ -9,6 +9,7 @@
 #include "security.h"
 #include "sctp_client.h"
 #include "telecom.h"
+#include "tun.h"
 #include "udp_client.h"
 #include "utils.h"
 
@@ -87,7 +88,7 @@ private:
 	void set_integrity_context();
 	
 public:
-	RanContext ran_context;
+	RanContext ran_ctx;
 	EpcAddrs epc_addrs;
 	SctpClient mme_client;
 	Crypt crypt;
@@ -103,6 +104,26 @@ public:
 	void transfer_data();
 	void detach();	
 	~Ran();
+};
+
+class UplinkInfo {
+public:
+	uint32_t s1_uteid_ul;
+	string sgw_s1_ip_addr;
+	uint64_t sgw_s1_port;
+
+	void init(uint32_t, string, uint64_t);
+};
+
+class TrafficMonitor {
+	void get_uplink_info(uint32_t, uint32_t&, string&, uint32_t&);
+
+public:
+	unordered_map<uint32_t, UplinkInfo> uplink_info;
+	pthread_mutex_t uplinkinfo_mux;
+
+	TrafficMonitor();
+	~TrafficMonitor();
 };
 
 #endif /* RAN_H */

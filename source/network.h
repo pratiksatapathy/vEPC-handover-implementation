@@ -39,7 +39,6 @@ public:
 	void bind_sock(int, struct sockaddr_in);
 	void get_sock_addr(int, struct sockaddr_in&);
 	void set_sock_reuse(int);
-	void set_snd_timeout(int);
 	void set_rcv_timeout(int);
 	string get_dst_ip_addr(Packet);
 };

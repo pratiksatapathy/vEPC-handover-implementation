@@ -36,13 +36,6 @@ void Network::set_sock_reuse(int sock_fd) {
 	g_utils.handle_type1_error(status, "Setsockopt reuse error: network_setsockreuse");
 }
 
-void Network::set_snd_timeout(int sock_fd) {
-	int status;
-
-	status = setsockopt(sock_fd, SOL_SOCKET, SO_SNDTIMEO, (struct timeval*)&g_timeout, sizeof(struct timeval));
-	g_utils.handle_type1_error(status, "Setsockopt snd timeout error: network_setsndtimeout");
-}
-
 void Network::set_rcv_timeout(int sock_fd) {
 	int status;
 

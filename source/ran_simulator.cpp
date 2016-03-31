@@ -4,6 +4,11 @@ time_t g_start_time;
 int g_threads_count;
 double g_req_duration;
 vector<thread> g_threads;
+thread g_mon_thread;
+
+void traffic_monitor() {
+
+}
 
 void simulate(int arg) {
 	Ran ran;
@@ -45,6 +50,8 @@ void init(char *argv[]) {
 void run() {
 	int i;
 
+	g_mon_thread = thread(traffic_monitor);
+	g_mon_thread.detach();
 	for (i = 0; i < g_threads_count; i++) {
 		g_threads[i] = thread(simulate, i);
 	}	

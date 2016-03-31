@@ -47,10 +47,10 @@ pgw.o:	diameter.h gtp.h network.h packet.h pgw.cpp pgw.h s1ap.h sync.h udp_clien
 pgw_server.o:	diameter.h gtp.h network.h packet.h pgw.h pgw_server.cpp pgw_server.h s1ap.h sync.h udp_client.h udp_server.h utils.h
 	$(G++) -c -o pgw_server.o pgw_server.cpp
 
-ran.o:	diameter.h gtp.h network.h packet.h ran.cpp ran.h s1ap.h security.h sctp_client.h telecom.h udp_client.h utils.h
+ran.o:	diameter.h gtp.h network.h packet.h ran.cpp ran.h s1ap.h security.h sctp_client.h telecom.h tun.h udp_client.h utils.h
 	$(G++) -c -o ran.o ran.cpp
 
-ran_simulator.o:	diameter.h gtp.h network.h packet.h ran.h ran_simulator.cpp ran_simulator.h s1ap.h security.h sctp_client.h telecom.h udp_client.h utils.h
+ran_simulator.o:	diameter.h gtp.h network.h packet.h ran.h ran_simulator.cpp ran_simulator.h s1ap.h security.h sctp_client.h telecom.h tun.h udp_client.h utils.h
 	$(G++) -c -o ran_simulator.o ran_simulator.cpp
 
 s1ap.o:	s1ap.cpp s1ap.h utils.h
@@ -77,6 +77,9 @@ sync.o:	sync.cpp sync.h utils.h
 telecom.o:	telecom.cpp telecom.h utils.h
 	$(G++) -c -o telecom.o telecom.cpp
 
+tun.o:	diameter.h gtp.h network.h packet.h s1ap.h tun.cpp tun.h utils.h
+	$(G++) -c -o tun.o tun.cpp
+
 udp_client.o:	diameter.h gtp.h network.h packet.h s1ap.h udp_client.cpp udp_client.h utils.h
 	$(G++) -c -o udp_client.o udp_client.cpp
 
@@ -100,7 +103,7 @@ PGW_R = $(G++) -o pgw.out $(PGW_P) -pthread
 MME_P = diameter.o gtp.o mme.o mme_server.o network.o packet.o s1ap.o security.o sctp_client.o sctp_server.o sync.o telecom.o udp_client.o utils.o
 MME_R = $(G++) -o mme.out $(MME_P) -pthread -lcrypto
 
-RAN_P = diameter.o gtp.o network.o packet.o ran.o ran_simulator.o s1ap.o security.o sctp_client.o telecom.o udp_client.o utils.o
+RAN_P = diameter.o gtp.o network.o packet.o ran.o ran_simulator.o s1ap.o security.o sctp_client.o telecom.o tun.o udp_client.o utils.o
 RAN_R = $(G++) -o ransim.out $(RAN_P) -pthread -lcrypto
 
 SGW_P = diameter.o gtp.o network.o packet.o s1ap.o sgw.o sgw_server.o sync.o udp_client.o udp_server.o utils.o
