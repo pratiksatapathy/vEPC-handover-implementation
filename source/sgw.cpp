@@ -36,10 +36,10 @@ UeContext::~UeContext() {
 }
 
 Sgw::Sgw() {
-	g_sync.mux_init(uectx_mux);	
 	g_sync.mux_init(s11id_mux);	
 	g_sync.mux_init(s1id_mux);	
 	g_sync.mux_init(s5id_mux);	
+	g_sync.mux_init(uectx_mux);	
 }
 
 void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {

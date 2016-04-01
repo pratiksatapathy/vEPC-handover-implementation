@@ -27,8 +27,9 @@ UeContext::~UeContext() {
 
 Pgw::Pgw() {
 	set_ip_addrs();
-	g_sync.mux_init(uectx_mux);	
+	g_sync.mux_init(s5id_mux);	
 	g_sync.mux_init(sgiid_mux);	
+	g_sync.mux_init(uectx_mux);	
 }
 
 void Pgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {

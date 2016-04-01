@@ -94,6 +94,7 @@ public:
 };
 
 class TrafficMonitor {
+private:
 	bool get_uplink_info(string, uint32_t&, string&, uint64_t&);
 
 public:
