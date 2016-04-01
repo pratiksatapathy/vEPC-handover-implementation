@@ -98,8 +98,8 @@ private:
 	bool get_uplink_info(string, uint32_t&, string&, uint64_t&);
 
 public:
-	UdpServer server;
 	Tun tun;
+	UdpServer server;
 	unordered_map<string, UplinkInfo> uplink_info;
 	
 	/* Lock parameter */

@@ -67,10 +67,10 @@ void Pgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 }
 
 void Pgw::handle_uplink_udata(Packet pkt) {
-	UdpClient pub_sink_client;
+	UdpClient sink_client;
 
-	pub_sink_client.conn(g_pub_sink_ip_addr.c_str(), g_pub_sink_port);
-	pub_sink_client.snd(pkt);
+	sink_client.conn(g_sink_ip_addr.c_str(), g_sink_port);
+	sink_client.snd(pkt);
 }
 
 void Pgw::handle_downlink_udata(Packet pkt) {

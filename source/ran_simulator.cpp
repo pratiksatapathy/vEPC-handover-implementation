@@ -63,6 +63,7 @@ void init(char *argv[]) {
 	g_threads_count = atoi(argv[1]);
 	g_req_duration = atof(argv[2]);
 	g_threads.resize(g_threads_count);
+	g_traf_mon.server.run(g_enodeb_ip_addr.c_str(), g_enodeb_port);	
 	g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");
 	g_traf_mon.tun.conn("tun1");
 }

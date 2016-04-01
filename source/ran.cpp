@@ -61,7 +61,6 @@ void UplinkInfo::init(uint32_t arg_s1_uteid_ul, string arg_sgw_s1_ip_addr, uint6
 }
 
 TrafficMonitor::TrafficMonitor() {
-	server.run(g_enodeb_ip_addr.c_str(), g_enodeb_port);
 	g_sync.mux_init(uplinkinfo_mux);
 }
 

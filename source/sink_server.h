@@ -17,7 +17,8 @@ extern vector<thread> g_threads;
 extern thread g_mon_thread;
 extern TrafficMonitor g_traf_mon;
 
-void simulate(int);
+void traffic_monitor();
+void sink(int);
 void check_usage(int);
 void init(char**);
 void run();

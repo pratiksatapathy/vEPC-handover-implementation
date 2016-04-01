@@ -1,6 +1,6 @@
 #---------------Final Target----------------#
 
-all:	hss.out mme.out pgw.out ransim.out sgw.out
+all:	hss.out mme.out pgw.out ransim.out sgw.out sink.out
 
 #-------------------------------------------#
 
@@ -71,6 +71,12 @@ sgw.o:	diameter.h gtp.h network.h packet.h s1ap.h sgw.cpp sgw.h sync.h udp_clien
 sgw_server.o:	diameter.h gtp.h network.h packet.h s1ap.h sgw.h sgw_server.cpp sgw_server.h sync.h udp_client.h udp_server.h utils.h
 	$(G++) -c -o sgw_server.o sgw_server.cpp
 
+sink.o:	diameter.h gtp.h network.h packet.h s1ap.h sink.cpp sink.h tun.h udp_client.h udp_server.h utils.h
+	$(G++) -c -o sink.o sink.cpp
+
+sink_server.o:	diameter.h gtp.h network.h packet.h s1ap.h sink.h sink_server.cpp sink_server.h tun.h udp_client.h udp_server.h utils.h
+	$(G++) -c -o sink_server.o sink_server.cpp	
+
 sync.o:	sync.cpp sync.h utils.h
 	$(G++) -c -o sync.o sync.cpp
 
@@ -109,6 +115,9 @@ RAN_R = $(G++) -o ransim.out $(RAN_P) -pthread -lcrypto
 SGW_P = diameter.o gtp.o network.o packet.o s1ap.o sgw.o sgw_server.o sync.o udp_client.o udp_server.o utils.o
 SGW_R = $(G++) -o sgw.out $(SGW_P) -pthread
 
+SINK_P = diameter.o gtp.o network.o packet.o s1ap.o sink.o sink_server.o tun.o udp_client.o udp_server.o utils.o
+SINK_R = $(G++) -o sink.out $(SINK_P) -pthread
+
 #-------------------------------------------#
 
 
@@ -128,6 +137,9 @@ ransim.out:	$(RAN_P)
 
 sgw.out:	$(SGW_P)
 	$(SGW_R)
+
+sink.out:	$(SINK_P)	
+	$(SINK_R)	
 
 #-------------------------------------------#
 

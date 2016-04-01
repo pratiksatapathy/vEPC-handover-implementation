@@ -42,6 +42,7 @@ public:
 	void set_rcv_timeout(int);
 	string get_src_ip_addr(Packet);
 	string get_dst_ip_addr(Packet);
+	void add_itf(uint64_t, string);
 };
 
 extern Network g_nw;

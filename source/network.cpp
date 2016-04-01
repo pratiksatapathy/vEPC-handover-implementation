@@ -76,3 +76,10 @@ string Network::get_dst_ip_addr(Packet pkt) {
 	free(cstr_ip_addr);
 	return str_ip_addr;
 }
+
+void Network::add_itf(uint64_t itf_no, string ip_addr_sp) {
+	string cmd;
+
+	cmd = "sudo ifconfig eth0:" + to_string(itf_no) + " " + ip_addr_sp;
+	system(cmd.c_str());
+}

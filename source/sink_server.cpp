@@ -6,11 +6,33 @@ thread g_mon_thread;
 TrafficMonitor g_traf_mon;
 
 void traffic_monitor() {
+	fd_set rcv_set;
+	int max_fd;
+	int status;
 
+	max_fd = max(g_traf_mon.server.conn_fd, g_traf_mon.tun.conn_fd);
+	while (1) {
+		FD_ZERO(&rcv_set);
+		FD_SET(g_traf_mon.server.conn_fd, &rcv_set); 
+		FD_SET(g_traf_mon.tun.conn_fd, &rcv_set); 
+		status = select(max_fd + 1, &rcv_set, NULL, NULL, NULL);
+		g_utils.handle_type1_error(status, "select error: sinkserver_trafficmonitor");		
+		if (FD_ISSET(g_traf_mon.server.conn_fd, &rcv_set)) {
+			g_traf_mon.handle_uplink_udata();
+		}
+		else if (FD_ISSET(g_traf_mon.tun.conn_fd, &rcv_set)) {
+			g_traf_mon.handle_downlink_udata();
+		}
+	}
 }
 
-void simulate( ) {
+void sink(int sink_num) {
+	string cmd;
+	int port;
 
+	port = (sink_num + 55000);
+	cmd = "iperf3 -s -B 172.16.0.2 -p " + to_string(port);
+	system(cmd.c_str());
 }
 
 void check_usage(int argc) {
@@ -23,6 +45,7 @@ void check_usage(int argc) {
 void init(char *argv[]) {
 	g_threads_count = atoi(argv[1]);
 	g_threads.resize(g_threads_count);
+	g_traf_mon.server.run(g_sink_ip_addr.c_str(), g_sink_port);	
 	g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");
 	g_traf_mon.tun.conn("tun1");
 }
@@ -30,6 +53,7 @@ void init(char *argv[]) {
 void run() {
 	int i;
 
+	g_nw.add_itf(0, "172.16.0.2/8");
 	g_mon_thread = thread(traffic_monitor);
 	g_mon_thread.detach();
 	for (i = 0; i < g_threads_count; i++) {

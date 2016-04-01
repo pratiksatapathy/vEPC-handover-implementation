@@ -56,7 +56,7 @@ extern int g_sgw_s1_port;
 extern int g_sgw_s5_port;
 extern int g_pgw_s5_port;
 extern int g_pgw_sgi_port;
-extern int g_pub_sink_port;
+extern int g_sink_port;
 extern string g_enodeb_ip_addr;
 extern string g_mme_ip_addr;
 extern string g_hss_ip_addr;
@@ -65,8 +65,7 @@ extern string g_sgw_s1_ip_addr;
 extern string g_sgw_s5_ip_addr;
 extern string g_pgw_s5_ip_addr;
 extern string g_pgw_sgi_ip_addr;
-extern string g_pub_sink_ip_addr;
-extern string g_pvt_sink_ip_addr;
+extern string g_sink_ip_addr;
 extern struct timeval g_timeout;
 
 class Utils {

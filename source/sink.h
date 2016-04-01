@@ -17,6 +17,8 @@ public:
 	Tun tun;
 
 	TrafficMonitor();
+	void handle_uplink_udata();
+	void handle_downlink_udata();
 	~TrafficMonitor();
 };
 
