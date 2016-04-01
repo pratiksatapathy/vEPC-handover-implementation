@@ -256,7 +256,22 @@ void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 }
 
 void Ran::transfer_data() {
+	string cmd;
+	string rate;	
+	string mtu;
+	string dur;
+	string server_ip_addr;
+	uint64_t server_port;
 
+	rate = " -b 1M";
+	mtu = " -M 500";
+	dur = " -t 1";
+	server_ip_addr = "172.16.0.2";
+	server_port = ran_ctx.key + 55000;
+	g_nw.add_itf(ran_ctx.key, ran_ctx.ip_addr + "/8");
+	cmd = "iperf3 -B " + ran_ctx.ip_addr + " -c " + server_ip_addr + " -p " + to_string(server_port) + rate + mtu + dur;	
+	system(cmd.c_str());
+	g_nw.rem_itf(ran_ctx.key);
 }
 
 void Ran::detach() {

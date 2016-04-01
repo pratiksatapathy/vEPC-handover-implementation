@@ -83,3 +83,10 @@ void Network::add_itf(uint64_t itf_no, string ip_addr_sp) {
 	cmd = "sudo ifconfig eth0:" + to_string(itf_no) + " " + ip_addr_sp;
 	system(cmd.c_str());
 }
+
+void Network::rem_itf(uint64_t itf_no) {
+	string cmd;
+
+	cmd = "sudo ifconfig eth0:" + to_string(itf_no) + " down";
+	system(cmd.c_str());
+}

@@ -43,6 +43,7 @@ public:
 	string get_src_ip_addr(Packet);
 	string get_dst_ip_addr(Packet);
 	void add_itf(uint64_t, string);
+	void rem_itf(uint64_t);
 };
 
 extern Network g_nw;
