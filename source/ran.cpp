@@ -78,7 +78,7 @@ void TrafficMonitor::handle_uplink_udata() {
 	if (res == true) {
 		UdpClient sgw_s1_client;
 
-		sgw_s1_client.conn(sgw_s1_ip_addr.c_str(), sgw_s1_port);
+		sgw_s1_client.conn(sgw_s1_ip_addr, sgw_s1_port);
 		pkt.prepend_s1ap_hdr(1, 1, pkt.len, s1_uteid_ul);
 		sgw_s1_client.snd(pkt);
 	}
@@ -119,7 +119,7 @@ TrafficMonitor::~TrafficMonitor() {
 }
 
 Ran::Ran(){
-	mme_client.conn(epc_addrs.mme_ip_addr.c_str(), epc_addrs.mme_port);
+	mme_client.conn(epc_addrs.mme_ip_addr, epc_addrs.mme_port);
 	crypt.load();
 }
 
@@ -217,7 +217,7 @@ void Ran::set_integrity_context() {
 
 void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	bool res;
-	int tai_list_size;
+	uint64_t tai_list_size;
 	uint64_t k_enodeb;
 
 	mme_client.rcv(pkt);
@@ -240,7 +240,6 @@ void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	pkt.extract_item(epc_addrs.sgw_s1_ip_addr);
 	pkt.extract_item(epc_addrs.sgw_s1_port);
 	pkt.extract_item(res);
-	cout << (int)ran_ctx.eps_bearer_id << " " << ran_ctx.e_rab_id << " " << ran_ctx.s1_uteid_ul << " " << k_enodeb << " " << ran_ctx.nw_capability << " " << tai_list_size << " " << ran_ctx.tau_timer << " " << ran_ctx.ip_addr << " " << epc_addrs.sgw_s1_ip_addr << " " << epc_addrs.sgw_s1_port << endl;
 	if (res == false) {
 		g_utils.handle_type1_error(-1, "attach request failure error: ran_setepssession");	
 	}	
@@ -268,7 +267,7 @@ void Ran::transfer_data() {
 
 	rate = " -b 1M";
 	mtu = " -M 500";
-	dur = " -t 1";
+	dur = " -t 2";
 	server_ip_addr = "172.16.0.2";
 	server_port = ran_ctx.key + 55000;
 	g_nw.add_itf(ran_ctx.key, ran_ctx.ip_addr + "/8");

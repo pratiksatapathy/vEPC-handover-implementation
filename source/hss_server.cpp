@@ -19,7 +19,7 @@ void init(char *argv[]) {
 
 void run() {
 	cout << "HSS server started" << endl;
-	g_hss.server.run(g_hss_ip_addr.c_str(), g_hss_port, g_workers_count, handle_mme);
+	g_hss.server.run(g_hss_ip_addr, g_hss_port, g_workers_count, handle_mme);
 }
 
 int handle_mme(int conn_fd) {

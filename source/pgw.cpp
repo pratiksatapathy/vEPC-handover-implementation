@@ -70,7 +70,7 @@ void Pgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 void Pgw::handle_uplink_udata(Packet pkt) {
 	UdpClient sink_client;
 
-	sink_client.conn(g_sink_ip_addr.c_str(), g_sink_port);
+	sink_client.conn(g_sink_ip_addr, g_sink_port);
 	sink_client.snd(pkt);
 	cout << "pgw_handleuplinkudata:" << " uplink udata forwarded to sink" << endl;
 }
@@ -87,7 +87,7 @@ void Pgw::handle_downlink_udata(Packet pkt) {
 	if (res) {
 		UdpClient sgw_s5_client;
 
-		sgw_s5_client.conn(g_sgw_s5_ip_addr.c_str(), g_sgw_s5_port);
+		sgw_s5_client.conn(g_sgw_s5_ip_addr, g_sgw_s5_port);
 		pkt.prepend_gtp_hdr(1, 3, pkt.len, s5_uteid_dl);
 		sgw_s5_client.snd(pkt);
 		cout << "pgw_handledownlinkudata:" << " downlink udata forwarded to sgw" << endl;
@@ -131,7 +131,7 @@ void Pgw::set_ip_addrs() {
 	string prefix;
 	string ip_addr;
 
-	prefix = "172.16";
+	prefix = "172.16.";
 	subnet = 1;
 	host = 3;
 	for (i = 0; i < MAX_UE_COUNT; i++) {

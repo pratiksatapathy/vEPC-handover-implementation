@@ -86,7 +86,7 @@ void Mme::handle_initial_attach(int conn_fd, Packet pkt) {
 	uint64_t guti;
 	uint64_t num_autn_vectors;
 
-	hss_client.conn(g_hss_ip_addr.c_str(), g_hss_port);
+	hss_client.conn(g_hss_ip_addr, g_hss_port);
 	num_autn_vectors = 1;
 	pkt.extract_item(imsi);
 	pkt.extract_item(tai);
@@ -249,7 +249,7 @@ void Mme::handle_location_update(Packet pkt) {
 	uint64_t imsi;
 	uint64_t default_apn;
 
-	hss_client.conn(g_hss_ip_addr.c_str(), g_hss_port);
+	hss_client.conn(g_hss_ip_addr, g_hss_port);
 	guti = get_guti(pkt);
 	g_sync.mlock(uectx_mux);
 	imsi = ue_ctx[guti].imsi;
@@ -290,12 +290,12 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	uint16_t nw_capability;
 	uint8_t eps_bearer_id;
 	uint8_t e_rab_id;
-	int tai_list_size;
+	uint64_t tai_list_size;
 	string pgw_s5_ip_addr;
 	string ue_ip_addr;
 	bool res;
 
-	sgw_client.conn(g_sgw_s11_ip_addr.c_str(), g_sgw_s11_port);
+	sgw_client.conn(g_sgw_s11_ip_addr, g_sgw_s11_port);
 	guti = get_guti(pkt);
 	eps_bearer_id = 5;
 	set_pgw_info(guti);
@@ -337,6 +337,7 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	ue_ctx[guti].s1_uteid_ul = s1_uteid_ul;
 	ue_ctx[guti].s5_uteid_ul = s5_uteid_ul;
 	ue_ctx[guti].s5_uteid_dl = s5_uteid_dl;
+	ue_ctx[guti].tai_list.clear();
 	ue_ctx[guti].tai_list.push_back(ue_ctx[guti].tai);
 	ue_ctx[guti].tau_timer = g_timer;
 	ue_ctx[guti].e_rab_id = ue_ctx[guti].eps_bearer_id;
@@ -365,7 +366,6 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	pkt.append_item(g_sgw_s1_ip_addr);
 	pkt.append_item(g_sgw_s1_port);
 	pkt.append_item(res);
-	cout << (int)eps_bearer_id << " " << e_rab_id << " " << s1_uteid_ul << " " << k_enodeb << " " << nw_capability << " " << tai_list_size << " " << tau_timer << " " << ue_ip_addr << " " << g_sgw_s1_ip_addr << " " << g_sgw_s1_port << endl;
 	crypt.enc(pkt, k_nas_enc);
 	integrity.add_hmac(pkt, k_nas_int);
 	pkt.prepend_s1ap_hdr(5, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
@@ -410,7 +410,7 @@ void Mme::handle_modify_bearer(Packet pkt) {
 	uint8_t eps_bearer_id;
 	bool res;
 
-	sgw_client.conn(g_sgw_s11_ip_addr.c_str(), g_sgw_s11_port);
+	sgw_client.conn(g_sgw_s11_ip_addr, g_sgw_s11_port);
 	guti = get_guti(pkt);
 	g_sync.mlock(uectx_mux);
 	eps_bearer_id = ue_ctx[guti].eps_bearer_id;
@@ -468,7 +468,7 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	pkt.extract_item(guti);
 	pkt.extract_item(ksi_asme);
 	pkt.extract_item(detach_type);	
-	sgw_client.conn(g_sgw_s11_ip_addr.c_str(), g_sgw_s11_port);
+	sgw_client.conn(g_sgw_s11_ip_addr, g_sgw_s11_port);
 	pkt.clear_pkt();
 	pkt.append_item(eps_bearer_id);
 	pkt.append_item(tai);

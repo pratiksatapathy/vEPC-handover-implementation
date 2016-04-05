@@ -28,7 +28,7 @@ void traffic_monitor() {
 
 void sink(int sink_num) {
 	string cmd;
-	int port;
+	uint64_t port;
 
 	port = (sink_num + 55000);
 	cmd = "iperf3 -s -B 172.16.0.2 -p " + to_string(port);
@@ -45,7 +45,7 @@ void check_usage(int argc) {
 void init(char *argv[]) {
 	g_threads_count = atoi(argv[1]);
 	g_threads.resize(g_threads_count);
-	g_traf_mon.server.run(g_sink_ip_addr.c_str(), g_sink_port);	
+	g_traf_mon.server.run(g_sink_ip_addr, g_sink_port);	
 	g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");
 	g_traf_mon.tun.conn("tun1");
 }

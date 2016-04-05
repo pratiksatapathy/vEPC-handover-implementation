@@ -20,7 +20,7 @@ void Hss::get_autn_info(uint64_t imsi, uint64_t &key, uint64_t &rand_num) {
 	query = "select key_id, rand_num from autn_info where imsi = " + to_string(imsi);
 	cout << "hss_getautninfo:" << query << endl;
 	g_sync.mlock(mysql_client_mux);
-	mysql_client.handle_query(query.c_str(), &query_res);
+	mysql_client.handle_query(query, &query_res);
 	g_sync.munlock(mysql_client_mux);
 	num_fields = mysql_num_fields(query_res);
 	cout << "hss_getautninfo:" << " fetched" << endl;
@@ -88,12 +88,12 @@ void Hss::set_loc_info(uint64_t imsi, uint32_t mmei) {
 	query = "delete from loc_info where imsi = " + to_string(imsi);
 	cout << "hss_setlocinfo:" << " " << query << endl;
 	g_sync.mlock(mysql_client_mux);
-	mysql_client.handle_query(query.c_str(), &query_res);
+	mysql_client.handle_query(query, &query_res);
 	g_sync.munlock(mysql_client_mux);
 	query = "insert into loc_info values(" + to_string(imsi) + ", " + to_string(mmei) + ")";
 	cout << "hss_setlocinfo:" << " " << query << endl;
 	g_sync.mlock(mysql_client_mux);
-	mysql_client.handle_query(query.c_str(), &query_res);
+	mysql_client.handle_query(query, &query_res);
 	g_sync.munlock(mysql_client_mux);
 	mysql_free_result(query_res);	
 }

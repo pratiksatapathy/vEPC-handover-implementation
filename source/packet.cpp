@@ -38,7 +38,7 @@ Packet::Packet(Packet &&src_obj)
 }
 
 void Packet::append_item(bool item) {
-	int item_len = sizeof(bool);
+	uint64_t item_len = sizeof(bool);
 
 	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
@@ -46,7 +46,7 @@ void Packet::append_item(bool item) {
 }
 
 void Packet::append_item(int item) {
-	int item_len = sizeof(int);
+	uint64_t item_len = sizeof(int);
 
 	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
@@ -54,7 +54,7 @@ void Packet::append_item(int item) {
 }
 
 void Packet::append_item(uint8_t item) {
-	int item_len = sizeof(uint8_t);
+	uint64_t item_len = sizeof(uint8_t);
 	
 	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
@@ -62,7 +62,7 @@ void Packet::append_item(uint8_t item) {
 }
 
 void Packet::append_item(uint16_t item) {
-	int item_len = sizeof(uint16_t);
+	uint64_t item_len = sizeof(uint16_t);
 	
 	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
@@ -70,7 +70,7 @@ void Packet::append_item(uint16_t item) {
 }
 
 void Packet::append_item(uint32_t item) {
-	int item_len = sizeof(uint32_t);
+	uint64_t item_len = sizeof(uint32_t);
 	
 	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
@@ -78,7 +78,7 @@ void Packet::append_item(uint32_t item) {
 }
 
 void Packet::append_item(uint64_t item) {
-	int item_len = sizeof(uint64_t);
+	uint64_t item_len = sizeof(uint64_t);
 
 	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
@@ -87,8 +87,8 @@ void Packet::append_item(uint64_t item) {
 
 void Packet::append_item(vector<uint64_t> item) {
 	int i;
-	int item_size = item.size();
-	int item_ele_len = sizeof(uint64_t);
+	uint64_t item_size = item.size();
+	uint64_t item_ele_len = sizeof(uint64_t);
 
 	for (i = 0; i < item_size; i++) {
 		memmove(data + data_ptr, &item[i], item_ele_len * sizeof(uint8_t));
@@ -97,14 +97,14 @@ void Packet::append_item(vector<uint64_t> item) {
 	}
 }
 
-void Packet::append_item(uint8_t *item, int item_len) {
+void Packet::append_item(uint8_t *item, uint64_t item_len) {
 	memmove(data + data_ptr, item, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 	len += item_len;
 }
 
 void Packet::append_item(const char *item) {
-	int item_len = strlen(item);
+	uint64_t item_len = strlen(item);
 	
 	memmove(data + data_ptr, item, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
@@ -112,15 +112,13 @@ void Packet::append_item(const char *item) {
 }
 
 void Packet::append_item(string item) {
-	int item_len = item.size();
+	uint64_t item_len = strlen(item.c_str());
 
 	append_item(item_len);
-	memmove(data + data_ptr, item.c_str(), item_len * sizeof(uint8_t));
-	data_ptr += item_len;
-	len += item_len;
+	append_item(item.c_str());
 }
 
-void Packet::prepend_item(uint8_t *item, int item_len) {
+void Packet::prepend_item(uint8_t *item, uint64_t item_len) {
 	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);
 
 	memmove(tem_data, item, item_len * sizeof(uint8_t));
@@ -133,7 +131,7 @@ void Packet::prepend_item(uint8_t *item, int item_len) {
 
 void Packet::prepend_gtp_hdr(uint8_t protocol, uint8_t msg_type, uint16_t msg_len, uint32_t teid) {
 	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);
-	int hdr_len = GTP_HDR_LEN;
+	uint64_t hdr_len = GTP_HDR_LEN;
 
 	gtp_hdr.init(protocol, msg_type, msg_len, teid);
 	memmove(tem_data, &gtp_hdr, hdr_len * sizeof(uint8_t));
@@ -146,7 +144,7 @@ void Packet::prepend_gtp_hdr(uint8_t protocol, uint8_t msg_type, uint16_t msg_le
 
 void Packet::prepend_s1ap_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t enodeb_s1ap_ue_id, uint32_t mme_s1ap_ue_id) {
 	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);	
-	int hdr_len = S1AP_HDR_LEN;
+	uint64_t hdr_len = S1AP_HDR_LEN;
 
 	s1ap_hdr.init(msg_type, msg_len, enodeb_s1ap_ue_id, mme_s1ap_ue_id);
 	memmove(tem_data, &s1ap_hdr, hdr_len * sizeof(uint8_t));
@@ -159,7 +157,7 @@ void Packet::prepend_s1ap_hdr(uint8_t msg_type, uint16_t msg_len, uint32_t enode
 
 void Packet::prepend_diameter_hdr(uint8_t msg_type, uint16_t msg_len) {
 	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);	
-	int hdr_len = DIAMETER_HDR_LEN;
+	uint64_t hdr_len = DIAMETER_HDR_LEN;
 
 	diameter_hdr.init(msg_type, msg_len);
 	memmove(tem_data, &diameter_hdr, hdr_len * sizeof(uint8_t));
@@ -171,50 +169,50 @@ void Packet::prepend_diameter_hdr(uint8_t msg_type, uint16_t msg_len) {
 }
 
 void Packet::extract_item(bool &item) {
-	int item_len = sizeof(bool);
+	uint64_t item_len = sizeof(bool);
 
 	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 }
 
 void Packet::extract_item(int &item){
-	int item_len = sizeof(int);
+	uint64_t item_len = sizeof(int);
 
 	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 }
 
 void Packet::extract_item(uint8_t &item){
-	int item_len = sizeof(uint8_t);
+	uint64_t item_len = sizeof(uint8_t);
 
 	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 }
 
 void Packet::extract_item(uint16_t &item){
-	int item_len = sizeof(uint16_t);
+	uint64_t item_len = sizeof(uint16_t);
 
 	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 }
 
 void Packet::extract_item(uint32_t &item){
-	int item_len = sizeof(uint32_t);
+	uint64_t item_len = sizeof(uint32_t);
 
 	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 }
 
 void Packet::extract_item(uint64_t &item){
-	int item_len = sizeof(uint64_t);
+	uint64_t item_len = sizeof(uint64_t);
 
 	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 }
 
-void Packet::extract_item(vector<uint64_t> &item, int item_size){
+void Packet::extract_item(vector<uint64_t> &item, uint64_t item_size){
 	int i;
-	int item_ele_len = sizeof(uint64_t);
+	uint64_t item_ele_len = sizeof(uint64_t);
 
 	item.clear();
 	for (i = 0; i < item_size; i++) {
@@ -226,44 +224,43 @@ void Packet::extract_item(vector<uint64_t> &item, int item_size){
 	}
 }
 
-void Packet::extract_item(uint8_t *item, int item_len){
+void Packet::extract_item(uint8_t *item, uint64_t item_len){
 	memmove(item, data + data_ptr, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 }
 
-void Packet::extract_item(char *item, int item_len){
+void Packet::extract_item(char *item, uint64_t item_len){
 	memmove(item, data + data_ptr, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 }
 
 void Packet::extract_item(string &item){
 	char *citem;
-	int item_len;
+	uint64_t item_len;
 
 	extract_item(item_len);
-	citem = g_utils.allocate_str_mem(item_len);
-	memmove(citem, data + data_ptr, item_len * sizeof(uint8_t));
+	citem = g_utils.allocate_str_mem(item_len + 1); /* 1 extra byte for storing NULL character */
+	extract_item(citem, item_len);
 	item.assign(citem);
-	data_ptr += item_len;
 	free(citem);
 }
 
 void Packet::extract_gtp_hdr(){
-	int hdr_len = GTP_HDR_LEN;
+	uint64_t hdr_len = GTP_HDR_LEN;
 
 	memmove(&gtp_hdr, data + data_ptr, hdr_len * sizeof(uint8_t));
 	data_ptr += hdr_len;
 }
 
 void Packet::extract_s1ap_hdr(){
-	int hdr_len = S1AP_HDR_LEN;
+	uint64_t hdr_len = S1AP_HDR_LEN;
 
 	memmove(&s1ap_hdr, data + data_ptr, hdr_len * sizeof(uint8_t));
 	data_ptr += hdr_len;
 }
 
 void Packet::extract_diameter_hdr(){
-	int hdr_len = DIAMETER_HDR_LEN;
+	uint64_t hdr_len = DIAMETER_HDR_LEN;
 
 	memmove(&diameter_hdr, data + data_ptr, hdr_len * sizeof(uint8_t));
 	data_ptr += hdr_len;
@@ -271,7 +268,7 @@ void Packet::extract_diameter_hdr(){
 
 void Packet::truncate() {
 	uint8_t *tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);
-	int new_len = len - data_ptr;
+	uint64_t new_len = len - data_ptr;
 
 	memmove(tem_data, data + data_ptr, new_len * sizeof(uint8_t));
 	swap(data, tem_data);
@@ -281,17 +278,17 @@ void Packet::truncate() {
 }
 
 void Packet::clear_pkt() {
-	int data_len = BUF_SIZE;
+	uint64_t data_len = BUF_SIZE;
 	
 	memset(data, 0, data_len * sizeof (uint8_t));	
 	data_ptr = 0;
 	len = 0;
 }
 
-struct ip* Packet::allocate_ip_hdr_mem(int len) {
+struct ip* Packet::allocate_ip_hdr_mem(uint64_t len) {
 	struct ip *ip_hdr;
 
-	if (len <= 0) {
+	if (len == 0) {
 		g_utils.handle_type1_error(-1, "Memory length error: packet_allocateiphdrmem");
 	}
 	ip_hdr = (ip*)malloc(len * sizeof (uint8_t));

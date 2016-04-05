@@ -17,7 +17,7 @@ void TrafficMonitor::handle_downlink_udata() {
 	Packet pkt;
 
 	tun.rcv(pkt);
-	pgw_sgi_client.conn(g_pgw_sgi_ip_addr.c_str(), g_pgw_sgi_port);
+	pgw_sgi_client.conn(g_pgw_sgi_ip_addr, g_pgw_sgi_port);
 	pgw_sgi_client.snd(pkt);
 }
 

@@ -21,8 +21,8 @@ void MySql::conn() {
 	}
 }
 
-void MySql::handle_query(const char *query, MYSQL_RES **result) {
-	if (mysql_query(conn_fd, query)) {
+void MySql::handle_query(string query, MYSQL_RES **result) {
+	if (mysql_query(conn_fd, query.c_str())) {
 		handle_db_error();
 	}
 	*result = mysql_store_result(conn_fd);

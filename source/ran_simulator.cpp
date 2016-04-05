@@ -46,8 +46,8 @@ void simulate(int arg) {
 		ran.authenticate();
 		ran.set_security();
 		ran.set_eps_session(g_traf_mon);
-		// ran.transfer_data();
-		// ran.detach();
+		ran.transfer_data();
+		ran.detach();
 	// }
 }
 
@@ -63,16 +63,16 @@ void init(char *argv[]) {
 	g_threads_count = atoi(argv[1]);
 	g_req_duration = atof(argv[2]);
 	g_threads.resize(g_threads_count);
-	// g_traf_mon.server.run(g_enodeb_ip_addr.c_str(), g_enodeb_port);	
-	// g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");
-	// g_traf_mon.tun.conn("tun1");
+	g_traf_mon.server.run(g_enodeb_ip_addr, g_enodeb_port);	
+	g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");
+	g_traf_mon.tun.conn("tun1");
 }
 
 void run() {
 	int i;
 
-	// g_mon_thread = thread(traffic_monitor);
-	// g_mon_thread.detach();
+	g_mon_thread = thread(traffic_monitor);
+	g_mon_thread.detach();
 	for (i = 0; i < g_threads_count; i++) {
 		g_threads[i] = thread(simulate, i);
 	}	

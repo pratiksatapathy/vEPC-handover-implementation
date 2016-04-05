@@ -47,16 +47,16 @@ using namespace std;
 
 const uint64_t MAX_UE_COUNT = 10000;
 extern int g_reuse;
-extern int g_freeport;
-extern int g_enodeb_port;
-extern int g_mme_port;
-extern int g_hss_port;
-extern int g_sgw_s11_port;
-extern int g_sgw_s1_port;
-extern int g_sgw_s5_port;
-extern int g_pgw_s5_port;
-extern int g_pgw_sgi_port;
-extern int g_sink_port;
+extern uint64_t g_freeport;
+extern uint64_t g_enodeb_port;
+extern uint64_t g_mme_port;
+extern uint64_t g_hss_port;
+extern uint64_t g_sgw_s11_port;
+extern uint64_t g_sgw_s1_port;
+extern uint64_t g_sgw_s5_port;
+extern uint64_t g_pgw_s5_port;
+extern uint64_t g_pgw_sgi_port;
+extern uint64_t g_sink_port;
 extern string g_enodeb_ip_addr;
 extern string g_mme_ip_addr;
 extern string g_hss_ip_addr;
@@ -72,8 +72,8 @@ class Utils {
 public:
 	void handle_type1_error(int, string);
 	void handle_type2_error(int, string);
-	char* allocate_str_mem(int);
-	uint8_t* allocate_uint8_mem(int);
+	char* allocate_str_mem(uint64_t);
+	uint8_t* allocate_uint8_mem(uint64_t);
 	void time_check(time_t, double, bool&);
 };
 

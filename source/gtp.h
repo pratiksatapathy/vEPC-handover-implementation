@@ -31,7 +31,7 @@ public:
 	~Gtp();	
 };
 
-const int GTP_HDR_LEN = sizeof(Gtp);
+const uint64_t GTP_HDR_LEN = sizeof(Gtp);
 
 /*
  * Protocol - gtpv1 (User plane)

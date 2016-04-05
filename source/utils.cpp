@@ -1,16 +1,16 @@
 #include "utils.h"
 
 int g_reuse = 1;
-int g_freeport = 0;
-int g_enodeb_port = 4000;
-int g_mme_port = 5000;
-int g_hss_port = 6000;
-int g_sgw_s11_port = 7000;
-int g_sgw_s1_port = 7100;
-int g_sgw_s5_port = 7200;
-int g_pgw_s5_port = 8000;
-int g_pgw_sgi_port = 8100;
-int g_sink_port = 10000;
+uint64_t g_freeport = 0;
+uint64_t g_enodeb_port = 4000;
+uint64_t g_mme_port = 5000;
+uint64_t g_hss_port = 6000;
+uint64_t g_sgw_s11_port = 7000;
+uint64_t g_sgw_s1_port = 7100;
+uint64_t g_sgw_s5_port = 7200;
+uint64_t g_pgw_s5_port = 8000;
+uint64_t g_pgw_sgi_port = 8100;
+uint64_t g_sink_port = 10000;
 string g_enodeb_ip_addr = "127.0.0.1";
 string g_mme_ip_addr = "127.0.0.1";
 string g_hss_ip_addr = "127.0.0.1";
@@ -39,10 +39,10 @@ void Utils::handle_type2_error(int arg, string msg) {
 	}
 }
 
-char* Utils::allocate_str_mem(int len) {
+char* Utils::allocate_str_mem(uint64_t len) {
 	char *tem;
 
-	if (len <= 0) {
+	if (len == 0) {
 		handle_type1_error(-1, "Memory length error: utils_allocatestrmem");
 	}
 	tem = (char*)malloc(len * sizeof (char));
@@ -55,10 +55,10 @@ char* Utils::allocate_str_mem(int len) {
 	}
 }
 
-uint8_t* Utils::allocate_uint8_mem(int len) {
+uint8_t* Utils::allocate_uint8_mem(uint64_t len) {
 	uint8_t *tem;
 
-	if (len <= 0) {
+	if (len == 0) {
 		handle_type1_error(-1, "Memory length error: utils_allocateuint8mem");
 	}
 	tem = (uint8_t*)malloc(len * sizeof (uint8_t));

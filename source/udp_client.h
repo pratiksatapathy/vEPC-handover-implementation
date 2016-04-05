@@ -10,22 +10,22 @@
 
 class UdpClient {
 private:
-	void init(const char*, int);
+	void init(string, uint64_t);
 	void set_port();
 	
 public:
 	/* Address parameters */
 	int conn_fd;
-	int port;
+	uint64_t port;
 	struct sockaddr_in sock_addr;
 
 	/* Server parameters */
-	int server_port;
+	uint64_t server_port;
 	string server_ip_addr;
 	struct sockaddr_in server_sock_addr;
 
 	UdpClient();
-	void conn(const char*, int);
+	void conn(string, uint64_t);
 	void snd(Packet);
 	void rcv(Packet&);
 	~UdpClient();		

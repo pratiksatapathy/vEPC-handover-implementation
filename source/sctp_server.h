@@ -12,15 +12,15 @@
 class SctpServer {
 private:
 	void clear_queue();
-	void init(const char*, int, int, int (*)(int));
+	void init(string, uint64_t, int, int (*)(int));
 	void create_workers();
 	void worker_func();
 	void accept_clients();
 	
 public:
 	/* Address parameters */
-	int port;
 	int listen_fd;
+	uint64_t port;
 	string ip_addr;
 	struct sockaddr_in sock_addr;
 
@@ -37,7 +37,7 @@ public:
 	pthread_cond_t qfull; /* arg for mwait/msignal - 2 */
 
 	SctpServer();
-	void run(const char*, int, int, int (*)(int));
+	void run(string, uint64_t, int, int (*)(int));
 	void snd(int, Packet);
 	void rcv(int, Packet&);
 	~SctpServer();

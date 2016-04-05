@@ -35,7 +35,7 @@ extern socklen_t g_sock_addr_len;
 
 class Network {
 public:
-	void set_inet_sock_addr(const char*, int, struct sockaddr_in&);
+	void set_inet_sock_addr(string, uint64_t, struct sockaddr_in&);
 	void bind_sock(int, struct sockaddr_in);
 	void get_sock_addr(int, struct sockaddr_in&);
 	void set_sock_reuse(int);

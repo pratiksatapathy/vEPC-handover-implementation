@@ -16,7 +16,7 @@ void init(char *argv[]) {
 
 void run() {
 	cout << "MME server started" << endl;
-	g_mme.server.run(g_mme_ip_addr.c_str(), g_mme_port, g_workers_count, handle_ue);
+	g_mme.server.run(g_mme_ip_addr, g_mme_port, g_workers_count, handle_ue);
 }
 
 int handle_ue(int conn_fd) {

@@ -3,13 +3,13 @@
 socklen_t g_sock_addr_len = sizeof(sockaddr_in);
 Network g_nw;
 
-void Network::set_inet_sock_addr(const char *ip_addr, int port, struct sockaddr_in &sock_addr) {
+void Network::set_inet_sock_addr(string ip_addr, uint64_t port, struct sockaddr_in &sock_addr) {
 	int status;
 	
 	bzero((void*)&sock_addr, sizeof(sock_addr));
 	sock_addr.sin_family = AF_INET;
 	sock_addr.sin_port = htons(port);
-	status = inet_aton(ip_addr, &sock_addr.sin_addr);	
+	status = inet_aton(ip_addr.c_str(), &sock_addr.sin_addr);	
 	if (status == 0) {
 		g_utils.handle_type1_error(-1, "inet_aton error: network_setinetsockaddr");
 	}

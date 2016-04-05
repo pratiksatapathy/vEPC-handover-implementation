@@ -79,7 +79,7 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	ue_ctx[imsi].tai = tai;
 	g_sync.munlock(uectx_mux);
 
-	pgw_client.conn(pgw_s5_ip_addr.c_str(), pgw_s5_port);
+	pgw_client.conn(pgw_s5_ip_addr, pgw_s5_port);
 	pkt.clear_pkt();
 	pkt.append_item(s5_cteid_dl);
 	pkt.append_item(imsi);
@@ -154,7 +154,7 @@ void Sgw::handle_uplink_udata(Packet pkt) {
 	if (res) {
 		UdpClient pgw_s5_client;
 
-		pgw_s5_client.conn(pgw_s5_ip_addr.c_str(), pgw_s5_port);
+		pgw_s5_client.conn(pgw_s5_ip_addr, pgw_s5_port);
 		pkt.prepend_gtp_hdr(1, 2, pkt.len, s5_uteid_ul);
 		pgw_s5_client.snd(pkt);		
 		cout << "sgw_handleuplinkudata:" << " uplink udata forwarded to pgw" << endl;
@@ -173,7 +173,7 @@ void Sgw::handle_downlink_udata(Packet pkt) {
 	if (res) {
 		UdpClient enodeb_client;
 
-		enodeb_client.conn(enodeb_ip_addr.c_str(), enodeb_port);
+		enodeb_client.conn(enodeb_ip_addr, enodeb_port);
 		pkt.prepend_gtp_hdr(1, 2, pkt.len, s1_uteid_dl);
 		enodeb_client.snd(pkt);
 		cout << "sgw_handledownlinkudata:" << " downlink udata forwarded to enodeb" << endl;
@@ -206,7 +206,7 @@ void Sgw::handle_detach(struct sockaddr_in src_sock_addr, Packet pkt) {
 	s1_uteid_ul = ue_ctx[imsi].s1_uteid_ul;
 	s5_uteid_dl = ue_ctx[imsi].s5_uteid_dl;
 	g_sync.munlock(uectx_mux);
-	pgw_s5_client.conn(pgw_s5_ip_addr.c_str(), pgw_s5_port);
+	pgw_s5_client.conn(pgw_s5_ip_addr, pgw_s5_port);
 	pkt.clear_pkt();
 	pkt.append_item(eps_bearer_id);
 	pkt.append_item(tai);

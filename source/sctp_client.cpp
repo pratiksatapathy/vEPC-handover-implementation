@@ -5,17 +5,17 @@ SctpClient::SctpClient() {
 	g_utils.handle_type1_error(conn_fd, "Socket error: sctpclient_sctpclient");
 }
 
-void SctpClient::conn(const char *arg_server_ip_addr, int arg_server_port) {
+void SctpClient::conn(string arg_server_ip_addr, uint64_t arg_server_port) {
 	init(arg_server_ip_addr, arg_server_port);
 	connect_with_server();
 }
 
-void SctpClient::init(const char *arg_server_ip_addr, int arg_server_port) {
+void SctpClient::init(string arg_server_ip_addr, uint64_t arg_server_port) {
 	int status;
 
 	server_port = arg_server_port;
-	server_ip_addr.assign(arg_server_ip_addr);
-	g_nw.set_inet_sock_addr(server_ip_addr.c_str(), server_port, server_sock_addr);
+	server_ip_addr = arg_server_ip_addr;
+	g_nw.set_inet_sock_addr(server_ip_addr, server_port, server_sock_addr);
 }
 
 void SctpClient::connect_with_server() {

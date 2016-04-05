@@ -16,7 +16,7 @@ void SctpServer::clear_queue() {
 	}
 }
 
-void SctpServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_count, int serve_client(int)) {
+void SctpServer::run(string arg_ip_addr, uint64_t arg_port, int arg_workers_count, int serve_client(int)) {
 	init(arg_ip_addr, arg_port, arg_workers_count, serve_client);
 	create_workers();
 	g_nw.set_sock_reuse(listen_fd);
@@ -24,12 +24,12 @@ void SctpServer::run(const char *arg_ip_addr, int arg_port, int arg_workers_coun
 	accept_clients();
 }
 
-void SctpServer::init(const char *arg_ip_addr, int arg_port, int arg_workers_count, int arg_serve_client(int)) {
+void SctpServer::init(string arg_ip_addr, uint64_t arg_port, int arg_workers_count, int arg_serve_client(int)) {
 	int status;
 
 	port = arg_port;
-	ip_addr.assign(arg_ip_addr);
-	g_nw.set_inet_sock_addr(ip_addr.c_str(), port, sock_addr);
+	ip_addr = arg_ip_addr;
+	g_nw.set_inet_sock_addr(ip_addr, port, sock_addr);
 	workers_count = arg_workers_count;	
 	workers.resize(workers_count);
 	serve_client = arg_serve_client;

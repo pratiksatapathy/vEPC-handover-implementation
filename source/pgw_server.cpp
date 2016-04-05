@@ -25,14 +25,14 @@ void run() {
 
 	/* PGW S5 server */
 	cout << "PGW S5 server started" << endl;
-	g_pgw.s5_server.run(g_pgw_s5_ip_addr.c_str(), g_pgw_s5_port);
+	g_pgw.s5_server.run(g_pgw_s5_ip_addr, g_pgw_s5_port);
 	for (i = 0; i < g_s5_server_threads_count; i++) {
 		g_s5_server_threads[i] = thread(handle_s5_traffic);
 	}
 
 	/* PGW SGI server */
 	cout << "PGW SGI server started" << endl;
-	g_pgw.sgi_server.run(g_pgw_sgi_ip_addr.c_str(), g_pgw_sgi_port);
+	g_pgw.sgi_server.run(g_pgw_sgi_ip_addr, g_pgw_sgi_port);
 	for (i = 0; i < g_sgi_server_threads_count; i++) {
 		g_sgi_server_threads[i] = thread(handle_sgi_traffic);
 	}

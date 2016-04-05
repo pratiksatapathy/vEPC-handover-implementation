@@ -29,21 +29,21 @@ void run() {
 
 	/* SGW S11 server */
 	cout << "SGW S11 server started" << endl;
-	g_sgw.s11_server.run(g_sgw_s11_ip_addr.c_str(), g_sgw_s11_port);
+	g_sgw.s11_server.run(g_sgw_s11_ip_addr, g_sgw_s11_port);
 	for (i = 0; i < g_s11_server_threads_count; i++) {
 		g_s11_server_threads[i] = thread(handle_s11_traffic);
 	}	
 
 	/* SGW S1 server */
 	cout << "SGW S1 server started" << endl;
-	g_sgw.s1_server.run(g_sgw_s1_ip_addr.c_str(), g_sgw_s1_port);
+	g_sgw.s1_server.run(g_sgw_s1_ip_addr, g_sgw_s1_port);
 	for (i = 0; i < g_s1_server_threads_count; i++) {
 		g_s1_server_threads[i] = thread(handle_s1_traffic);
 	}
 
 	/* SGW S5 server */
 	cout << "SGW S5 server started" << endl;
-	g_sgw.s5_server.run(g_sgw_s5_ip_addr.c_str(), g_sgw_s5_port);
+	g_sgw.s5_server.run(g_sgw_s5_ip_addr, g_sgw_s5_port);
 	for (i = 0; i < g_s5_server_threads_count; i++) {
 		g_s5_server_threads[i] = thread(handle_s5_traffic);
 	}
