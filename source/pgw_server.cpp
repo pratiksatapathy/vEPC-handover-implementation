@@ -79,7 +79,6 @@ void handle_s5_traffic() {
 			/* For error handling */
 			default:
 				cout << "pgwserver_handles5traffic:" << " default case:" << endl;	
-				break;
 		}		
 	}
 }

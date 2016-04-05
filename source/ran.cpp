@@ -240,6 +240,7 @@ void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	pkt.extract_item(epc_addrs.sgw_s1_ip_addr);
 	pkt.extract_item(epc_addrs.sgw_s1_port);
 	pkt.extract_item(res);
+	cout << (int)ran_ctx.eps_bearer_id << " " << ran_ctx.e_rab_id << " " << ran_ctx.s1_uteid_ul << " " << k_enodeb << " " << ran_ctx.nw_capability << " " << tai_list_size << " " << ran_ctx.tau_timer << " " << ran_ctx.ip_addr << " " << epc_addrs.sgw_s1_ip_addr << " " << epc_addrs.sgw_s1_port << endl;
 	if (res == false) {
 		g_utils.handle_type1_error(-1, "attach request failure error: ran_setepssession");	
 	}	

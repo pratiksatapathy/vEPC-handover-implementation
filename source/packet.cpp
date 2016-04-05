@@ -115,7 +115,7 @@ void Packet::append_item(string item) {
 	int item_len = item.size();
 
 	append_item(item_len);
-	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
+	memmove(data + data_ptr, item.c_str(), item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 	len += item_len;
 }
@@ -237,11 +237,15 @@ void Packet::extract_item(char *item, int item_len){
 }
 
 void Packet::extract_item(string &item){
+	char *citem;
 	int item_len;
 
 	extract_item(item_len);
-	memmove(&item, data + data_ptr, item_len * sizeof(uint8_t));
+	citem = g_utils.allocate_str_mem(item_len);
+	memmove(citem, data + data_ptr, item_len * sizeof(uint8_t));
+	item.assign(citem);
 	data_ptr += item_len;
+	free(citem);
 }
 
 void Packet::extract_gtp_hdr(){

@@ -76,6 +76,7 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	update_itfid(5, s5_uteid_dl, imsi);
 	g_sync.mlock(uectx_mux);
 	ue_ctx[imsi].init(tai, apn_in_use, eps_bearer_id, s1_uteid_ul, s5_uteid_dl, s11_cteid_mme, s11_cteid_sgw, s5_cteid_dl, pgw_s5_ip_addr, pgw_s5_port);
+	ue_ctx[imsi].tai = tai;
 	g_sync.munlock(uectx_mux);
 
 	pgw_client.conn(pgw_s5_ip_addr.c_str(), pgw_s5_port);

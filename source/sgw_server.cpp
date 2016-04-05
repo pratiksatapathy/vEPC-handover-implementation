@@ -95,7 +95,6 @@ void handle_s11_traffic() {
 			/* For error handling */
 			default:
 				cout << "sgwserver_handles11traffic:" << " default case:" << endl;
-				break;
 		}		
 	}
 }
@@ -117,7 +116,6 @@ void handle_s1_traffic() {
 			/* For error handling */
 			default:
 				cout << "sgwserver_handles1traffic:" << " default case:" << endl;
-				break;
 		}		
 	}		
 }
@@ -139,7 +137,6 @@ void handle_s5_traffic() {
 			/* For error handling */
 			default:
 				cout << "sgwserver_handles5traffic:" << " default case:" << endl;	
-				break;
 		}		
 	}			
 }

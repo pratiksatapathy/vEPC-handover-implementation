@@ -301,6 +301,7 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	set_pgw_info(guti);
 	g_sync.mlock(uectx_mux);
 	ue_ctx[guti].s11_cteid_mme = ue_ctx[guti].mme_s1ap_ue_id;
+	ue_ctx[guti].eps_bearer_id = eps_bearer_id;
 	s11_cteid_mme = ue_ctx[guti].s11_cteid_mme;
 	imsi = ue_ctx[guti].imsi;
 	eps_bearer_id = ue_ctx[guti].eps_bearer_id;
@@ -364,6 +365,7 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	pkt.append_item(g_sgw_s1_ip_addr);
 	pkt.append_item(g_sgw_s1_port);
 	pkt.append_item(res);
+	cout << (int)eps_bearer_id << " " << e_rab_id << " " << s1_uteid_ul << " " << k_enodeb << " " << nw_capability << " " << tai_list_size << " " << tau_timer << " " << ue_ip_addr << " " << g_sgw_s1_ip_addr << " " << g_sgw_s1_port << endl;
 	crypt.enc(pkt, k_nas_enc);
 	integrity.add_hmac(pkt, k_nas_int);
 	pkt.prepend_s1ap_hdr(5, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
