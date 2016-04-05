@@ -18,7 +18,7 @@ UeContext::UeContext() {
 	enodeb_port = 0;	
 }
 
-void UeContext::init(uint64_t arg_tai, uint64_t arg_apn_in_use, uint8_t arg_eps_bearer_id, uint32_t arg_s1_uteid_ul, uint32_t arg_s5_uteid_dl, uint32_t arg_s11_cteid_mme, uint32_t arg_s11_cteid_sgw, uint32_t arg_s5_cteid_dl, string arg_pgw_s5_ip_addr, int arg_pgw_s5_port) {
+void UeContext::init(uint64_t arg_tai, uint64_t arg_apn_in_use, uint8_t arg_eps_bearer_id, uint32_t arg_s1_uteid_ul, uint32_t arg_s5_uteid_dl, uint32_t arg_s11_cteid_mme, uint32_t arg_s11_cteid_sgw, uint32_t arg_s5_cteid_dl, string arg_pgw_s5_ip_addr, uint64_t arg_pgw_s5_port) {
 	tai = arg_tai; 
 	apn_in_use = arg_apn_in_use;
 	eps_bearer_id = arg_eps_bearer_id;
@@ -53,10 +53,10 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	uint32_t s5_cteid_dl;
 	uint64_t imsi;
 	uint8_t eps_bearer_id;
+	uint64_t pgw_s5_port;
+	uint64_t apn_in_use;
 	string pgw_s5_ip_addr;
 	string ue_ip_addr;
-	int pgw_s5_port;
-	uint64_t apn_in_use;
 	uint64_t tai;
 
 	pkt.extract_item(s11_cteid_mme);
@@ -88,7 +88,9 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(tai);
 	pkt.prepend_gtp_hdr(2, 1, pkt.len, 0);
 	pgw_client.snd(pkt);
+	cout << "sgw_handlecreatesession:" << " create session request sent to pgw" << endl;
 	pgw_client.rcv(pkt);
+	cout << "sgw_handlecreatesession:" << " create session response received from pgw" << endl;
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(s5_cteid_ul);
 	pkt.extract_item(eps_bearer_id);
@@ -108,7 +110,7 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(s5_uteid_dl);
 	pkt.prepend_gtp_hdr(2, 1, pkt.len, s11_cteid_mme);
 	s11_server.snd(src_sock_addr, pkt);
-
+	cout << "sgw_handlecreatesession:" << " create session response sent to mme" << endl;
 }
 
 void Sgw::handle_modify_bearer(struct sockaddr_in src_sock_addr, Packet pkt) {
@@ -136,6 +138,7 @@ void Sgw::handle_modify_bearer(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(res);
 	pkt.prepend_gtp_hdr(2, 2, pkt.len, s11_cteid_mme);
 	s11_server.snd(src_sock_addr, pkt);
+	cout << "sgw_handlemodifybearer:" << " modify bearer response sent to mme" << endl;
 }
 
 void Sgw::handle_uplink_udata(Packet pkt) {
@@ -153,6 +156,7 @@ void Sgw::handle_uplink_udata(Packet pkt) {
 		pgw_s5_client.conn(pgw_s5_ip_addr.c_str(), pgw_s5_port);
 		pkt.prepend_gtp_hdr(1, 2, pkt.len, s5_uteid_ul);
 		pgw_s5_client.snd(pkt);		
+		cout << "sgw_handleuplinkudata:" << " uplink udata forwarded to pgw" << endl;
 	}
 }
 
@@ -171,6 +175,7 @@ void Sgw::handle_downlink_udata(Packet pkt) {
 		enodeb_client.conn(enodeb_ip_addr.c_str(), enodeb_port);
 		pkt.prepend_gtp_hdr(1, 2, pkt.len, s1_uteid_dl);
 		enodeb_client.snd(pkt);
+		cout << "sgw_handledownlinkudata:" << " downlink udata forwarded to enodeb" << endl;
 	}
 }
 
@@ -206,7 +211,9 @@ void Sgw::handle_detach(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(tai);
 	pkt.prepend_gtp_hdr(2, 4, pkt.len, s5_cteid_ul);
 	pgw_s5_client.snd(pkt);
+	cout << "sgw_handledetach:" << " detach request sent to pgw" << endl;
 	pgw_s5_client.rcv(pkt);
+	cout << "sgw_handledetach:" << " detach response received from pgw" << endl;
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(res);
 	if (res == false) {
@@ -217,10 +224,12 @@ void Sgw::handle_detach(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(res);
 	pkt.prepend_gtp_hdr(2, 3, pkt.len, s11_cteid_mme);
 	s11_server.snd(src_sock_addr, pkt);
+	cout << "sgw_handledetach:" << " detach response sent to mme" << endl;
 	rem_itfid(11, s11_cteid_sgw);
 	rem_itfid(1, s1_uteid_ul);
 	rem_itfid(5, s5_uteid_dl);
 	rem_uectx(imsi);
+	cout << "sgw_handledetach:" << " detach successful" << endl;
 }
 
 void Sgw::update_itfid(uint64_t itf_id_no, uint32_t teid, uint64_t imsi) {
@@ -228,17 +237,17 @@ void Sgw::update_itfid(uint64_t itf_id_no, uint32_t teid, uint64_t imsi) {
 		case 11:
 			g_sync.mlock(s11id_mux);
 			s11_id[teid] = imsi;
-			g_sync.mlock(s11id_mux);
+			g_sync.munlock(s11id_mux);
 			break;
 		case 1:
 			g_sync.mlock(s1id_mux);
 			s1_id[teid] = imsi;
-			g_sync.mlock(s1id_mux);		
+			g_sync.munlock(s1id_mux);		
 			break;
 		case 5:
 			g_sync.mlock(s5id_mux);
 			s5_id[teid] = imsi;
-			g_sync.mlock(s5id_mux);		
+			g_sync.munlock(s5id_mux);		
 			break;
 		default:
 			g_utils.handle_type1_error(-1, "incorrect itf_id_no: sgw_updateitfid");
@@ -255,21 +264,21 @@ uint64_t Sgw::get_imsi(uint64_t itf_id_no, uint32_t teid) {
 			if (s11_id.find(teid) != s11_id.end()) {
 				imsi = s11_id[teid];
 			}
-			g_sync.mlock(s11id_mux);
+			g_sync.munlock(s11id_mux);
 			break;
 		case 1:
 			g_sync.mlock(s1id_mux);
 			if (s1_id.find(teid) != s1_id.end()) {
 				imsi = s1_id[teid];
 			}
-			g_sync.mlock(s1id_mux);		
+			g_sync.munlock(s1id_mux);		
 			break;
 		case 5:
 			g_sync.mlock(s5id_mux);
 			if (s5_id.find(teid) != s5_id.end()) {
 				imsi = s5_id[teid];
 			}
-			g_sync.mlock(s5id_mux);		
+			g_sync.munlock(s5id_mux);		
 			break;
 		default:
 			g_utils.handle_type1_error(-1, "incorrect itf_id_no: sgw_getimsi");
@@ -310,17 +319,17 @@ void Sgw::rem_itfid(uint64_t itf_id_no, uint32_t teid) {
 		case 11:
 			g_sync.mlock(s11id_mux);
 			s11_id.erase(teid);
-			g_sync.mlock(s11id_mux);
+			g_sync.munlock(s11id_mux);
 			break;
 		case 1:
 			g_sync.mlock(s1id_mux);
 			s1_id.erase(teid);
-			g_sync.mlock(s1id_mux);		
+			g_sync.munlock(s1id_mux);		
 			break;
 		case 5:
 			g_sync.mlock(s5id_mux);
 			s5_id.erase(teid);
-			g_sync.mlock(s5id_mux);		
+			g_sync.munlock(s5id_mux);		
 			break;
 		default:
 			g_utils.handle_type1_error(-1, "incorrect itf_id_no: sgw_remitfid");

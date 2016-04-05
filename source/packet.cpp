@@ -115,7 +115,7 @@ void Packet::append_item(string item) {
 	int item_len = item.size();
 
 	append_item(item_len);
-	memmove(data + data_ptr, item.c_str(), item_len * sizeof(uint8_t));
+	memmove(data + data_ptr, &item, item_len * sizeof(uint8_t));
 	data_ptr += item_len;
 	len += item_len;
 }

@@ -86,12 +86,12 @@ void Hss::set_loc_info(uint64_t imsi, uint32_t mmei) {
 
 	query_res = NULL;
 	query = "delete from loc_info where imsi = " + to_string(imsi);
-	cout << "hss_setlocinfo:" << query << endl;
+	cout << "hss_setlocinfo:" << " " << query << endl;
 	g_sync.mlock(mysql_client_mux);
 	mysql_client.handle_query(query.c_str(), &query_res);
 	g_sync.munlock(mysql_client_mux);
 	query = "insert into loc_info values(" + to_string(imsi) + ", " + to_string(mmei) + ")";
-	cout << "hss_setlocinfo:" << query << endl;
+	cout << "hss_setlocinfo:" << " " << query << endl;
 	g_sync.mlock(mysql_client_mux);
 	mysql_client.handle_query(query.c_str(), &query_res);
 	g_sync.munlock(mysql_client_mux);
@@ -107,10 +107,12 @@ void Hss::handle_location_update(int conn_fd, Packet &pkt) {
 	pkt.extract_item(imsi);
 	pkt.extract_item(mmei);
 	set_loc_info(imsi, mmei);
+	cout << "hss_handleautoinforeq:" << " loc updated" << endl;
 	pkt.clear_pkt();
 	pkt.append_item(default_apn);
 	pkt.prepend_diameter_hdr(2, pkt.len);
 	server.snd(conn_fd, pkt);
+	cout << "hss_handleautoinforeq:" << " loc update complete sent to mme" << endl;
 }
 
 Hss::~Hss() {

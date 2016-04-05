@@ -39,7 +39,7 @@ public:
 	uint64_t enodeb_port;
 
 	UeContext();
-	void init(uint64_t, uint64_t, uint8_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, string, int);
+	void init(uint64_t, uint64_t, uint8_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, string, uint64_t);
 	~UeContext();
 };
 

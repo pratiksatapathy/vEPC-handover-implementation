@@ -64,6 +64,7 @@ void Pgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(ue_ip_addr);
 	pkt.prepend_gtp_hdr(2, 1, pkt.len, s5_cteid_dl);
 	s5_server.snd(src_sock_addr, pkt);
+	cout << "pgw_handlecreatesession:" << " create session response sent to mme" << endl;
 }
 
 void Pgw::handle_uplink_udata(Packet pkt) {
@@ -71,6 +72,7 @@ void Pgw::handle_uplink_udata(Packet pkt) {
 
 	sink_client.conn(g_sink_ip_addr.c_str(), g_sink_port);
 	sink_client.snd(pkt);
+	cout << "pgw_handleuplinkudata:" << " uplink udata forwarded to sink" << endl;
 }
 
 void Pgw::handle_downlink_udata(Packet pkt) {
@@ -88,6 +90,7 @@ void Pgw::handle_downlink_udata(Packet pkt) {
 		sgw_s5_client.conn(g_sgw_s5_ip_addr.c_str(), g_sgw_s5_port);
 		pkt.prepend_gtp_hdr(1, 3, pkt.len, s5_uteid_dl);
 		sgw_s5_client.snd(pkt);
+		cout << "pgw_handledownlinkudata:" << " downlink udata forwarded to sgw" << endl;
 	}
 }
 
@@ -113,9 +116,11 @@ void Pgw::handle_detach(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(res);
 	pkt.prepend_gtp_hdr(2, 4, pkt.len, s5_cteid_dl);
 	s5_server.snd(src_sock_addr, pkt);
+	cout << "pgw_handledetach:" << " detach complete sent to sgw" << endl;
 	rem_itfid(5, s5_cteid_ul, "");
 	rem_itfid(0, 0, ue_ip_addr);
 	rem_uectx(imsi);
+	cout << "pgw_handledetach:" << " detach successful" << endl;
 }
 
 void Pgw::set_ip_addrs() {
@@ -148,12 +153,12 @@ void Pgw::update_itfid(uint64_t itf_id_no, uint32_t teid, string ue_ip_addr, uin
 		case 5:
 			g_sync.mlock(s5id_mux);
 			s5_id[teid] = imsi;
-			g_sync.mlock(s5id_mux);
+			g_sync.munlock(s5id_mux);
 			break;
 		case 0:
 			g_sync.mlock(sgiid_mux);
 			sgi_id[ue_ip_addr] = imsi;
-			g_sync.mlock(sgiid_mux);		
+			g_sync.munlock(sgiid_mux);		
 			break;
 		default:
 			g_utils.handle_type1_error(-1, "incorrect itf_id_no: pgw_updateitfid");
@@ -170,14 +175,14 @@ uint64_t Pgw::get_imsi(uint64_t itf_id_no, uint32_t teid, string ue_ip_addr) {
 			if (s5_id.find(teid) != s5_id.end()) {
 				imsi = s5_id[teid];
 			}
-			g_sync.mlock(s5id_mux);		
+			g_sync.munlock(s5id_mux);		
 			break;
 		case 0:
 			g_sync.mlock(sgiid_mux);
 			if (sgi_id.find(ue_ip_addr) != sgi_id.end()) {
 				imsi = sgi_id[ue_ip_addr];
 			}
-			g_sync.mlock(sgiid_mux);		
+			g_sync.munlock(sgiid_mux);		
 			break;
 		default:
 			g_utils.handle_type1_error(-1, "incorrect itf_id_no: pgw_getimsi");
@@ -202,12 +207,12 @@ void Pgw::rem_itfid(uint64_t itf_id_no, uint32_t teid, string ue_ip_addr) {
 		case 5:
 			g_sync.mlock(s5id_mux);
 			s5_id.erase(teid);
-			g_sync.mlock(s5id_mux);
+			g_sync.munlock(s5id_mux);
 			break;
 		case 0:
 			g_sync.mlock(sgiid_mux);
 			sgi_id.erase(ue_ip_addr);
-			g_sync.mlock(sgiid_mux);		
+			g_sync.munlock(sgiid_mux);		
 			break;
 		default:
 			g_utils.handle_type1_error(-1, "incorrect itf_id_no: pgw_remitfid");

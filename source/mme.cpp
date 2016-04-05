@@ -259,7 +259,9 @@ void Mme::handle_location_update(Packet pkt) {
 	pkt.append_item(mme_ids.mmei);
 	pkt.prepend_diameter_hdr(2, pkt.len);
 	hss_client.snd(pkt);
+	cout << "mme_handlelocationupdate:" << " loc update sent to hss" << endl;
 	hss_client.rcv(pkt);
+	cout << "mme_handlelocationupdate:" << " loc update response received from hss" << endl;
 	pkt.extract_diameter_hdr();
 	pkt.extract_item(default_apn);
 	g_sync.mlock(uectx_mux);
@@ -318,7 +320,9 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	pkt.append_item(tai);
 	pkt.prepend_gtp_hdr(2, 1, pkt.len, 0);
 	sgw_client.snd(pkt);
+	cout << "mme_createsession:" << " create session request sent to sgw" << endl;
 	sgw_client.rcv(pkt);
+	cout << "mme_createsession:" << " create session response received sgw" << endl;
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(s11_cteid_sgw);
 	pkt.extract_item(ue_ip_addr);
@@ -364,6 +368,7 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	integrity.add_hmac(pkt, k_nas_int);
 	pkt.prepend_s1ap_hdr(5, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
+	cout << "mme_createsession:" << " attach accept sent to ue" << endl;
 }
 
 void Mme::handle_attach_complete(Packet pkt) {
@@ -389,7 +394,9 @@ void Mme::handle_attach_complete(Packet pkt) {
 		pkt.extract_item(s1_uteid_dl);
 		g_sync.mlock(uectx_mux);
 		ue_ctx[guti].s1_uteid_dl = s1_uteid_dl;
+		ue_ctx[guti].emm_state = 1;
 		g_sync.munlock(uectx_mux);
+		cout << "mme_handleattachcomplete:" << " attach complete for ue" << endl;
 	}
 }
 
@@ -415,12 +422,18 @@ void Mme::handle_modify_bearer(Packet pkt) {
 	pkt.append_item(g_enodeb_port);
 	pkt.prepend_gtp_hdr(2, 2, pkt.len, s11_cteid_sgw);
 	sgw_client.snd(pkt);
+	cout << "mme_handlemodifybearer:" << " modify bearer request sent to sgw" << endl;
 	sgw_client.rcv(pkt);
+	cout << "mme_handlemodifybearer:" << " modify bearer response received from sgw" << endl;
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(res);
 	if (res == false) {
 		cout << "mme_handlemodifybearer:" << " modify bearer failure" << endl;
 	}
+	g_sync.mlock(uectx_mux);
+	ue_ctx[guti].ecm_state = 1;
+	g_sync.munlock(uectx_mux);
+
 	cout << "mme_handlemodifybearer:" << " eps session setup success" << endl;
 }
 
@@ -459,7 +472,9 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	pkt.append_item(tai);
 	pkt.prepend_gtp_hdr(2, 3, pkt.len, s11_cteid_sgw);
 	sgw_client.snd(pkt);
+	cout << "mme_handledetach:" << " detach request sent to sgw" << endl;
 	sgw_client.rcv(pkt);
+	cout << "mme_handledetach:" << " detach response received from sgw" << endl;
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(res);
 	if (res == false) {
@@ -472,8 +487,10 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	integrity.add_hmac(pkt, k_nas_int);
 	pkt.prepend_s1ap_hdr(7, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
+	cout << "mme_handledetach:" << " detach complete sent to ue" << endl;
 	rem_itfid(pkt.s1ap_hdr.mme_s1ap_ue_id);
 	rem_uectx(guti);
+	cout << "mme_handledetach:" << " detach successful" << endl;
 }
 
 void Mme::set_pgw_info(uint64_t guti) {

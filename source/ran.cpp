@@ -160,7 +160,7 @@ void Ran::authenticate() {
 	res = ran_ctx.key + sqn + rand_num;
 	autn_num = res + 1;
 	if (autn_num != xautn_num) {
-		g_utils.handle_type1_error(-1, "Authentication of MME failed error: ran_authenticate");
+		g_utils.handle_type1_error(-1, "authentication of MME failed error: ran_authenticate");
 	}
 	ck = res + 2;
 	ik = res + 3;
@@ -169,7 +169,7 @@ void Ran::authenticate() {
 	pkt.append_item(res);
 	pkt.prepend_s1ap_hdr(2, pkt.len, ran_ctx.enodeb_s1ap_ue_id, ran_ctx.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
-	cout << "ran_authenticate:" << " Authentication sucessful for RAN - " << ran_ctx.key << endl;
+	cout << "ran_authenticate:" << " authentication sucessful for RAN - " << ran_ctx.key << endl;
 }
 
 void Ran::set_security() {
@@ -192,7 +192,7 @@ void Ran::set_security() {
 	integrity.get_hmac(pkt.data, pkt.len, hmac_res, ran_ctx.k_nas_int);
 	res = integrity.cmp_hmacs(hmac_res, hmac_xres);
 	if (res == false) {
-		g_utils.handle_type1_error(-1, "HMAC initial security failure error: ran_setsecurity");
+		g_utils.handle_type1_error(-1, "hmac initial security failure error: ran_setsecurity");
 	}
 	cout << "ran_setsecurity:" << " security mode command success" << endl;
 
@@ -221,10 +221,11 @@ void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	uint64_t k_enodeb;
 
 	mme_client.rcv(pkt);
+	cout << "ran_setepssession:" << " attach accept received from mme" << endl;
 	pkt.extract_s1ap_hdr();
 	res = integrity.hmac_check(pkt, ran_ctx.k_nas_int);
 	if (res == false) {
-		g_utils.handle_type1_error(-1, "HMAC attach accept failure error: ran_setepssession");
+		g_utils.handle_type1_error(-1, "hmac attach accept failure error: ran_setepssession");
 	}
 	crypt.dec(pkt, ran_ctx.k_nas_enc);
 	pkt.extract_item(ran_ctx.eps_bearer_id);
@@ -251,6 +252,7 @@ void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	integrity.add_hmac(pkt, ran_ctx.k_nas_int);
 	pkt.prepend_s1ap_hdr(6, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
+	cout << "ran_setepssession:" << " attach complete sent to mme" << endl;
 	ran_ctx.emm_state = 1;
 	ran_ctx.ecm_state = 1;
 }
@@ -272,6 +274,7 @@ void Ran::transfer_data() {
 	cmd = "iperf3 -B " + ran_ctx.ip_addr + " -c " + server_ip_addr + " -p " + to_string(server_port) + rate + mtu + dur;	
 	system(cmd.c_str());
 	g_nw.rem_itf(ran_ctx.key);
+	cout << "ran_transferdata:" << " transfer done for ran:" << ran_ctx.key << endl;
 }
 
 void Ran::detach() {
@@ -287,7 +290,9 @@ void Ran::detach() {
 	integrity.add_hmac(pkt, ran_ctx.k_nas_int);
 	pkt.prepend_s1ap_hdr(7, pkt.len, ran_ctx.enodeb_s1ap_ue_id, ran_ctx.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
+	cout << "ran_detach:" << " detach request sent to mme" << endl;
 	mme_client.rcv(pkt);
+	cout << "ran_detach:" << " detach complete received from mme" << endl;
 	pkt.extract_s1ap_hdr();
 	res = integrity.hmac_check(pkt, ran_ctx.k_nas_int);
 	if (res == false) {
@@ -298,10 +303,10 @@ void Ran::detach() {
 	if (res == false) {
 		g_utils.handle_type1_error(-1, "detach failure error: ran_detach");	
 	}
+	cout << "ran_detach:" << " detach successful" << endl;
 }
 
 Ran::~Ran(){
 
 }
-
 

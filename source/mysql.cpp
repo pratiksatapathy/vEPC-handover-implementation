@@ -26,10 +26,6 @@ void MySql::handle_query(const char *query, MYSQL_RES **result) {
 		handle_db_error();
 	}
 	*result = mysql_store_result(conn_fd);
-	if (*result == NULL) {
-		handle_db_error();
-	}
-
 }
 
 void MySql::handle_db_error() {
