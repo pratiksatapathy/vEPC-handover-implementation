@@ -10,17 +10,17 @@
 
 class UdpServer {
 private:
-	void init(string, uint64_t);
+	void init(string, int);
 	
 public:
 	/* Address parameters */
 	int conn_fd;
-	uint64_t port;
+	int port;
 	string ip_addr;
 	struct sockaddr_in sock_addr;
 	
 	UdpServer();
-	void run(string, uint64_t);
+	void run(string, int);
 	void snd(struct sockaddr_in, Packet);
 	void rcv(struct sockaddr_in&, Packet&);
 	~UdpServer();

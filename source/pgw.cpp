@@ -125,9 +125,9 @@ void Pgw::handle_detach(struct sockaddr_in src_sock_addr, Packet pkt) {
 
 void Pgw::set_ip_addrs() {
 	int i;
-	uint64_t imsi;
-	uint64_t subnet;
-	uint64_t host;
+	int imsi;
+	int subnet;
+	int host;
 	string prefix;
 	string ip_addr;
 
@@ -148,7 +148,7 @@ void Pgw::set_ip_addrs() {
 	}
 }
 
-void Pgw::update_itfid(uint64_t itf_id_no, uint32_t teid, string ue_ip_addr, uint64_t imsi) {
+void Pgw::update_itfid(int itf_id_no, uint32_t teid, string ue_ip_addr, uint64_t imsi) {
 	switch (itf_id_no) {
 		case 5:
 			g_sync.mlock(s5id_mux);
@@ -165,7 +165,7 @@ void Pgw::update_itfid(uint64_t itf_id_no, uint32_t teid, string ue_ip_addr, uin
 	}
 }
 
-uint64_t Pgw::get_imsi(uint64_t itf_id_no, uint32_t teid, string ue_ip_addr) {
+uint64_t Pgw::get_imsi(int itf_id_no, uint32_t teid, string ue_ip_addr) {
 	uint64_t imsi;
 
 	imsi = 0;
@@ -202,7 +202,7 @@ bool Pgw::get_downlink_info(uint64_t imsi, uint32_t &s5_uteid_dl) {
 	return res;
 }
 
-void Pgw::rem_itfid(uint64_t itf_id_no, uint32_t teid, string ue_ip_addr) {
+void Pgw::rem_itfid(int itf_id_no, uint32_t teid, string ue_ip_addr) {
 	switch (itf_id_no) {
 		case 5:
 			g_sync.mlock(s5id_mux);

@@ -16,6 +16,6 @@ public:
 	~Diameter();
 };
 
-const uint64_t DIAMETER_HDR_LEN = sizeof(Diameter);
+const int DIAMETER_HDR_LEN = sizeof(Diameter);
 
 #endif /* DIAMETER_H */

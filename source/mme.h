@@ -71,7 +71,7 @@ public:
 
 	/* PGW info */
 	string pgw_s5_ip_addr;
-	uint64_t pgw_s5_port;
+	int pgw_s5_port;
 
 	/* Control plane info */
 	uint32_t s11_cteid_mme; /* S11 Controlplane Tunnel Endpoint Identifier - MME */

@@ -75,8 +75,8 @@ public:
 
 class EpcAddrs {
 public:
-	uint64_t mme_port;
-	uint64_t sgw_s1_port;
+	int mme_port;
+	int sgw_s1_port;
 	string mme_ip_addr;
 	string sgw_s1_ip_addr;
 
@@ -88,14 +88,14 @@ class UplinkInfo {
 public:
 	uint32_t s1_uteid_ul;
 	string sgw_s1_ip_addr;
-	uint64_t sgw_s1_port;
+	int sgw_s1_port;
 
-	void init(uint32_t, string, uint64_t);
+	void init(uint32_t, string, int);
 };
 
 class TrafficMonitor {
 private:
-	bool get_uplink_info(string, uint32_t&, string&, uint64_t&);
+	bool get_uplink_info(string, uint32_t&, string&, int&);
 
 public:
 	Tun tun;
@@ -108,7 +108,7 @@ public:
 	TrafficMonitor();
 	void handle_uplink_udata();
 	void handle_downlink_udata();
-	void update_uplink_info(string, uint32_t, string, uint64_t);
+	void update_uplink_info(string, uint32_t, string, int);
 	~TrafficMonitor();
 };
 

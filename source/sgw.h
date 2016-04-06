@@ -32,24 +32,24 @@ public:
 
 	/* PGW info */
 	string pgw_s5_ip_addr;
-	uint64_t pgw_s5_port;
+	int pgw_s5_port;
 
 	/* eNodeB info */
 	string enodeb_ip_addr;
-	uint64_t enodeb_port;
+	int enodeb_port;
 
 	UeContext();
-	void init(uint64_t, uint64_t, uint8_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, string, uint64_t);
+	void init(uint64_t, uint64_t, uint8_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, string, int);
 	~UeContext();
 };
 
 class Sgw {
 private:
-	void update_itfid(uint64_t, uint32_t, uint64_t);
-	uint64_t get_imsi(uint64_t, uint32_t);
-	bool get_uplink_info(uint64_t, uint32_t&, string&, uint64_t&);
-	bool get_downlink_info(uint64_t, uint32_t&, string&, uint64_t&);
-	void rem_itfid(uint64_t, uint32_t);
+	void update_itfid(int, uint32_t, uint64_t);
+	uint64_t get_imsi(int, uint32_t);
+	bool get_uplink_info(uint64_t, uint32_t&, string&, int&);
+	bool get_downlink_info(uint64_t, uint32_t&, string&, int&);
+	void rem_itfid(int, uint32_t);
 	void rem_uectx(uint64_t);
 
 public:

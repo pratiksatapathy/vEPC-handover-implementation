@@ -1,4 +1,4 @@
-#include "ran_simulator.h"
+#include "sink_server.h"
 
 int g_threads_count;
 vector<thread> g_threads;
@@ -28,7 +28,7 @@ void traffic_monitor() {
 
 void sink(int sink_num) {
 	string cmd;
-	uint64_t port;
+	int port;
 
 	port = (sink_num + 55000);
 	cmd = "iperf3 -s -B 172.16.0.2 -p " + to_string(port);

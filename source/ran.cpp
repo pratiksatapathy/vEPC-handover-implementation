@@ -54,7 +54,7 @@ EpcAddrs::~EpcAddrs() {
 
 }
 
-void UplinkInfo::init(uint32_t arg_s1_uteid_ul, string arg_sgw_s1_ip_addr, uint64_t arg_sgw_s1_port) {
+void UplinkInfo::init(uint32_t arg_s1_uteid_ul, string arg_sgw_s1_ip_addr, int arg_sgw_s1_port) {
 	s1_uteid_ul = arg_s1_uteid_ul;
 	sgw_s1_ip_addr = arg_sgw_s1_ip_addr;
 	sgw_s1_port = arg_sgw_s1_port;
@@ -69,7 +69,7 @@ void TrafficMonitor::handle_uplink_udata() {
 	string ip_addr;
 	uint32_t s1_uteid_ul;
 	string sgw_s1_ip_addr;
-	uint64_t sgw_s1_port;
+	int sgw_s1_port;
 	bool res;
 
 	tun.rcv(pkt);
@@ -94,13 +94,13 @@ void TrafficMonitor::handle_downlink_udata() {
 	tun.snd(pkt);
 }
 
-void TrafficMonitor::update_uplink_info(string ip_addr, uint32_t s1_uteid_ul, string sgw_s1_ip_addr, uint64_t sgw_s1_port) {
+void TrafficMonitor::update_uplink_info(string ip_addr, uint32_t s1_uteid_ul, string sgw_s1_ip_addr, int sgw_s1_port) {
 	g_sync.mlock(uplinkinfo_mux);
 	uplink_info[ip_addr].init(s1_uteid_ul, sgw_s1_ip_addr, sgw_s1_port);
 	g_sync.munlock(uplinkinfo_mux);
 }
 
-bool TrafficMonitor::get_uplink_info(string ip_addr, uint32_t &s1_uteid_ul, string &sgw_s1_ip_addr, uint64_t &sgw_s1_port) {
+bool TrafficMonitor::get_uplink_info(string ip_addr, uint32_t &s1_uteid_ul, string &sgw_s1_ip_addr, int &sgw_s1_port) {
 	bool res = false;
 
 	g_sync.mlock(uplinkinfo_mux);
@@ -217,8 +217,8 @@ void Ran::set_integrity_context() {
 
 void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	bool res;
-	uint64_t tai_list_size;
 	uint64_t k_enodeb;
+	int tai_list_size;
 
 	mme_client.rcv(pkt);
 	cout << "ran_setepssession:" << " attach accept received from mme" << endl;
@@ -263,7 +263,7 @@ void Ran::transfer_data() {
 	string mtu;
 	string dur;
 	string server_ip_addr;
-	uint64_t server_port;
+	int server_port;
 
 	rate = " -b 1M";
 	mtu = " -M 500";

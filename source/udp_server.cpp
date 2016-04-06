@@ -5,13 +5,13 @@ UdpServer::UdpServer() {
 	g_utils.handle_type1_error(conn_fd, "Socket error: udpserver_udpserver");		
 }
 
-void UdpServer::run(string arg_ip_addr, uint64_t arg_port) {
+void UdpServer::run(string arg_ip_addr, int arg_port) {
 	init(arg_ip_addr, arg_port);
 	g_nw.set_sock_reuse(conn_fd);
 	g_nw.bind_sock(conn_fd, sock_addr);
 }
 
-void UdpServer::init(string arg_ip_addr, uint64_t arg_port) {
+void UdpServer::init(string arg_ip_addr, int arg_port) {
 	int status;
 
 	port = arg_port;

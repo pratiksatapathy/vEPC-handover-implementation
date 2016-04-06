@@ -37,10 +37,10 @@ public:
 class Pgw {
 private:
 	void set_ip_addrs();
-	void update_itfid(uint64_t, uint32_t, string, uint64_t);
-	uint64_t get_imsi(uint64_t, uint32_t, string);
+	void update_itfid(int, uint32_t, string, uint64_t);
+	uint64_t get_imsi(int, uint32_t, string);
 	bool get_downlink_info(uint64_t, uint32_t&);	
-	void rem_itfid(uint64_t, uint32_t, string);
+	void rem_itfid(int, uint32_t, string);
 	void rem_uectx(uint64_t);
 
 public:
