@@ -295,7 +295,7 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	int pgw_s5_port;
 	bool res;
 
-	sgw_client.conn(g_sgw_s11_ip_addr, g_sgw_s11_port);
+	sgw_client.conn(g_mme_ip_addr, g_sgw_s11_ip_addr, g_sgw_s11_port);
 	guti = get_guti(pkt);
 	eps_bearer_id = 5;
 	set_pgw_info(guti);
@@ -410,7 +410,7 @@ void Mme::handle_modify_bearer(Packet pkt) {
 	uint8_t eps_bearer_id;
 	bool res;
 
-	sgw_client.conn(g_sgw_s11_ip_addr, g_sgw_s11_port);
+	sgw_client.conn(g_mme_ip_addr, g_sgw_s11_ip_addr, g_sgw_s11_port);
 	guti = get_guti(pkt);
 	g_sync.mlock(uectx_mux);
 	eps_bearer_id = ue_ctx[guti].eps_bearer_id;
@@ -420,8 +420,8 @@ void Mme::handle_modify_bearer(Packet pkt) {
 	pkt.clear_pkt();
 	pkt.append_item(eps_bearer_id);
 	pkt.append_item(s1_uteid_dl);
-	pkt.append_item(g_enodeb_ip_addr);
-	pkt.append_item(g_enodeb_port);
+	pkt.append_item(g_trafmon_ip_addr);
+	pkt.append_item(g_trafmon_port);
 	pkt.prepend_gtp_hdr(2, 2, pkt.len, s11_cteid_sgw);
 	sgw_client.snd(pkt);
 	cout << "mme_handlemodifybearer:" << " modify bearer request sent to sgw" << endl;
@@ -468,7 +468,7 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	pkt.extract_item(guti);
 	pkt.extract_item(ksi_asme);
 	pkt.extract_item(detach_type);	
-	sgw_client.conn(g_sgw_s11_ip_addr, g_sgw_s11_port);
+	sgw_client.conn(g_mme_ip_addr, g_sgw_s11_ip_addr, g_sgw_s11_port);
 	pkt.clear_pkt();
 	pkt.append_item(eps_bearer_id);
 	pkt.append_item(tai);

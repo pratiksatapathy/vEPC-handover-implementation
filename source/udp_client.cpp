@@ -4,19 +4,20 @@ UdpClient::UdpClient() {
 	conn_fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	g_utils.handle_type1_error(conn_fd, "Socket error: udpclient_udpclient");
 	port = g_freeport;
-	g_nw.set_inet_sock_addr("127.0.0.1", port, sock_addr);
 }
 
-void UdpClient::conn(string arg_server_ip_addr, int arg_server_port) {
-	init(arg_server_ip_addr, arg_server_port);
+void UdpClient::conn(string arg_ip_addr, string arg_server_ip_addr, int arg_server_port) {
+	init(arg_ip_addr, arg_server_ip_addr, arg_server_port);
 	g_nw.bind_sock(conn_fd, sock_addr);
 	set_port();
 	g_nw.set_rcv_timeout(conn_fd);
 }
 
-void UdpClient::init(string arg_server_ip_addr, int arg_server_port) {
+void UdpClient::init(string arg_ip_addr, string arg_server_ip_addr, int arg_server_port) {
 	int status;
 
+	ip_addr = arg_ip_addr;
+	g_nw.set_inet_sock_addr(ip_addr, port, sock_addr);
 	server_port = arg_server_port;
 	server_ip_addr = arg_server_ip_addr;
 	g_nw.set_inet_sock_addr(server_ip_addr, server_port, server_sock_addr);
@@ -31,7 +32,6 @@ void UdpClient::snd(Packet pkt) {
 	int status;
 
 	while (1) {
-		cout << pkt.len << " " << conn_fd << " " << ntohs(server_sock_addr.sin_port) << " " << inet_ntoa(server_sock_addr.sin_addr) << endl;
 		status = sendto(conn_fd, pkt.data, pkt.len, 0, (sockaddr*)&server_sock_addr, g_sock_addr_len);
 		if (errno == EPERM) {
 			errno = 0;

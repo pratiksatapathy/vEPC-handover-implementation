@@ -70,7 +70,7 @@ void run() {
 
 	/* Traffic monitor server */
 	cout << "Traffic monitor server started" << endl;
-	g_traf_mon.server.run(g_enodeb_ip_addr, g_enodeb_port);	
+	g_traf_mon.server.run(g_trafmon_ip_addr, g_trafmon_port);	
 
 	/* Tun */
 	g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");

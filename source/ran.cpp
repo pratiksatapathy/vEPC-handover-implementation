@@ -78,7 +78,7 @@ void TrafficMonitor::handle_uplink_udata() {
 	if (res == true) {
 		UdpClient sgw_s1_client;
 
-		sgw_s1_client.conn(sgw_s1_ip_addr, sgw_s1_port);
+		sgw_s1_client.conn(g_ran_ip_addr, sgw_s1_ip_addr, sgw_s1_port);
 		pkt.prepend_gtp_hdr(1, 1, pkt.len, s1_uteid_ul);
 		sgw_s1_client.snd(pkt);
 	}
