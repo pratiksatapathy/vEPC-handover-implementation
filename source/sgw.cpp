@@ -18,7 +18,7 @@ UeContext::UeContext() {
 	enodeb_port = 0;	
 }
 
-void UeContext::init(uint64_t arg_tai, uint64_t arg_apn_in_use, uint8_t arg_eps_bearer_id, uint32_t arg_s1_uteid_ul, uint32_t arg_s5_uteid_dl, uint32_t arg_s11_cteid_mme, uint32_t arg_s11_cteid_sgw, uint32_t arg_s5_cteid_dl, string arg_pgw_s5_ip_addr, uint64_t arg_pgw_s5_port) {
+void UeContext::init(uint64_t arg_tai, uint64_t arg_apn_in_use, uint8_t arg_eps_bearer_id, uint32_t arg_s1_uteid_ul, uint32_t arg_s5_uteid_dl, uint32_t arg_s11_cteid_mme, uint32_t arg_s11_cteid_sgw, uint32_t arg_s5_cteid_dl, string arg_pgw_s5_ip_addr, int arg_pgw_s5_port) {
 	tai = arg_tai; 
 	apn_in_use = arg_apn_in_use;
 	eps_bearer_id = arg_eps_bearer_id;
@@ -53,11 +53,11 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	uint32_t s5_cteid_dl;
 	uint64_t imsi;
 	uint8_t eps_bearer_id;
-	uint64_t pgw_s5_port;
 	uint64_t apn_in_use;
+	uint64_t tai;
 	string pgw_s5_ip_addr;
 	string ue_ip_addr;
-	uint64_t tai;
+	int pgw_s5_port;
 
 	pkt.extract_item(s11_cteid_mme);
 	pkt.extract_item(imsi);
@@ -120,7 +120,7 @@ void Sgw::handle_modify_bearer(struct sockaddr_in src_sock_addr, Packet pkt) {
 	uint32_t s11_cteid_mme;
 	uint8_t eps_bearer_id;
 	string enodeb_ip_addr;
-	uint64_t enodeb_port;
+	int enodeb_port;
 	bool res;
 
 	imsi = get_imsi(11, pkt.gtp_hdr.teid);
@@ -146,7 +146,7 @@ void Sgw::handle_uplink_udata(Packet pkt) {
 	uint64_t imsi;
 	uint32_t s5_uteid_ul;
 	string pgw_s5_ip_addr;
-	uint64_t pgw_s5_port;
+	int pgw_s5_port;
 	bool res;
 
 	imsi = get_imsi(1, pkt.gtp_hdr.teid);
@@ -165,7 +165,7 @@ void Sgw::handle_downlink_udata(Packet pkt) {
 	uint64_t imsi;
 	uint32_t s1_uteid_dl;
 	string enodeb_ip_addr;
-	uint64_t enodeb_port;
+	int enodeb_port;
 	bool res;
 
 	imsi = get_imsi(5, pkt.gtp_hdr.teid);
@@ -191,7 +191,7 @@ void Sgw::handle_detach(struct sockaddr_in src_sock_addr, Packet pkt) {
 	uint64_t s5_cteid_ul;
 	uint8_t eps_bearer_id;
 	string pgw_s5_ip_addr;
-	uint64_t pgw_s5_port;
+	int pgw_s5_port;
 	bool res;
 
 	imsi = get_imsi(11, pkt.gtp_hdr.teid);
@@ -233,7 +233,7 @@ void Sgw::handle_detach(struct sockaddr_in src_sock_addr, Packet pkt) {
 	cout << "sgw_handledetach:" << " detach successful" << endl;
 }
 
-void Sgw::update_itfid(uint64_t itf_id_no, uint32_t teid, uint64_t imsi) {
+void Sgw::update_itfid(int itf_id_no, uint32_t teid, uint64_t imsi) {
 	switch (itf_id_no) {
 		case 11:
 			g_sync.mlock(s11id_mux);
@@ -255,7 +255,7 @@ void Sgw::update_itfid(uint64_t itf_id_no, uint32_t teid, uint64_t imsi) {
 	}
 }
 
-uint64_t Sgw::get_imsi(uint64_t itf_id_no, uint32_t teid) {
+uint64_t Sgw::get_imsi(int itf_id_no, uint32_t teid) {
 	uint64_t imsi;
 
 	imsi = 0;
@@ -287,7 +287,7 @@ uint64_t Sgw::get_imsi(uint64_t itf_id_no, uint32_t teid) {
 	return imsi;
 }
 
-bool Sgw::get_uplink_info(uint64_t imsi, uint32_t &s5_uteid_ul, string &pgw_s5_ip_addr, uint64_t &pgw_s5_port) {
+bool Sgw::get_uplink_info(uint64_t imsi, uint32_t &s5_uteid_ul, string &pgw_s5_ip_addr, int &pgw_s5_port) {
 	bool res = false;
 
 	g_sync.mlock(uectx_mux);
@@ -301,7 +301,7 @@ bool Sgw::get_uplink_info(uint64_t imsi, uint32_t &s5_uteid_ul, string &pgw_s5_i
 	return res;
 }
 
-bool Sgw::get_downlink_info(uint64_t imsi, uint32_t &s1_uteid_dl, string &enodeb_ip_addr, uint64_t &enodeb_port) {
+bool Sgw::get_downlink_info(uint64_t imsi, uint32_t &s1_uteid_dl, string &enodeb_ip_addr, int &enodeb_port) {
 	bool res = false;
 
 	g_sync.mlock(uectx_mux);
@@ -315,7 +315,7 @@ bool Sgw::get_downlink_info(uint64_t imsi, uint32_t &s1_uteid_dl, string &enodeb
 	return res;
 }
 
-void Sgw::rem_itfid(uint64_t itf_id_no, uint32_t teid) {
+void Sgw::rem_itfid(int itf_id_no, uint32_t teid) {
 	switch (itf_id_no) {
 		case 11:
 			g_sync.mlock(s11id_mux);

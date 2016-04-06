@@ -22,6 +22,6 @@ public:
 	~S1ap();
 };
 
-const uint64_t S1AP_HDR_LEN = sizeof(S1ap);
+const int S1AP_HDR_LEN = sizeof(S1ap);
 
 #endif /* S1AP_H */

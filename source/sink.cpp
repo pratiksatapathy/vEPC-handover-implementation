@@ -1,9 +1,5 @@
 #include "sink.h"
 
-TrafficMonitor::TrafficMonitor() {
-
-}
-
 void TrafficMonitor::handle_uplink_udata() {
 	struct sockaddr_in src_sock_addr;
 	Packet pkt;
@@ -19,8 +15,4 @@ void TrafficMonitor::handle_downlink_udata() {
 	tun.rcv(pkt);
 	pgw_sgi_client.conn(g_pgw_sgi_ip_addr, g_pgw_sgi_port);
 	pgw_sgi_client.snd(pkt);
-}
-
-TrafficMonitor::~TrafficMonitor() {
-
 }

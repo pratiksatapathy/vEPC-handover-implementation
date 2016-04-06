@@ -275,7 +275,6 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	vector<uint64_t> tai_list;
 	uint64_t guti;
 	uint64_t imsi;
-	uint64_t pgw_s5_port;
 	uint64_t apn_in_use;
 	uint64_t tai;
 	uint64_t k_enodeb;
@@ -290,9 +289,10 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	uint16_t nw_capability;
 	uint8_t eps_bearer_id;
 	uint8_t e_rab_id;
-	uint64_t tai_list_size;
 	string pgw_s5_ip_addr;
 	string ue_ip_addr;
+	int tai_list_size;
+	int pgw_s5_port;
 	bool res;
 
 	sgw_client.conn(g_sgw_s11_ip_addr, g_sgw_s11_port);

@@ -16,7 +16,7 @@ void SctpServer::clear_queue() {
 	}
 }
 
-void SctpServer::run(string arg_ip_addr, uint64_t arg_port, int arg_workers_count, int serve_client(int)) {
+void SctpServer::run(string arg_ip_addr, int arg_port, int arg_workers_count, int serve_client(int)) {
 	init(arg_ip_addr, arg_port, arg_workers_count, serve_client);
 	create_workers();
 	g_nw.set_sock_reuse(listen_fd);
@@ -24,7 +24,7 @@ void SctpServer::run(string arg_ip_addr, uint64_t arg_port, int arg_workers_coun
 	accept_clients();
 }
 
-void SctpServer::init(string arg_ip_addr, uint64_t arg_port, int arg_workers_count, int arg_serve_client(int)) {
+void SctpServer::init(string arg_ip_addr, int arg_port, int arg_workers_count, int arg_serve_client(int)) {
 	int status;
 
 	port = arg_port;
@@ -79,12 +79,11 @@ void SctpServer::worker_func() {
 void SctpServer::accept_clients() {
 	int conn_fd;
 	int status;
-	socklen_t sock_addr_len;
 	struct sockaddr_in client_sock_addr;
 
 	listen(listen_fd, 500);
 	while (1) {
-		conn_fd = accept(listen_fd, (struct sockaddr *)&client_sock_addr, &sock_addr_len);
+		conn_fd = accept(listen_fd, (struct sockaddr *)&client_sock_addr, &g_sock_addr_len);
 		g_utils.handle_type1_error(conn_fd, "Accept error: sctpserver_acceptclient");
 		g_nw.set_rcv_timeout(conn_fd);
 		g_sync.mlock(mux);

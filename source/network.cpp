@@ -3,7 +3,7 @@
 socklen_t g_sock_addr_len = sizeof(sockaddr_in);
 Network g_nw;
 
-void Network::set_inet_sock_addr(string ip_addr, uint64_t port, struct sockaddr_in &sock_addr) {
+void Network::set_inet_sock_addr(string ip_addr, int port, struct sockaddr_in &sock_addr) {
 	int status;
 	
 	bzero((void*)&sock_addr, sizeof(sock_addr));
@@ -77,14 +77,14 @@ string Network::get_dst_ip_addr(Packet pkt) {
 	return str_ip_addr;
 }
 
-void Network::add_itf(uint64_t itf_no, string ip_addr_sp) {
+void Network::add_itf(int itf_no, string ip_addr_sp) {
 	string cmd;
 
 	cmd = "sudo ifconfig eth0:" + to_string(itf_no) + " " + ip_addr_sp;
 	system(cmd.c_str());
 }
 
-void Network::rem_itf(uint64_t itf_no) {
+void Network::rem_itf(int itf_no) {
 	string cmd;
 
 	cmd = "sudo ifconfig eth0:" + to_string(itf_no) + " down";

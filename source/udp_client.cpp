@@ -7,14 +7,14 @@ UdpClient::UdpClient() {
 	g_nw.set_inet_sock_addr("127.0.0.1", port, sock_addr);
 }
 
-void UdpClient::conn(string arg_server_ip_addr, uint64_t arg_server_port) {
+void UdpClient::conn(string arg_server_ip_addr, int arg_server_port) {
 	init(arg_server_ip_addr, arg_server_port);
 	g_nw.bind_sock(conn_fd, sock_addr);
 	set_port();
 	g_nw.set_rcv_timeout(conn_fd);
 }
 
-void UdpClient::init(string arg_server_ip_addr, uint64_t arg_server_port) {
+void UdpClient::init(string arg_server_ip_addr, int arg_server_port) {
 	int status;
 
 	server_port = arg_server_port;

@@ -1,10 +1,10 @@
 #include "pgw_server.h"
 
-Pgw g_pgw;
 int g_s5_server_threads_count;
 int g_sgi_server_threads_count;
 vector<thread> g_s5_server_threads;
 vector<thread> g_sgi_server_threads;
+Pgw g_pgw;
 
 void check_usage(int argc) {
 	if (argc < 3) {

@@ -16,10 +16,8 @@ public:
 	UdpServer server;
 	Tun tun;
 
-	TrafficMonitor();
 	void handle_uplink_udata();
 	void handle_downlink_udata();
-	~TrafficMonitor();
 };
 
 #endif /* SINK_H */
