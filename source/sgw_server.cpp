@@ -1,12 +1,12 @@
 #include "sgw_server.h"
 
-Sgw g_sgw;
 int g_s11_server_threads_count;
 int g_s1_server_threads_count;
 int g_s5_server_threads_count;
 vector<thread> g_s11_server_threads;
 vector<thread> g_s1_server_threads;
 vector<thread> g_s5_server_threads;
+Sgw g_sgw;
 
 void check_usage(int argc) {
 	if (argc < 4) {
