@@ -24,13 +24,13 @@ private:
 	uint8_t *key;
 	uint8_t *iv;
 
+	void load();
 	int enc_data(uint8_t*, int, uint8_t*, uint64_t);
 	int dec_data(uint8_t*, int, uint8_t*, uint64_t);
 	void handle_crypt_error();
 
 public:
 	Crypt();
-	void load();
 	void enc(Packet&, uint64_t);
 	void dec(Packet&, uint64_t);
 	~Crypt();
@@ -53,5 +53,8 @@ public:
 	void print_hmac(uint8_t*);
 	~Integrity();
 };
+
+extern Crypt g_crypt;
+extern Integrity g_integrity;
 
 #endif /* SECURITY_H */

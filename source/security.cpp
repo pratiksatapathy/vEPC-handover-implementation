@@ -1,5 +1,8 @@
 #include "security.h"
 
+Crypt g_crypt;
+Integrity g_integrity;
+
 Crypt::Crypt() {
 	key = (uint8_t *)"01234567890123456789012345678901";
 	iv = (uint8_t *)"01234567890123456";

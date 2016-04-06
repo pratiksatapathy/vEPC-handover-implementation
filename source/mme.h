@@ -108,8 +108,6 @@ private:
 public:
 	SctpServer server;
 	MmeIds mme_ids;
-	Crypt crypt;
-	Integrity integrity;
 	int ue_count;
 	unordered_map<uint32_t, uint64_t> s1mme_id; /* S1_MME UE identification table: mme_s1ap_ue_id -> guti */
 	unordered_map<uint64_t, UeContext> ue_ctx; /* UE context table: guti -> UeContext */

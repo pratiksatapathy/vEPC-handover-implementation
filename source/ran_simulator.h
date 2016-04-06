@@ -19,8 +19,8 @@
 extern time_t g_start_time;
 extern int g_threads_count;
 extern double g_req_duration;
-extern vector<thread> g_threads;
 extern thread g_mon_thread;
+extern vector<thread> g_threads;
 extern TrafficMonitor g_traf_mon;
 
 void simulate(int);

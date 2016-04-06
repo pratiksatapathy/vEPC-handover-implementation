@@ -121,8 +121,6 @@ public:
 	RanContext ran_ctx;
 	EpcAddrs epc_addrs;
 	SctpClient mme_client;
-	Crypt crypt;
-	Integrity integrity;
 	Packet pkt;
 
 	Ran();
