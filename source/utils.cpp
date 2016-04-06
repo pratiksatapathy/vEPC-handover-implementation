@@ -2,7 +2,7 @@
 
 int g_reuse = 1;
 int g_freeport = 0;
-int g_enodeb_port = 4000;
+int g_trafmon_port = 4000;
 int g_mme_port = 5000;
 int g_hss_port = 6000;
 int g_sgw_s11_port = 7000;
@@ -11,7 +11,8 @@ int g_sgw_s5_port = 7200;
 int g_pgw_s5_port = 8000;
 int g_pgw_sgi_port = 8100;
 int g_sink_port = 8500;
-string g_enodeb_ip_addr = "10.14.13.29";
+string g_ran_ip_addr = "10.14.13.29";
+string g_trafmon_ip_addr = "10.14.13.29";
 string g_mme_ip_addr = "10.14.13.29";
 string g_hss_ip_addr = "10.14.13.29";
 string g_sgw_s11_ip_addr = "10.14.13.29";

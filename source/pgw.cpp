@@ -71,7 +71,7 @@ void Pgw::handle_uplink_udata(Packet pkt) {
 	UdpClient sink_client;
 
 	pkt.truncate();
-	sink_client.conn(g_sink_ip_addr, g_sink_port);
+	sink_client.conn(g_pgw_sgi_ip_addr, g_sink_ip_addr, g_sink_port);
 	sink_client.snd(pkt);
 	cout << "pgw_handleuplinkudata:" << " uplink udata forwarded to sink" << endl;
 }
@@ -89,7 +89,7 @@ void Pgw::handle_downlink_udata(Packet pkt) {
 		UdpClient sgw_s5_client;
 
 		pkt.prepend_gtp_hdr(1, 3, pkt.len, s5_uteid_dl);
-		sgw_s5_client.conn(g_sgw_s5_ip_addr, g_sgw_s5_port);
+		sgw_s5_client.conn(g_pgw_s5_ip_addr, g_sgw_s5_ip_addr, g_sgw_s5_port);
 		sgw_s5_client.snd(pkt);
 		cout << "pgw_handledownlinkudata:" << " downlink udata forwarded to sgw" << endl;
 	}
