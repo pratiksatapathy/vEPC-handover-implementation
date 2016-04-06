@@ -200,7 +200,7 @@ void Ran::set_security() {
 	pkt.append_item(res);
 	crypt.enc(pkt, ran_ctx.k_nas_enc);
 	integrity.add_hmac(pkt, ran_ctx.k_nas_int);
-	pkt.prepend_s1ap_hdr(4, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+	pkt.prepend_s1ap_hdr(3, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
 	cout << "ran_setsecurity:" << " security mode complete success" << endl;
 	free(hmac_res);
@@ -250,7 +250,7 @@ void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	pkt.append_item(ran_ctx.s1_uteid_dl);
 	crypt.enc(pkt, ran_ctx.k_nas_enc);
 	integrity.add_hmac(pkt, ran_ctx.k_nas_int);
-	pkt.prepend_s1ap_hdr(6, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+	pkt.prepend_s1ap_hdr(4, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
 	cout << "ran_setepssession:" << " attach complete sent to mme" << endl;
 	ran_ctx.emm_state = 1;
@@ -289,7 +289,7 @@ void Ran::detach() {
 	pkt.append_item(detach_type);
 	crypt.enc(pkt, ran_ctx.k_nas_enc);
 	integrity.add_hmac(pkt, ran_ctx.k_nas_int);
-	pkt.prepend_s1ap_hdr(7, pkt.len, ran_ctx.enodeb_s1ap_ue_id, ran_ctx.mme_s1ap_ue_id);
+	pkt.prepend_s1ap_hdr(5, pkt.len, ran_ctx.enodeb_s1ap_ue_id, ran_ctx.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
 	cout << "ran_detach:" << " detach request sent to mme" << endl;
 	mme_client.rcv(pkt);
