@@ -79,7 +79,7 @@ void TrafficMonitor::handle_uplink_udata() {
 		UdpClient sgw_s1_client;
 
 		sgw_s1_client.conn(sgw_s1_ip_addr, sgw_s1_port);
-		pkt.prepend_s1ap_hdr(1, 1, pkt.len, s1_uteid_ul);
+		pkt.prepend_gtp_hdr(1, 1, pkt.len, s1_uteid_ul);
 		sgw_s1_client.snd(pkt);
 	}
 }
@@ -239,7 +239,7 @@ void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	pkt.extract_item(ran_ctx.ip_addr);
 	pkt.extract_item(epc_addrs.sgw_s1_ip_addr);
 	pkt.extract_item(epc_addrs.sgw_s1_port);
-	pkt.extract_item(res);
+	pkt.extract_item(res);	
 	if (res == false) {
 		g_utils.handle_type1_error(-1, "attach request failure error: ran_setepssession");	
 	}	
@@ -272,6 +272,7 @@ void Ran::transfer_data() {
 	server_port = ran_ctx.key + 55000;
 	g_nw.add_itf(ran_ctx.key, ran_ctx.ip_addr + "/8");
 	cmd = "iperf3 -B " + ran_ctx.ip_addr + " -c " + server_ip_addr + " -p " + to_string(server_port) + rate + mtu + dur;	
+	cout << cmd << endl;
 	system(cmd.c_str());
 	g_nw.rem_itf(ran_ctx.key);
 	cout << "ran_transferdata:" << " transfer done for ran:" << ran_ctx.key << endl;

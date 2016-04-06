@@ -31,6 +31,7 @@ void UdpClient::snd(Packet pkt) {
 	int status;
 
 	while (1) {
+		cout << pkt.len << " " << conn_fd << " " << ntohs(server_sock_addr.sin_port) << " " << inet_ntoa(server_sock_addr.sin_addr) << endl;
 		status = sendto(conn_fd, pkt.data, pkt.len, 0, (sockaddr*)&server_sock_addr, g_sock_addr_len);
 		if (errno == EPERM) {
 			errno = 0;
