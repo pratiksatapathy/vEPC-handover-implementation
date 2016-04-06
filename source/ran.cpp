@@ -120,7 +120,6 @@ TrafficMonitor::~TrafficMonitor() {
 
 Ran::Ran(){
 	mme_client.conn(epc_addrs.mme_ip_addr, epc_addrs.mme_port);
-	crypt.load();
 }
 
 void Ran::init(int arg) {
@@ -177,20 +176,20 @@ void Ran::set_security() {
 	uint8_t *hmac_xres;
 	bool res;
 
-	hmac_res = g_utils.allocate_uint8_mem(integrity.hmac_len);
-	hmac_xres = g_utils.allocate_uint8_mem(integrity.hmac_len);
+	hmac_res = g_utils.allocate_uint8_mem(g_integrity.hmac_len);
+	hmac_xres = g_utils.allocate_uint8_mem(g_integrity.hmac_len);
 	mme_client.rcv(pkt);
 	cout << "ran_setsecurity: " << " received request for ran - " << ran_ctx.key << endl;
 	pkt.extract_s1ap_hdr();
-	integrity.rem_hmac(pkt, hmac_xres);
+	g_integrity.rem_hmac(pkt, hmac_xres);
 	pkt.extract_item(ran_ctx.ksi_asme);
 	pkt.extract_item(ran_ctx.nw_capability);
 	pkt.extract_item(ran_ctx.nas_enc_algo);
 	pkt.extract_item(ran_ctx.nas_int_algo);
 	set_crypt_context();
 	set_integrity_context();
-	integrity.get_hmac(pkt.data, pkt.len, hmac_res, ran_ctx.k_nas_int);
-	res = integrity.cmp_hmacs(hmac_res, hmac_xres);
+	g_integrity.get_hmac(pkt.data, pkt.len, hmac_res, ran_ctx.k_nas_int);
+	res = g_integrity.cmp_hmacs(hmac_res, hmac_xres);
 	if (res == false) {
 		g_utils.handle_type1_error(-1, "hmac initial security failure error: ran_setsecurity");
 	}
@@ -198,8 +197,8 @@ void Ran::set_security() {
 
 	pkt.clear_pkt();
 	pkt.append_item(res);
-	crypt.enc(pkt, ran_ctx.k_nas_enc);
-	integrity.add_hmac(pkt, ran_ctx.k_nas_int);
+	g_crypt.enc(pkt, ran_ctx.k_nas_enc);
+	g_integrity.add_hmac(pkt, ran_ctx.k_nas_int);
 	pkt.prepend_s1ap_hdr(3, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
 	cout << "ran_setsecurity:" << " security mode complete success" << endl;
@@ -223,11 +222,11 @@ void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	mme_client.rcv(pkt);
 	cout << "ran_setepssession:" << " attach accept received from mme" << endl;
 	pkt.extract_s1ap_hdr();
-	res = integrity.hmac_check(pkt, ran_ctx.k_nas_int);
+	res = g_integrity.hmac_check(pkt, ran_ctx.k_nas_int);
 	if (res == false) {
 		g_utils.handle_type1_error(-1, "hmac attach accept failure error: ran_setepssession");
 	}
-	crypt.dec(pkt, ran_ctx.k_nas_enc);
+	g_crypt.dec(pkt, ran_ctx.k_nas_enc);
 	pkt.extract_item(ran_ctx.eps_bearer_id);
 	pkt.extract_item(ran_ctx.e_rab_id);
 	pkt.extract_item(ran_ctx.s1_uteid_ul);
@@ -248,8 +247,8 @@ void Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	pkt.clear_pkt();
 	pkt.append_item(ran_ctx.eps_bearer_id);
 	pkt.append_item(ran_ctx.s1_uteid_dl);
-	crypt.enc(pkt, ran_ctx.k_nas_enc);
-	integrity.add_hmac(pkt, ran_ctx.k_nas_int);
+	g_crypt.enc(pkt, ran_ctx.k_nas_enc);
+	g_integrity.add_hmac(pkt, ran_ctx.k_nas_int);
 	pkt.prepend_s1ap_hdr(4, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
 	cout << "ran_setepssession:" << " attach complete sent to mme" << endl;
@@ -287,19 +286,19 @@ void Ran::detach() {
 	pkt.append_item(ran_ctx.guti);
 	pkt.append_item(ran_ctx.ksi_asme);
 	pkt.append_item(detach_type);
-	crypt.enc(pkt, ran_ctx.k_nas_enc);
-	integrity.add_hmac(pkt, ran_ctx.k_nas_int);
+	g_crypt.enc(pkt, ran_ctx.k_nas_enc);
+	g_integrity.add_hmac(pkt, ran_ctx.k_nas_int);
 	pkt.prepend_s1ap_hdr(5, pkt.len, ran_ctx.enodeb_s1ap_ue_id, ran_ctx.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
 	cout << "ran_detach:" << " detach request sent to mme" << endl;
 	mme_client.rcv(pkt);
 	cout << "ran_detach:" << " detach complete received from mme" << endl;
 	pkt.extract_s1ap_hdr();
-	res = integrity.hmac_check(pkt, ran_ctx.k_nas_int);
+	res = g_integrity.hmac_check(pkt, ran_ctx.k_nas_int);
 	if (res == false) {
 		g_utils.handle_type1_error(-1, "HMAC detach failure error: ran_detach");
 	}
-	crypt.dec(pkt, ran_ctx.k_nas_enc);
+	g_crypt.dec(pkt, ran_ctx.k_nas_enc);
 	pkt.extract_item(res);
 	if (res == false) {
 		g_utils.handle_type1_error(-1, "detach failure error: ran_detach");	

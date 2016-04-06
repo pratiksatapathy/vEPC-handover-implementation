@@ -64,7 +64,6 @@ MmeIds::~MmeIds() {
 }
 
 Mme::Mme() {
-	crypt.load();
 	ue_count = 0;
 	g_sync.mux_init(s1mmeid_mux);
 	g_sync.mux_init(uectx_mux);
@@ -193,7 +192,7 @@ void Mme::handle_security_mode_cmd(int conn_fd, Packet pkt) {
 	pkt.append_item(nw_capability);
 	pkt.append_item(nas_enc_algo);
 	pkt.append_item(nas_int_algo);
-	integrity.add_hmac(pkt, k_nas_int);
+	g_integrity.add_hmac(pkt, k_nas_int);
 	pkt.prepend_s1ap_hdr(2, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
 	cout << "mme_handlesecuritymodecmd:" << " security mode command sent" << endl;
@@ -224,13 +223,13 @@ bool Mme::handle_security_mode_complete(int conn_fd, Packet pkt) {
 	k_nas_enc = ue_ctx[guti].k_nas_enc;
 	k_nas_int = ue_ctx[guti].k_nas_int;
 	g_sync.munlock(uectx_mux);
-	res = integrity.hmac_check(pkt, k_nas_int);
+	res = g_integrity.hmac_check(pkt, k_nas_int);
 	if (res == false) {
 		cout << "mme_handlesecuritymodecomplete:" << " hmac failure" << endl;
 		return false;
 	}
 	else {
-		crypt.dec(pkt, k_nas_enc);
+		g_crypt.dec(pkt, k_nas_enc);
 		pkt.extract_item(res);
 		if (res == false) {
 			cout << "mme_handlesecuritymodecomplete:" << " security mode complete failure" << endl;
@@ -366,8 +365,8 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	pkt.append_item(g_sgw_s1_ip_addr);
 	pkt.append_item(g_sgw_s1_port);
 	pkt.append_item(res);
-	crypt.enc(pkt, k_nas_enc);
-	integrity.add_hmac(pkt, k_nas_int);
+	g_crypt.enc(pkt, k_nas_enc);
+	g_integrity.add_hmac(pkt, k_nas_int);
 	pkt.prepend_s1ap_hdr(3, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
 	cout << "mme_createsession:" << " attach accept sent to ue" << endl;
@@ -386,12 +385,12 @@ void Mme::handle_attach_complete(Packet pkt) {
 	k_nas_enc = ue_ctx[guti].k_nas_enc;
 	k_nas_int = ue_ctx[guti].k_nas_int;
 	g_sync.munlock(uectx_mux);
-	res = integrity.hmac_check(pkt, k_nas_int);
+	res = g_integrity.hmac_check(pkt, k_nas_int);
 	if (res == false) {
 		cout << "mme_handleattachcomplete:" << " hmac failure" << endl;
 	}
 	else {
-		crypt.dec(pkt, k_nas_enc);
+		g_crypt.dec(pkt, k_nas_enc);
 		pkt.extract_item(eps_bearer_id);
 		pkt.extract_item(s1_uteid_dl);
 		g_sync.mlock(uectx_mux);
@@ -458,12 +457,12 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	tai = ue_ctx[guti].tai;
 	s11_cteid_sgw = ue_ctx[guti].s11_cteid_sgw;
 	g_sync.munlock(uectx_mux);
-	res = integrity.hmac_check(pkt, k_nas_int);
+	res = g_integrity.hmac_check(pkt, k_nas_int);
 	if (res == false) {
 		cout << "mme_handledetach:" << " hmac detach failure" << endl;
 		return;
 	}
-	crypt.dec(pkt, k_nas_enc);
+	g_crypt.dec(pkt, k_nas_enc);
 	pkt.extract_item(guti);
 	pkt.extract_item(ksi_asme);
 	pkt.extract_item(detach_type);	
@@ -484,8 +483,8 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	}
 	pkt.clear_pkt();
 	pkt.append_item(res);
-	crypt.enc(pkt, k_nas_enc);
-	integrity.add_hmac(pkt, k_nas_int);
+	g_crypt.enc(pkt, k_nas_enc);
+	g_integrity.add_hmac(pkt, k_nas_int);
 	pkt.prepend_s1ap_hdr(5, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
 	cout << "mme_handledetach:" << " detach complete sent to ue" << endl;

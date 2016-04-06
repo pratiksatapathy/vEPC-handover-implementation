@@ -130,7 +130,7 @@ void handle_s5_traffic() {
 		switch(pkt.gtp_hdr.msg_type) {
 			/* Downlink userplane data */
 			case 3:
-				cout << "sgwserver_handles5traffic:" << " case 1:" << endl;
+				cout << "sgwserver_handles5traffic:" << " case 3:" << endl;
 				g_sgw.handle_downlink_udata(pkt);
 				break;
 

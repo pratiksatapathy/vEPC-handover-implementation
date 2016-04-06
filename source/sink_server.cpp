@@ -52,13 +52,13 @@ void run() {
 
 	g_nw.add_itf(0, "172.16.0.2/8");
 
-	/* Traffic monitor server */
-	cout << "Traffic monitor server started" << endl;
-	g_traf_mon.server.run(g_sink_ip_addr, g_sink_port);
-
 	/* Tun */
 	g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");
 	g_traf_mon.tun.conn("tun1");
+
+	/* Traffic monitor server */
+	cout << "Traffic monitor server started" << endl;
+	g_traf_mon.server.run(g_sink_ip_addr, g_sink_port);
 
 	g_mon_thread = thread(traffic_monitor);
 	g_mon_thread.detach();

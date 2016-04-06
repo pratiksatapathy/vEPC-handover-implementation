@@ -3,8 +3,8 @@
 time_t g_start_time;
 int g_threads_count;
 double g_req_duration;
-vector<thread> g_threads;
 thread g_mon_thread;
+vector<thread> g_threads;
 TrafficMonitor g_traf_mon;
 
 void traffic_monitor() {
@@ -68,13 +68,13 @@ void init(char *argv[]) {
 void run() {
 	int i;
 
-	/* Traffic monitor server */
-	cout << "Traffic monitor server started" << endl;
-	g_traf_mon.server.run(g_trafmon_ip_addr, g_trafmon_port);	
-
 	/* Tun */
 	g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");
 	g_traf_mon.tun.conn("tun1");
+
+	/* Traffic monitor server */
+	cout << "Traffic monitor server started" << endl;
+	g_traf_mon.server.run(g_trafmon_ip_addr, g_trafmon_port);	
 
 	g_mon_thread = thread(traffic_monitor);
 	g_mon_thread.detach();

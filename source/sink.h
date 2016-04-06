@@ -13,8 +13,8 @@
 
 class TrafficMonitor {
 public:
-	UdpServer server;
 	Tun tun;
+	UdpServer server;
 
 	void handle_uplink_udata();
 	void handle_downlink_udata();
