@@ -142,7 +142,7 @@ void Mme::handle_initial_attach(int conn_fd, Packet pkt) {
 	pkt.append_item(ksi_asme);
 	pkt.prepend_s1ap_hdr(1, pkt.len, enodeb_s1ap_ue_id, mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
-	cout << "mme_handletype1attach:" << " request sent to ran" << endl;	
+	cout << "mme_handletype1attach:" << " autn request sent to ran" << endl;	
 }
 
 bool Mme::handle_autn(int conn_fd, Packet pkt) {
@@ -194,7 +194,7 @@ void Mme::handle_security_mode_cmd(int conn_fd, Packet pkt) {
 	pkt.append_item(nas_enc_algo);
 	pkt.append_item(nas_int_algo);
 	integrity.add_hmac(pkt, k_nas_int);
-	pkt.prepend_s1ap_hdr(3, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+	pkt.prepend_s1ap_hdr(2, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
 	cout << "mme_handlesecuritymodecmd:" << " security mode command sent" << endl;
 }
@@ -368,7 +368,7 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	pkt.append_item(res);
 	crypt.enc(pkt, k_nas_enc);
 	integrity.add_hmac(pkt, k_nas_int);
-	pkt.prepend_s1ap_hdr(5, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+	pkt.prepend_s1ap_hdr(3, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
 	cout << "mme_createsession:" << " attach accept sent to ue" << endl;
 }
@@ -435,7 +435,6 @@ void Mme::handle_modify_bearer(Packet pkt) {
 	g_sync.mlock(uectx_mux);
 	ue_ctx[guti].ecm_state = 1;
 	g_sync.munlock(uectx_mux);
-
 	cout << "mme_handlemodifybearer:" << " eps session setup success" << endl;
 }
 
@@ -487,7 +486,7 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	pkt.append_item(res);
 	crypt.enc(pkt, k_nas_enc);
 	integrity.add_hmac(pkt, k_nas_int);
-	pkt.prepend_s1ap_hdr(7, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+	pkt.prepend_s1ap_hdr(5, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
 	cout << "mme_handledetach:" << " detach complete sent to ue" << endl;
 	rem_itfid(pkt.s1ap_hdr.mme_s1ap_ue_id);

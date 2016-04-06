@@ -55,7 +55,7 @@ int handle_ue(int conn_fd) {
 				break;
 
 			/* Security Mode Complete */
-			case 4: 
+			case 3: 
 				cout << "mmeserver_handleue:" << " case 4:" << endl;
 				res = g_mme.handle_security_mode_complete(conn_fd, pkt);
 				if (res) {
@@ -65,14 +65,14 @@ int handle_ue(int conn_fd) {
 				break;
 
 			/* Attach Complete */
-			case 6: 
+			case 4: 
 				cout << "mmeserver_handleue:" << " case 6:" << endl;
 				g_mme.handle_attach_complete(pkt);
 				g_mme.handle_modify_bearer(pkt);
 				break;
 
 			/* Detach request */
-			case 7: 
+			case 5: 
 				cout << "mmeserver_handleue:" << " case 7:" << endl;
 				g_mme.handle_detach(conn_fd, pkt);
 				break;
