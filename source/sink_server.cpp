@@ -45,15 +45,21 @@ void check_usage(int argc) {
 void init(char *argv[]) {
 	g_threads_count = atoi(argv[1]);
 	g_threads.resize(g_threads_count);
-	g_traf_mon.server.run(g_sink_ip_addr, g_sink_port);	
-	g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");
-	g_traf_mon.tun.conn("tun1");
 }
 
 void run() {
 	int i;
 
 	g_nw.add_itf(0, "172.16.0.2/8");
+
+	/* Traffic monitor server */
+	cout << "Traffic monitor server started" << endl;
+	g_traf_mon.server.run(g_sink_ip_addr, g_sink_port);
+
+	/* Tun */
+	g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");
+	g_traf_mon.tun.conn("tun1");
+
 	g_mon_thread = thread(traffic_monitor);
 	g_mon_thread.detach();
 	for (i = 0; i < g_threads_count; i++) {

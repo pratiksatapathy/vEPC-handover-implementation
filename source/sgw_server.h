@@ -12,13 +12,13 @@
 #include "udp_server.h"
 #include "utils.h"
 
-extern Sgw g_sgw;
 extern int g_s11_server_threads_count;
 extern int g_s1_server_threads_count;
 extern int g_s5_server_threads_count;
 extern vector<thread> g_s11_server_threads;
 extern vector<thread> g_s1_server_threads;
 extern vector<thread> g_s5_server_threads;
+extern Sgw g_sgw;
 
 void check_usage(int);
 void init(char**);
