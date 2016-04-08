@@ -1,8 +1,15 @@
 #include "sgw.h"
 
-string g_sgw_s11_ip_addr = "10.14.13.29";
-string g_sgw_s1_ip_addr = "10.14.13.29";
-string g_sgw_s5_ip_addr = "10.14.13.29";
+// string g_sgw_s11_ip_addr = "10.14.13.29";
+// string g_sgw_s1_ip_addr = "10.14.13.29";
+// string g_sgw_s5_ip_addr = "10.14.13.29";
+// int g_sgw_s11_port = 7000;
+// int g_sgw_s1_port = 7100;
+// int g_sgw_s5_port = 7200;
+
+string g_sgw_s11_ip_addr = "10.129.5.193";
+string g_sgw_s1_ip_addr = "10.129.5.193";
+string g_sgw_s5_ip_addr = "10.129.5.193";
 int g_sgw_s11_port = 7000;
 int g_sgw_s1_port = 7100;
 int g_sgw_s5_port = 7200;

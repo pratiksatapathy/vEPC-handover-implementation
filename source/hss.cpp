@@ -1,6 +1,9 @@
 #include "hss.h"
 
-string g_hss_ip_addr = "10.14.13.29";
+// string g_hss_ip_addr = "10.14.13.29";
+// int g_hss_port = 6000;
+
+string g_hss_ip_addr = "10.129.5.193";
 int g_hss_port = 6000;
 
 Hss::Hss() {
@@ -30,7 +33,6 @@ void Hss::get_autn_info(uint64_t imsi, uint64_t &key, uint64_t &rand_num) {
 	num_fields = mysql_num_fields(query_res);
 	cout << "hss_getautninfo:" << " fetched" << endl;
 	query_res_row = mysql_fetch_row(query_res);
-	cout << "hss_getautninfo:" << endl;
 	if (query_res_row == 0) {
 		g_utils.handle_type1_error(-1, "mysql_fetch_row error: hss_getautninfo");
 	}
