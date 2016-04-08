@@ -39,6 +39,7 @@ void simulate(int arg) {
 	Ran ran;
 	int status;
 	int ran_num;
+	bool ok;
 	bool time_exceeded;
 
 	ran_num = arg;
@@ -57,15 +58,27 @@ void simulate(int arg) {
 
 		/* Attach */
 		ran.initial_attach();
-		ran.authenticate();
-		ran.set_security();
-		ran.set_eps_session(g_traf_mon);
+		ok = ran.authenticate();
+		if (!ok) {
+			continue;
+		}
+		ok = ran.set_security();
+		if (!ok) {
+			continue;
+		}
+		ok = ran.set_eps_session(g_traf_mon);
+		if (!ok) {
+			continue;
+		}
 
 		/* Data transfer */
 		// ran.transfer_data();
 
 		/* Detach */
-		ran.detach();
+		ok = ran.detach();
+		if (!ok) {
+			continue;
+		}
 
 		/* Stop time */
 		stop_time = CLOCK::now();

@@ -3,7 +3,7 @@
 socklen_t g_sock_addr_len = sizeof(sockaddr_in);
 int g_reuse = 1;
 int g_freeport = 0;
-struct timeval g_timeout_lev1 = {10, 0};
+struct timeval g_timeout_lev1 = {5, 0};
 struct timeval g_timeout_lev2 = {30, 0};
 struct timeval g_timeout_lev3 = {60, 0};
 Network g_nw;
@@ -45,7 +45,7 @@ void Network::set_rcv_timeout(int sock_fd, int level) {
 	int status;
 
 	switch (level) {
-		/* Timeout period = 10s */
+		/* Timeout period = 5s */
 		case 1:
 			status = setsockopt(sock_fd, SOL_SOCKET, SO_RCVTIMEO, (struct timeval*)&g_timeout_lev1, sizeof(struct timeval));
 			break;

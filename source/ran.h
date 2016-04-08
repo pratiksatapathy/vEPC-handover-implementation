@@ -133,11 +133,11 @@ public:
 	void init(int);
 	void conn_mme();
 	void initial_attach();
-	void authenticate();
-	void set_security();
-	void set_eps_session(TrafficMonitor&);
+	bool authenticate();
+	bool set_security();
+	bool set_eps_session(TrafficMonitor&);
 	void transfer_data();
-	void detach();	
+	bool detach();	
 };
 
 #endif /* RAN_H */

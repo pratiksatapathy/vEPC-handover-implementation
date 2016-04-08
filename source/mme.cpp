@@ -402,6 +402,7 @@ void Mme::handle_attach_complete(Packet pkt) {
 	g_sync.munlock(uectx_mux);
 	res = g_integrity.hmac_check(pkt, k_nas_int);
 	if (res == false) {
+		cout << "pkt len " << pkt.len << endl;
 		cout << "mme_handleattachcomplete:" << " hmac failure" << endl;
 	}
 	else {
@@ -446,10 +447,12 @@ void Mme::handle_modify_bearer(Packet pkt) {
 	if (res == false) {
 		cout << "mme_handlemodifybearer:" << " modify bearer failure" << endl;
 	}
-	g_sync.mlock(uectx_mux);
-	ue_ctx[guti].ecm_state = 1;
-	g_sync.munlock(uectx_mux);
-	cout << "mme_handlemodifybearer:" << " eps session setup success" << endl;
+	else {
+		g_sync.mlock(uectx_mux);
+		ue_ctx[guti].ecm_state = 1;
+		g_sync.munlock(uectx_mux);
+		cout << "mme_handlemodifybearer:" << " eps session setup success" << endl;		
+	}
 }
 
 void Mme::handle_detach(int conn_fd, Packet pkt) {
