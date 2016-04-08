@@ -10,13 +10,14 @@
 
 class Tun {
 private:
+	string name;
+
 	void init(string);
 	void attach();
 
 public:
 	int conn_fd;
-	string name;
-
+	
 	Tun();
 	void conn(string);
 	void snd(Packet);

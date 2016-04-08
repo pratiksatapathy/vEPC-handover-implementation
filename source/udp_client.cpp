@@ -10,7 +10,7 @@ void UdpClient::conn(string arg_ip_addr, string arg_server_ip_addr, int arg_serv
 	init(arg_ip_addr, arg_server_ip_addr, arg_server_port);
 	g_nw.bind_sock(conn_fd, sock_addr);
 	set_port();
-	g_nw.set_rcv_timeout(conn_fd);
+	g_nw.set_rcv_timeout(conn_fd, 1);
 }
 
 void UdpClient::init(string arg_ip_addr, string arg_server_ip_addr, int arg_server_port) {

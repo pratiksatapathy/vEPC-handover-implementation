@@ -1,6 +1,21 @@
 #include "mme.h"
 
+string g_trafmon_ip_addr = "10.14.13.29";
+string g_mme_ip_addr = "10.14.13.29";
+string g_hss_ip_addr = "10.14.13.29";
+string g_sgw_s11_ip_addr = "10.14.13.29";
+string g_sgw_s1_ip_addr = "10.14.13.29";
+string g_sgw_s5_ip_addr = "10.14.13.29";
+string g_pgw_s5_ip_addr = "10.14.13.29";
+int g_trafmon_port = 4000;
+int g_mme_port = 5000;
+int g_hss_port = 6000;
+int g_sgw_s11_port = 7000;
+int g_sgw_s1_port = 7100;
+int g_sgw_s5_port = 7200;
+int g_pgw_s5_port = 8000;
 uint64_t g_timer = 100;
+
 
 UeContext::UeContext() {
 	emm_state = 0;

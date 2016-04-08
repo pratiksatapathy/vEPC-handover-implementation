@@ -18,6 +18,7 @@ void init(char *argv[]) {
 	g_sgi_server_threads_count = atoi(argv[2]);
 	g_s5_server_threads.resize(g_s5_server_threads_count);
 	g_sgi_server_threads.resize(g_sgi_server_threads_count);
+	signal(SIGPIPE, SIG_IGN);
 }
 
 void run() {

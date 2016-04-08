@@ -4,18 +4,12 @@
 #include "utils.h"
 
 class Gtp {
-public:
+private:
 	/* 0 - 7 Protocol dependent - see below */
 	uint8_t flags;
 
-	/* 8 - 15 Message Type */
-	uint8_t msg_type;
-
 	/* 16 - 31 Message length (Size of payload excluding GTP header) */
 	uint16_t msg_len;
-
-	/* 32 - 63 TEID (Dummy TEID) */
-	uint32_t teid;
 
 	/* 64 - 79 Protocol dependent - see below */
 	uint16_t field_1;
@@ -25,6 +19,13 @@ public:
 
 	/* 88 - 95 Protocol dependent - see below */
 	uint8_t field_3;
+
+public:
+	/* 8 - 15 Message Type */
+	uint8_t msg_type;
+
+	/* 32 - 63 TEID (Dummy TEID) */
+	uint32_t teid;
 
 	Gtp();
 	void init(uint8_t, uint8_t, uint16_t, uint32_t);

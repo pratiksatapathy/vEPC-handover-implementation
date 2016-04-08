@@ -168,6 +168,19 @@ void Packet::prepend_diameter_hdr(uint8_t msg_type, uint16_t msg_len) {
 	free(tem_data);
 }
 
+void Packet::prepend_len() {
+	uint8_t *tem_data;	
+	int len_size = sizeof(int);
+
+	tem_data = g_utils.allocate_uint8_mem(BUF_SIZE);
+	memmove(tem_data, &len, len_size * sizeof(uint8_t));
+	memmove(tem_data + len_size, data, len * sizeof(uint8_t));
+	swap(data, tem_data);
+	data_ptr += len_size;
+	len += len_size;
+	free(tem_data);
+}
+
 void Packet::extract_item(bool &item) {
 	int item_len = sizeof(bool);
 

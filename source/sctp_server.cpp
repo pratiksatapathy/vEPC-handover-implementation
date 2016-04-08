@@ -85,7 +85,7 @@ void SctpServer::accept_clients() {
 	while (1) {
 		conn_fd = accept(listen_fd, (struct sockaddr *)&client_sock_addr, &g_sock_addr_len);
 		g_utils.handle_type1_error(conn_fd, "Accept error: sctpserver_acceptclient");
-		g_nw.set_rcv_timeout(conn_fd);
+		g_nw.set_rcv_timeout(conn_fd, 3);
 		g_sync.mlock(mux);
 		while (conn_q.size() >= max_qsize) {
 			g_sync.cndwait(qfull, mux);
@@ -100,7 +100,7 @@ void SctpServer::snd(int conn_fd,  Packet pkt) {
 	int status;
 
 	while (1) {
-		status = write(conn_fd, pkt.data, pkt.len);
+		status = g_nw.write_sctp_pkt(conn_fd, pkt);
 		if (errno == EPERM) {
 			errno = 0;
 			usleep(1000);
@@ -116,11 +116,8 @@ void SctpServer::snd(int conn_fd,  Packet pkt) {
 void SctpServer::rcv(int conn_fd, Packet &pkt) {
 	int status;
 
-	pkt.clear_pkt();
-	status = read(conn_fd, pkt.data, BUF_SIZE);
+	status = g_nw.read_sctp_pkt(conn_fd, pkt);
 	g_utils.handle_type2_error(status, "Read error: sctpserver_rcv");
-	pkt.data_ptr = 0;
-	pkt.len = status;
 }
 
 SctpServer::~SctpServer() {

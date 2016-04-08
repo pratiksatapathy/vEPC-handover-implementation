@@ -1,5 +1,10 @@
 #include "sink.h"
 
+string g_pgw_sgi_ip_addr = "10.14.13.29";
+string g_sink_ip_addr = "10.129.5.193";
+int g_pgw_sgi_port = 8100;
+int g_sink_port = 8500;
+
 void TrafficMonitor::handle_uplink_udata() {
 	struct sockaddr_in src_sock_addr;
 	Packet pkt;

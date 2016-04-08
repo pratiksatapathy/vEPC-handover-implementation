@@ -11,13 +11,6 @@
 
 class SctpServer {
 private:
-	void clear_queue();
-	void init(string, int, int, int (*)(int));
-	void create_workers();
-	void worker_func();
-	void accept_clients();
-	
-public:
 	/* Address parameters */
 	int listen_fd;
 	int port;
@@ -36,6 +29,13 @@ public:
 	pthread_cond_t qempty; /* arg for mwait/msignal - 1 */
 	pthread_cond_t qfull; /* arg for mwait/msignal - 2 */
 
+	void clear_queue();
+	void init(string, int, int, int (*)(int));
+	void create_workers();
+	void worker_func();
+	void accept_clients();
+	
+public:
 	SctpServer();
 	void run(string, int, int, int (*)(int));
 	void snd(int, Packet);

@@ -1,8 +1,13 @@
 #include "hss.h"
 
+string g_hss_ip_addr = "10.14.13.29";
+int g_hss_port = 6000;
+
 Hss::Hss() {
 	g_sync.mux_init(mysql_client_mux);
+}
 
+void Hss::handle_mysql_conn() {
 	/* Lock not necessary since this is called only once per object. Added for uniformity in locking */
 	g_sync.mlock(mysql_client_mux);
 	mysql_client.conn();

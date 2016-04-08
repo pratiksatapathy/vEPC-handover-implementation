@@ -45,29 +45,10 @@
 
 using namespace std;
 
+typedef std::chrono::high_resolution_clock CLOCK;
+typedef std::chrono::microseconds MICROSECONDS;
+
 const int MAX_UE_COUNT = 10000;
-extern int g_reuse;
-extern int g_freeport;
-extern int g_trafmon_port;
-extern int g_mme_port;
-extern int g_hss_port;
-extern int g_sgw_s11_port;
-extern int g_sgw_s1_port;
-extern int g_sgw_s5_port;
-extern int g_pgw_s5_port;
-extern int g_pgw_sgi_port;
-extern int g_sink_port;
-extern string g_ran_ip_addr;
-extern string g_trafmon_ip_addr;
-extern string g_mme_ip_addr;
-extern string g_hss_ip_addr;
-extern string g_sgw_s11_ip_addr;
-extern string g_sgw_s1_ip_addr;
-extern string g_sgw_s5_ip_addr;
-extern string g_pgw_s5_ip_addr;
-extern string g_pgw_sgi_ip_addr;
-extern string g_sink_ip_addr;
-extern struct timeval g_timeout;
 
 class Utils {
 public:

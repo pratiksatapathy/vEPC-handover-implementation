@@ -1,5 +1,11 @@
 #include "ran.h"
 
+string g_ran_ip_addr = "10.14.13.29";
+string g_trafmon_ip_addr = "10.14.13.29";
+string g_mme_ip_addr = "10.14.13.29";
+int g_trafmon_port = 4000;
+int g_mme_port = 5000;
+
 RanContext::RanContext() {
 	emm_state = 0; 
 	ecm_state = 0; 
@@ -118,12 +124,12 @@ TrafficMonitor::~TrafficMonitor() {
 
 }
 
-Ran::Ran(){
-	mme_client.conn(epc_addrs.mme_ip_addr, epc_addrs.mme_port);
-}
-
 void Ran::init(int arg) {
 	ran_ctx.init(arg);
+}
+
+void Ran::conn_mme() {
+	mme_client.conn(epc_addrs.mme_ip_addr, epc_addrs.mme_port);
 }
 
 void Ran::initial_attach() {
@@ -305,8 +311,3 @@ void Ran::detach() {
 	}
 	cout << "ran_detach:" << " detach successful" << endl;
 }
-
-Ran::~Ran(){
-
-}
-

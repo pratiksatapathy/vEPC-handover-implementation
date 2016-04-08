@@ -15,9 +15,14 @@ void init(char *argv[]) {
 	if (mysql_library_init(0, NULL, NULL)) {
 		g_utils.handle_type1_error(-1, "mysql_library_init error: hssserver_init");
 	}
+	signal(SIGPIPE, SIG_IGN);
 }
 
 void run() {
+	/* MySQL connection */
+	g_hss.handle_mysql_conn();
+
+	/* HSS server */
 	cout << "HSS server started" << endl;
 	g_hss.server.run(g_hss_ip_addr, g_hss_port, g_workers_count, handle_mme);
 }

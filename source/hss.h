@@ -11,17 +11,22 @@
 #include "sync.h"
 #include "utils.h"
 
+extern string g_hss_ip_addr;
+extern int g_hss_port;
+
 class Hss {
 private:
+	pthread_mutex_t mysql_client_mux;
+	
 	void get_autn_info(uint64_t, uint64_t&, uint64_t&);
 	void set_loc_info(uint64_t, uint32_t);
 	
 public:
 	SctpServer server;
 	MySql mysql_client;
-	pthread_mutex_t mysql_client_mux;
 
 	Hss();
+	void handle_mysql_conn();
 	void handle_autninfo_req(int, Packet&);
 	void handle_location_update(int, Packet&);
 	~Hss();

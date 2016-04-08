@@ -11,6 +11,15 @@
 #include "udp_server.h"
 #include "utils.h"
 
+extern string g_sgw_s5_ip_addr;
+extern string g_pgw_s5_ip_addr;
+extern string g_pgw_sgi_ip_addr;
+extern string g_sink_ip_addr;
+extern int g_sgw_s5_port;
+extern int g_pgw_s5_port;
+extern int g_pgw_sgi_port;
+extern int g_sink_port;
+
 class UeContext {
 public:
 	/* UE id */
@@ -36,16 +45,6 @@ public:
 
 class Pgw {
 private:
-	void set_ip_addrs();
-	void update_itfid(int, uint32_t, string, uint64_t);
-	uint64_t get_imsi(int, uint32_t, string);
-	bool get_downlink_info(uint64_t, uint32_t&);	
-	void rem_itfid(int, uint32_t, string);
-	void rem_uectx(uint64_t);
-
-public:
-	UdpServer s5_server;
-	UdpServer sgi_server;
 	unordered_map<uint32_t, uint64_t> s5_id; /* S5 UE identification table: s5_cteid_ul -> imsi */
 	unordered_map<string, uint64_t> sgi_id; /* SGI UE identification table: ue_ip_addr -> imsi */
 	unordered_map<uint64_t, UeContext> ue_ctx; /* UE context table: imsi -> UeContext */
@@ -57,6 +56,17 @@ public:
 	pthread_mutex_t s5id_mux; /* Handles s5_id */
 	pthread_mutex_t sgiid_mux; /* Handles sgi_id */
 	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
+	
+	void set_ip_addrs();
+	void update_itfid(int, uint32_t, string, uint64_t);
+	uint64_t get_imsi(int, uint32_t, string);
+	bool get_downlink_info(uint64_t, uint32_t&);	
+	void rem_itfid(int, uint32_t, string);
+	void rem_uectx(uint64_t);
+
+public:
+	UdpServer s5_server;
+	UdpServer sgi_server;
 
 	Pgw();
 	void handle_create_session(struct sockaddr_in, Packet);

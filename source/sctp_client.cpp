@@ -7,6 +7,7 @@ SctpClient::SctpClient() {
 
 void SctpClient::conn(string arg_server_ip_addr, int arg_server_port) {
 	init(arg_server_ip_addr, arg_server_port);
+	g_nw.set_rcv_timeout(conn_fd, 1);
 	connect_with_server();
 }
 
@@ -29,7 +30,7 @@ void SctpClient::snd(Packet pkt) {
 	int status;
 
 	while (1) {
-		status = write(conn_fd, pkt.data, pkt.len);
+		status = g_nw.write_sctp_pkt(conn_fd, pkt);
 		if (errno == EPERM) {
 			errno = 0;
 			usleep(1000);
@@ -45,11 +46,8 @@ void SctpClient::snd(Packet pkt) {
 void SctpClient::rcv(Packet &pkt) {
 	int status;
 
-	pkt.clear_pkt();
-	status = read(conn_fd, pkt.data, BUF_SIZE);
+	status = g_nw.read_sctp_pkt(conn_fd, pkt);
 	g_utils.handle_type2_error(status, "Read error: sctpclient_rcv");
-	pkt.data_ptr = 0;
-	pkt.len = status;
 }
 
 SctpClient::~SctpClient() {

@@ -40,6 +40,7 @@ public:
 	void prepend_gtp_hdr(uint8_t, uint8_t, uint16_t, uint32_t);
 	void prepend_s1ap_hdr(uint8_t, uint16_t, uint32_t, uint32_t);
 	void prepend_diameter_hdr(uint8_t, uint16_t);
+	void prepend_len();
 	void extract_item(bool&);
 	void extract_item(int&);
 	void extract_item(uint8_t&);

@@ -22,6 +22,7 @@ void init(char *argv[]) {
 	g_s11_server_threads.resize(g_s11_server_threads_count);
 	g_s1_server_threads.resize(g_s1_server_threads_count);
 	g_s5_server_threads.resize(g_s5_server_threads_count);
+	signal(SIGPIPE, SIG_IGN);
 }
 
 void run() {

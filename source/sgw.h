@@ -11,6 +11,13 @@
 #include "udp_server.h"
 #include "utils.h"
 
+extern string g_sgw_s11_ip_addr;
+extern string g_sgw_s1_ip_addr;
+extern string g_sgw_s5_ip_addr;
+extern int g_sgw_s11_port;
+extern int g_sgw_s1_port;
+extern int g_sgw_s5_port;
+
 class UeContext {
 public:
 	/* UE location info */
@@ -45,6 +52,17 @@ public:
 
 class Sgw {
 private:
+	unordered_map<uint32_t, uint64_t> s11_id; /* S11 UE identification table: s11_cteid_sgw -> imsi */
+	unordered_map<uint32_t, uint64_t> s1_id; /* S1 UE identification table: s1_uteid_ul -> imsi */
+	unordered_map<uint32_t, uint64_t> s5_id; /* S5 UE identification table: s5_uteid_dl -> imsi */
+	unordered_map<uint64_t, UeContext> ue_ctx; /* UE context table: imsi -> UeContext */
+
+	/* Lock parameters */
+	pthread_mutex_t s11id_mux; /* Handles s11_id */
+	pthread_mutex_t s1id_mux; /* Handles s1_id */
+	pthread_mutex_t s5id_mux; /* Handles s5_id */
+	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
+	
 	void update_itfid(int, uint32_t, uint64_t);
 	uint64_t get_imsi(int, uint32_t);
 	bool get_uplink_info(uint64_t, uint32_t&, string&, int&);
@@ -56,16 +74,6 @@ public:
 	UdpServer s11_server;
 	UdpServer s1_server;
 	UdpServer s5_server;
-	unordered_map<uint32_t, uint64_t> s11_id; /* S11 UE identification table: s11_cteid_sgw -> imsi */
-	unordered_map<uint32_t, uint64_t> s1_id; /* S1 UE identification table: s1_uteid_ul -> imsi */
-	unordered_map<uint32_t, uint64_t> s5_id; /* S5 UE identification table: s5_uteid_dl -> imsi */
-	unordered_map<uint64_t, UeContext> ue_ctx; /* UE context table: imsi -> UeContext */
-
-	/* Lock parameters */
-	pthread_mutex_t s11id_mux; /* Handles s11_id */
-	pthread_mutex_t s1id_mux; /* Handles s1_id */
-	pthread_mutex_t s5id_mux; /* Handles s5_id */
-	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
 
 	Sgw();
 	void handle_create_session(struct sockaddr_in, Packet);

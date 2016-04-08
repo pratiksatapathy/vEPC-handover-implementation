@@ -10,10 +10,6 @@
 
 class SctpClient {
 private:
-	void init(string, int);
-	void connect_with_server();
-	
-public:
 	/* Address parameters */
 	int conn_fd;
 	
@@ -22,6 +18,10 @@ public:
 	string server_ip_addr;
 	struct sockaddr_in server_sock_addr;
 
+	void init(string, int);
+	void connect_with_server();
+	
+public:
 	SctpClient();
 	void conn(string, int);
 	void snd(Packet);

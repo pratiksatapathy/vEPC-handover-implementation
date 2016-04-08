@@ -12,6 +12,7 @@ void check_usage(int argc) {
 
 void init(char *argv[]) {
 	g_workers_count = atoi(argv[1]);
+	signal(SIGPIPE, SIG_IGN);
 }
 
 void run() {

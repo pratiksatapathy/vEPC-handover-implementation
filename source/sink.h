@@ -11,6 +11,11 @@
 #include "udp_server.h"
 #include "utils.h"
 
+extern string g_pgw_sgi_ip_addr;
+extern string g_sink_ip_addr;
+extern int g_pgw_sgi_port;
+extern int g_sink_port;
+
 class TrafficMonitor {
 public:
 	Tun tun;

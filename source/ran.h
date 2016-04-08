@@ -15,6 +15,12 @@
 #include "udp_server.h"
 #include "utils.h"
 
+extern string g_ran_ip_addr;
+extern string g_trafmon_ip_addr;
+extern string g_mme_ip_addr;
+extern int g_trafmon_port;
+extern int g_mme_port;
+
 class RanContext {
 public:
 	/* EMM state 
@@ -95,15 +101,16 @@ public:
 
 class TrafficMonitor {
 private:
+	unordered_map<string, UplinkInfo> uplink_info;
+	
+	/* Lock parameter */
+	pthread_mutex_t uplinkinfo_mux; /* Handles uplink_info */
+
 	bool get_uplink_info(string, uint32_t&, string&, int&);
 
 public:
 	Tun tun;
 	UdpServer server;
-	unordered_map<string, UplinkInfo> uplink_info;
-	
-	/* Lock parameter */
-	pthread_mutex_t uplinkinfo_mux; /* Handles uplink_info */
 
 	TrafficMonitor();
 	void handle_uplink_udata();
@@ -114,24 +121,23 @@ public:
 
 class Ran {
 private:
-	void set_crypt_context();
-	void set_integrity_context();
-	
-public:
 	RanContext ran_ctx;
 	EpcAddrs epc_addrs;
 	SctpClient mme_client;
 	Packet pkt;
 
-	Ran();
+	void set_crypt_context();
+	void set_integrity_context();
+	
+public:
 	void init(int);
+	void conn_mme();
 	void initial_attach();
 	void authenticate();
 	void set_security();
 	void set_eps_session(TrafficMonitor&);
 	void transfer_data();
 	void detach();	
-	~Ran();
 };
 
 #endif /* RAN_H */

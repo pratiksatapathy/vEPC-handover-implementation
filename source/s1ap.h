@@ -4,12 +4,13 @@
 #include "utils.h"
 
 class S1ap {
+private:
+	/* 8 - 23 Message length (Size of payload excluding S1AP header) */
+	uint16_t msg_len;	
+	
 public:
 	/* 0 - 7 Message Type */
 	uint8_t msg_type; 
-
-	/* 8 - 23 Message length (Size of payload excluding S1AP header) */
-	uint16_t msg_len;	
 
 	/* 24 - 55 S1AP eNodeB UE ID */
 	uint32_t enodeb_s1ap_ue_id;

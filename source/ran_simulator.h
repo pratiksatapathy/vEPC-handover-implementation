@@ -19,6 +19,10 @@
 extern time_t g_start_time;
 extern int g_threads_count;
 extern double g_req_duration;
+extern uint64_t g_run_duration;
+extern int g_tot_regs;
+extern uint64_t g_tot_regstime;
+extern pthread_mutex_t g_mux;
 extern thread g_mon_thread;
 extern vector<thread> g_threads;
 extern TrafficMonitor g_traf_mon;

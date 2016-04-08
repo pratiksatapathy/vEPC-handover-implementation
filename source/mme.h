@@ -14,6 +14,20 @@
 #include "udp_client.h"
 #include "utils.h"
 
+extern string g_trafmon_ip_addr;
+extern string g_mme_ip_addr;
+extern string g_hss_ip_addr;
+extern string g_sgw_s11_ip_addr;
+extern string g_sgw_s1_ip_addr;
+extern string g_sgw_s5_ip_addr;
+extern string g_pgw_s5_ip_addr;
+extern int g_trafmon_port;
+extern int g_mme_port;
+extern int g_hss_port;
+extern int g_sgw_s11_port;
+extern int g_sgw_s1_port;
+extern int g_sgw_s5_port;
+extern int g_pgw_s5_port;
 extern uint64_t g_timer;
 
 class UeContext {
@@ -98,6 +112,15 @@ public:
 
 class Mme {
 private:
+	MmeIds mme_ids;
+	int ue_count;
+	unordered_map<uint32_t, uint64_t> s1mme_id; /* S1_MME UE identification table: mme_s1ap_ue_id -> guti */
+	unordered_map<uint64_t, UeContext> ue_ctx; /* UE context table: guti -> UeContext */
+
+	/* Lock parameters */
+	pthread_mutex_t s1mmeid_mux; /* Handles table1 and ue_count */
+	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
+	
 	void set_crypt_context(uint64_t);
 	void set_integrity_context(uint64_t);
 	void set_pgw_info(uint64_t);
@@ -107,14 +130,6 @@ private:
 	
 public:
 	SctpServer server;
-	MmeIds mme_ids;
-	int ue_count;
-	unordered_map<uint32_t, uint64_t> s1mme_id; /* S1_MME UE identification table: mme_s1ap_ue_id -> guti */
-	unordered_map<uint64_t, UeContext> ue_ctx; /* UE context table: guti -> UeContext */
-
-	/* Lock parameters */
-	pthread_mutex_t s1mmeid_mux; /* Handles table1 and ue_count */
-	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
 
 	Mme();
 	void handle_initial_attach(int, Packet);

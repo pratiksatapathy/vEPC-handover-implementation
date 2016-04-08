@@ -19,12 +19,12 @@ public:
 
 class MySql {
 private:
-	void handle_db_error();
-	
-public:
 	MYSQL *conn_fd;
 	ConnInfo conn_info;
 
+	void handle_db_error();
+	
+public:
 	MySql();
 	void conn();
 	void handle_query(string, MYSQL_RES**);
