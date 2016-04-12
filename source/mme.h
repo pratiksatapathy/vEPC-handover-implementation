@@ -113,7 +113,7 @@ public:
 class Mme {
 private:
 	MmeIds mme_ids;
-	int ue_count;
+	uint64_t ue_count;
 	unordered_map<uint32_t, uint64_t> s1mme_id; /* S1_MME UE identification table: mme_s1ap_ue_id -> guti */
 	unordered_map<uint64_t, UeContext> ue_ctx; /* UE context table: guti -> UeContext */
 
@@ -122,6 +122,7 @@ private:
 	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
 	
 	void clrstl();
+	uint32_t get_s11cteidmme(uint64_t);
 	void set_crypt_context(uint64_t);
 	void set_integrity_context(uint64_t);
 	void set_pgw_info(uint64_t);

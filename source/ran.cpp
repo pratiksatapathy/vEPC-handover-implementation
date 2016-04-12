@@ -1,16 +1,16 @@
 #include "ran.h"
 
-string g_ran_ip_addr = "10.14.13.29";
-string g_trafmon_ip_addr = "10.14.13.29";
-string g_mme_ip_addr = "10.14.13.29";
-int g_trafmon_port = 4000;
-int g_mme_port = 5000;
-
-// string g_ran_ip_addr = "10.129.5.193";
-// string g_trafmon_ip_addr = "10.129.5.193";
-// string g_mme_ip_addr = "10.129.5.193";
+// string g_ran_ip_addr = "10.14.13.29";
+// string g_trafmon_ip_addr = "10.14.13.29";
+// string g_mme_ip_addr = "10.14.13.29";
 // int g_trafmon_port = 4000;
 // int g_mme_port = 5000;
+
+string g_ran_ip_addr = "10.129.5.193";
+string g_trafmon_ip_addr = "10.129.5.193";
+string g_mme_ip_addr = "10.129.5.193";
+int g_trafmon_port = 4000;
+int g_mme_port = 5000;
 
 RanContext::RanContext() {
 	emm_state = 0; 
@@ -191,6 +191,8 @@ bool Ran::authenticate() {
 	return true;
 }
 
+//
+
 bool Ran::set_security() {
 	uint8_t *hmac_res;
 	uint8_t *hmac_xres;
@@ -211,18 +213,22 @@ bool Ran::set_security() {
 	pkt.extract_item(ran_ctx.nas_int_algo);
 	set_crypt_context();
 	set_integrity_context();
+
 	// g_integrity.get_hmac(pkt.data, pkt.len, hmac_res, ran_ctx.k_nas_int);
 	// res = g_integrity.cmp_hmacs(hmac_res, hmac_xres);
 	// if (res == false) {
 	// 	cout << "ran_setsecurity:" << " hmac security mode command failure: " << ran_ctx.imsi << endl;
 	// 	return false;
 	// }
+
 	cout << "ran_setsecurity:" << " security mode command success: " << ran_ctx.imsi << endl;
 	res = true;
 	pkt.clear_pkt();
 	pkt.append_item(res);
+
 	// g_crypt.enc(pkt, ran_ctx.k_nas_enc);
 	// g_integrity.add_hmac(pkt, ran_ctx.k_nas_int);
+
 	pkt.prepend_s1ap_hdr(3, pkt.len, ran_ctx.enodeb_s1ap_ue_id, ran_ctx.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
 	cout << "ran_setsecurity:" << " security mode complete success: " << ran_ctx.imsi << endl;
@@ -250,12 +256,14 @@ bool Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	}	
 	cout << "ran_setepssession:" << " attach accept received from mme: " << ran_ctx.imsi << endl;
 	pkt.extract_s1ap_hdr();
+	
 	// res = g_integrity.hmac_check(pkt, ran_ctx.k_nas_int);
 	// if (res == false) {
 	// 	cout << "ran_setepssession:" << " hmac attach accept failure: " << ran_ctx.imsi << endl;
 	// 	return false;
 	// }
 	// g_crypt.dec(pkt, ran_ctx.k_nas_enc);
+	
 	pkt.extract_item(ran_ctx.guti);
 	pkt.extract_item(ran_ctx.eps_bearer_id);
 	pkt.extract_item(ran_ctx.e_rab_id);
@@ -278,8 +286,10 @@ bool Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	pkt.clear_pkt();
 	pkt.append_item(ran_ctx.eps_bearer_id);
 	pkt.append_item(ran_ctx.s1_uteid_dl);
+	
 	// g_crypt.enc(pkt, ran_ctx.k_nas_enc);
 	// g_integrity.add_hmac(pkt, ran_ctx.k_nas_int);
+	
 	pkt.prepend_s1ap_hdr(4, pkt.len, ran_ctx.enodeb_s1ap_ue_id, ran_ctx.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
 	cout << "ran_setepssession:" << " attach complete sent to mme: " << ran_ctx.imsi << endl;
@@ -318,8 +328,10 @@ bool Ran::detach() {
 	pkt.append_item(ran_ctx.guti);
 	pkt.append_item(ran_ctx.ksi_asme);
 	pkt.append_item(detach_type);
+	
 	// g_crypt.enc(pkt, ran_ctx.k_nas_enc);
 	// g_integrity.add_hmac(pkt, ran_ctx.k_nas_int);
+	
 	pkt.prepend_s1ap_hdr(5, pkt.len, ran_ctx.enodeb_s1ap_ue_id, ran_ctx.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
 	cout << "ran_detach:" << " detach request sent to mme: " << ran_ctx.imsi << endl;
@@ -329,12 +341,14 @@ bool Ran::detach() {
 	}	
 	cout << "ran_detach:" << " detach complete received from mme: " << ran_ctx.imsi << endl;
 	pkt.extract_s1ap_hdr();
+	
 	// res = g_integrity.hmac_check(pkt, ran_ctx.k_nas_int);
 	// if (res == false) {
 	// 	cout << "ran_detach:" << " hmac detach failure: " << ran_ctx.imsi << endl;
 	// 	return false;
 	// }
 	// g_crypt.dec(pkt, ran_ctx.k_nas_enc);
+	
 	pkt.extract_item(res);
 	if (res == false) {
 		cout << "ran_detach:" << " detach failure: " << ran_ctx.imsi << endl;

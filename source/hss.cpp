@@ -1,10 +1,10 @@
 #include "hss.h"
 
-string g_hss_ip_addr = "10.14.13.29";
-int g_hss_port = 6000;
-
-// string g_hss_ip_addr = "10.129.5.193";
+// string g_hss_ip_addr = "10.14.13.29";
 // int g_hss_port = 6000;
+
+string g_hss_ip_addr = "10.129.5.193";
+int g_hss_port = 6000;
 
 Hss::Hss() {
 	g_sync.mux_init(mysql_client_mux);
