@@ -61,19 +61,19 @@ void handle_s5_traffic() {
 		switch(pkt.gtp_hdr.msg_type) {
 			/* Create session */
 			case 1:
-				cout << "pgwserver_handles5traffic:" << " case 1:" << endl;	
+				cout << "pgwserver_handles5traffic:" << " case 1: create session" << endl;	
 				g_pgw.handle_create_session(src_sock_addr, pkt);
 				break;
 
 			/* Uplink userplane data */
 			case 2:
-				cout << "pgwserver_handles5traffic:" << " case 2:" << endl;	
+				cout << "pgwserver_handles5traffic:" << " case 2: uplink udata" << endl;	
 				g_pgw.handle_uplink_udata(pkt);
 				break;
 
 			/* Detach */
 			case 4:
-				cout << "pgwserver_handles5traffic:" << " case 4:" << endl;	
+				cout << "pgwserver_handles5traffic:" << " case 4: detach" << endl;	
 				g_pgw.handle_detach(src_sock_addr, pkt);
 				break;
 
@@ -92,7 +92,7 @@ void handle_sgi_traffic() {
 		g_pgw.sgi_server.rcv(src_sock_addr, pkt);
 
 		/* Downlink userplane data */
-		cout << "pgwserver_handlesgitraffic:" << endl;	
+		cout << "pgwserver_handlesgitraffic: downlink udata" << endl;	
 		g_pgw.handle_downlink_udata(pkt);
 	}	
 }

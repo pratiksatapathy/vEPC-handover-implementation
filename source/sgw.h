@@ -63,6 +63,7 @@ private:
 	pthread_mutex_t s5id_mux; /* Handles s5_id */
 	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
 	
+	void clrstl();
 	void update_itfid(int, uint32_t, uint64_t);
 	uint64_t get_imsi(int, uint32_t);
 	bool get_uplink_info(uint64_t, uint32_t&, string&, int&);

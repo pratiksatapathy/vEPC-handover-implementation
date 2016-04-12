@@ -34,7 +34,7 @@ int handle_ue(int conn_fd) {
 		switch (pkt.s1ap_hdr.msg_type) {
 			/* Initial Attach request */
 			case 1: 
-				cout << "mmeserver_handleue:" << " case 1:" << endl;
+				cout << "mmeserver_handleue:" << " case 1: initial attach" << endl;
 				g_mme.handle_initial_attach(conn_fd, pkt);
 				break;
 
@@ -48,7 +48,7 @@ int handle_ue(int conn_fd) {
 		switch (pkt.s1ap_hdr.msg_type) {
 			/* Authentication response */
 			case 2: 
-				cout << "mmeserver_handleue:" << " case 2:" << endl;
+				cout << "mmeserver_handleue:" << " case 2: authentication response" << endl;
 				res = g_mme.handle_autn(conn_fd, pkt);
 				if (res) {
 					g_mme.handle_security_mode_cmd(conn_fd, pkt);
@@ -57,7 +57,7 @@ int handle_ue(int conn_fd) {
 
 			/* Security Mode Complete */
 			case 3: 
-				cout << "mmeserver_handleue:" << " case 3:" << endl;
+				cout << "mmeserver_handleue:" << " case 3: security mode complete" << endl;
 				res = g_mme.handle_security_mode_complete(conn_fd, pkt);
 				if (res) {
 					g_mme.handle_location_update(pkt);
@@ -67,14 +67,14 @@ int handle_ue(int conn_fd) {
 
 			/* Attach Complete */
 			case 4: 
-				cout << "mmeserver_handleue:" << " case 4:" << endl;
+				cout << "mmeserver_handleue:" << " case 4: attach complete" << endl;
 				g_mme.handle_attach_complete(pkt);
 				g_mme.handle_modify_bearer(pkt);
 				break;
 
 			/* Detach request */
 			case 5: 
-				cout << "mmeserver_handleue:" << " case 5:" << endl;
+				cout << "mmeserver_handleue:" << " case 5: detach request" << endl;
 				g_mme.handle_detach(conn_fd, pkt);
 				break;
 

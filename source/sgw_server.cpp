@@ -77,19 +77,19 @@ void handle_s11_traffic() {
 		switch(pkt.gtp_hdr.msg_type) {
 			/* Create session */
 			case 1:
-				cout << "sgwserver_handles11traffic:" << " case 1:" << endl;
+				cout << "sgwserver_handles11traffic:" << " case 1: create session" << endl;
 				g_sgw.handle_create_session(src_sock_addr, pkt);
 				break;
 
 			/* Modify bearer */
 			case 2:
-				cout << "sgwserver_handles11traffic:" << " case 2:" << endl;
+				cout << "sgwserver_handles11traffic:" << " case 2: modify bearer" << endl;
 				g_sgw.handle_modify_bearer(src_sock_addr, pkt);
 				break;
 
 			/* Detach */
 			case 3:
-				cout << "sgwserver_handles11traffic:" << " case 3:" << endl;
+				cout << "sgwserver_handles11traffic:" << " case 3: detach" << endl;
 				g_sgw.handle_detach(src_sock_addr, pkt);
 				break;
 
@@ -110,7 +110,7 @@ void handle_s1_traffic() {
 		switch(pkt.gtp_hdr.msg_type) {
 			/* Uplink userplane data */
 			case 1:
-				cout << "sgwserver_handles1traffic:" << " case 1:" << endl;
+				cout << "sgwserver_handles1traffic:" << " case 1: uplink udata" << endl;
 				g_sgw.handle_uplink_udata(pkt);
 				break;
 
@@ -131,7 +131,7 @@ void handle_s5_traffic() {
 		switch(pkt.gtp_hdr.msg_type) {
 			/* Downlink userplane data */
 			case 3:
-				cout << "sgwserver_handles5traffic:" << " case 3:" << endl;
+				cout << "sgwserver_handles5traffic:" << " case 3: downlink udata" << endl;
 				g_sgw.handle_downlink_udata(pkt);
 				break;
 

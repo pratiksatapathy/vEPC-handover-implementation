@@ -1,18 +1,18 @@
 #include "sgw.h"
 
-// string g_sgw_s11_ip_addr = "10.14.13.29";
-// string g_sgw_s1_ip_addr = "10.14.13.29";
-// string g_sgw_s5_ip_addr = "10.14.13.29";
-// int g_sgw_s11_port = 7000;
-// int g_sgw_s1_port = 7100;
-// int g_sgw_s5_port = 7200;
-
-string g_sgw_s11_ip_addr = "10.129.5.193";
-string g_sgw_s1_ip_addr = "10.129.5.193";
-string g_sgw_s5_ip_addr = "10.129.5.193";
+string g_sgw_s11_ip_addr = "10.14.13.29";
+string g_sgw_s1_ip_addr = "10.14.13.29";
+string g_sgw_s5_ip_addr = "10.14.13.29";
 int g_sgw_s11_port = 7000;
 int g_sgw_s1_port = 7100;
 int g_sgw_s5_port = 7200;
+
+// string g_sgw_s11_ip_addr = "10.129.5.193";
+// string g_sgw_s1_ip_addr = "10.129.5.193";
+// string g_sgw_s5_ip_addr = "10.129.5.193";
+// int g_sgw_s11_port = 7000;
+// int g_sgw_s1_port = 7100;
+// int g_sgw_s5_port = 7200;
 
 UeContext::UeContext() {
 	tai = 0; 
@@ -50,10 +50,18 @@ UeContext::~UeContext() {
 }
 
 Sgw::Sgw() {
+	clrstl();
 	g_sync.mux_init(s11id_mux);	
 	g_sync.mux_init(s1id_mux);	
 	g_sync.mux_init(s5id_mux);	
 	g_sync.mux_init(uectx_mux);	
+}
+
+void Sgw::clrstl() {
+	s11_id.clear();
+	s1_id.clear();
+	s5_id.clear();
+	ue_ctx.clear();
 }
 
 void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
@@ -84,6 +92,7 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	s5_uteid_dl = s11_cteid_mme;
 	s11_cteid_sgw = s11_cteid_mme;
 	s5_cteid_dl = s11_cteid_mme;
+	cout << "--" << pgw_s5_ip_addr << "--" << pkt.len << "--: " << imsi << endl;
 	
 	update_itfid(11, s11_cteid_sgw, imsi);
 	update_itfid(1, s1_uteid_ul, imsi);
@@ -92,6 +101,7 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	ue_ctx[imsi].init(tai, apn_in_use, eps_bearer_id, s1_uteid_ul, s5_uteid_dl, s11_cteid_mme, s11_cteid_sgw, s5_cteid_dl, pgw_s5_ip_addr, pgw_s5_port);
 	ue_ctx[imsi].tai = tai;
 	g_sync.munlock(uectx_mux);
+	cout << "Entry added for this imsi: " << imsi << endl;
 
 	pgw_client.conn(g_sgw_s5_ip_addr, pgw_s5_ip_addr, pgw_s5_port);
 	pkt.clear_pkt();
@@ -103,9 +113,9 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(tai);
 	pkt.prepend_gtp_hdr(2, 1, pkt.len, 0);
 	pgw_client.snd(pkt);
-	cout << "sgw_handlecreatesession:" << " create session request sent to pgw" << endl;
+	cout << "sgw_handlecreatesession:" << " create session request sent to pgw: " << imsi << endl;
 	pgw_client.rcv(pkt);
-	cout << "sgw_handlecreatesession:" << " create session response received from pgw" << endl;
+	cout << "sgw_handlecreatesession:" << " create session response received from pgw: " << imsi << endl;
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(s5_cteid_ul);
 	pkt.extract_item(eps_bearer_id);
@@ -125,7 +135,7 @@ void Sgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(s5_uteid_dl);
 	pkt.prepend_gtp_hdr(2, 1, pkt.len, s11_cteid_mme);
 	s11_server.snd(src_sock_addr, pkt);
-	cout << "sgw_handlecreatesession:" << " create session response sent to mme" << endl;
+	cout << "sgw_handlecreatesession:" << " create session response sent to mme: " << imsi << endl;
 }
 
 void Sgw::handle_modify_bearer(struct sockaddr_in src_sock_addr, Packet pkt) {
@@ -138,6 +148,10 @@ void Sgw::handle_modify_bearer(struct sockaddr_in src_sock_addr, Packet pkt) {
 	bool res;
 
 	imsi = get_imsi(11, pkt.gtp_hdr.teid);
+	if (imsi == 0) {
+		cout << "sgw_handlemodifybearer:" << " :zero imsi " << pkt.gtp_hdr.teid << " " << pkt.len << ": " << imsi << endl;
+		g_utils.handle_type1_error(-1, "Zero imsi: sgw_handlemodifybearer");
+	}
 	pkt.extract_item(eps_bearer_id);
 	pkt.extract_item(s1_uteid_dl);
 	pkt.extract_item(enodeb_ip_addr);
@@ -153,7 +167,7 @@ void Sgw::handle_modify_bearer(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(res);
 	pkt.prepend_gtp_hdr(2, 2, pkt.len, s11_cteid_mme);
 	s11_server.snd(src_sock_addr, pkt);
-	cout << "sgw_handlemodifybearer:" << " modify bearer response sent to mme" << endl;
+	cout << "sgw_handlemodifybearer:" << " modify bearer response sent to mme: " << imsi << endl;
 }
 
 void Sgw::handle_uplink_udata(Packet pkt) {
@@ -172,7 +186,7 @@ void Sgw::handle_uplink_udata(Packet pkt) {
 		pkt.prepend_gtp_hdr(1, 2, pkt.len, s5_uteid_ul);
 		pgw_s5_client.conn(g_sgw_s5_ip_addr, pgw_s5_ip_addr, pgw_s5_port);
 		pgw_s5_client.snd(pkt);		
-		cout << "sgw_handleuplinkudata:" << " uplink udata forwarded to pgw" << endl;
+		cout << "sgw_handleuplinkudata:" << " uplink udata forwarded to pgw: " << imsi << endl;
 	}
 }
 
@@ -192,7 +206,7 @@ void Sgw::handle_downlink_udata(Packet pkt) {
 		pkt.prepend_gtp_hdr(1, 2, pkt.len, s1_uteid_dl);
 		enodeb_client.conn(g_sgw_s1_ip_addr, enodeb_ip_addr, enodeb_port);
 		enodeb_client.snd(pkt);
-		cout << "sgw_handledownlinkudata:" << " downlink udata forwarded to enodeb" << endl;
+		cout << "sgw_handledownlinkudata:" << " downlink udata forwarded to enodeb: " << imsi << endl;
 	}
 }
 
@@ -211,42 +225,55 @@ void Sgw::handle_detach(struct sockaddr_in src_sock_addr, Packet pkt) {
 	bool res;
 
 	imsi = get_imsi(11, pkt.gtp_hdr.teid);
+	if (imsi == 0) {
+		cout << "imsi is zero" << " " << pkt.gtp_hdr.teid << " " << pkt.len << ": " << imsi << endl;
+		// g_utils.handle_type1_error(-1, "No imsi found for this teid " + to_string(pkt.gtp_hdr.teid));
+	}
 	pkt.extract_item(eps_bearer_id);
 	pkt.extract_item(tai);
 	g_sync.mlock(uectx_mux);
+	if (ue_ctx.find(imsi) == ue_ctx.end()) {
+		cout << "ERR ERR ERR: " << imsi << endl;
+		g_utils.handle_type1_error(-1, "No values found for this imsi " + to_string(imsi) + ": sgw_handledetach");
+	}
 	pgw_s5_ip_addr = ue_ctx[imsi].pgw_s5_ip_addr;
 	pgw_s5_port = ue_ctx[imsi].pgw_s5_port;
 	s5_cteid_ul = ue_ctx[imsi].s5_cteid_ul;
 	s11_cteid_mme = ue_ctx[imsi].s11_cteid_mme;
 	s11_cteid_sgw = ue_ctx[imsi].s11_cteid_sgw;
 	s1_uteid_ul = ue_ctx[imsi].s1_uteid_ul;
-	s5_uteid_dl = ue_ctx[imsi].s5_uteid_dl;
+	s5_uteid_dl = ue_ctx[imsi].s5_uteid_dl;	
 	g_sync.munlock(uectx_mux);
+	if (imsi == 0) {
+		cout << "ERR: " << pgw_s5_ip_addr << " " << pgw_s5_port << " " << s5_cteid_ul << " " << s11_cteid_mme << " " << imsi << endl;
+	}
+
 	pgw_s5_client.conn(g_sgw_s5_ip_addr, pgw_s5_ip_addr, pgw_s5_port);
 	pkt.clear_pkt();
 	pkt.append_item(eps_bearer_id);
 	pkt.append_item(tai);
 	pkt.prepend_gtp_hdr(2, 4, pkt.len, s5_cteid_ul);
 	pgw_s5_client.snd(pkt);
-	cout << "sgw_handledetach:" << " detach request sent to pgw" << endl;
+	cout << "sgw_handledetach:" << " detach request sent to pgw: " << imsi << endl;
 	pgw_s5_client.rcv(pkt);
-	cout << "sgw_handledetach:" << " detach response received from pgw" << endl;
+	cout << "sgw_handledetach:" << " detach response received from pgw: " << imsi << endl;
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(res);
 	if (res == false) {
-		cout << "sgw_handledetach:" << " pgw detach failure" << endl;
+		cout << "sgw_handledetach:" << " pgw detach failure: " << imsi << endl;
 		return;
 	}
 	pkt.clear_pkt();
 	pkt.append_item(res);
 	pkt.prepend_gtp_hdr(2, 3, pkt.len, s11_cteid_mme);
 	s11_server.snd(src_sock_addr, pkt);
-	cout << "sgw_handledetach:" << " detach response sent to mme" << endl;
+	cout << "sgw_handledetach:" << " detach response sent to mme: " << imsi << endl;
 	rem_itfid(11, s11_cteid_sgw);
 	rem_itfid(1, s1_uteid_ul);
 	rem_itfid(5, s5_uteid_dl);
 	rem_uectx(imsi);
-	cout << "sgw_handledetach:" << " detach successful" << endl;
+	cout << "Entry removed for this imsi: " << imsi << " " << endl;
+	cout << "sgw_handledetach:" << " detach successful: " << imsi << endl;
 }
 
 void Sgw::update_itfid(int itf_id_no, uint32_t teid, uint64_t imsi) {

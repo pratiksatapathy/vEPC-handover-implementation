@@ -16,7 +16,6 @@ void Network::set_inet_sock_addr(string ip_addr, int port, struct sockaddr_in &s
 	sock_addr.sin_port = htons(port);
 	status = inet_aton(ip_addr.c_str(), &sock_addr.sin_addr);	
 	if (status == 0) {
-		cout << "Address " << ip_addr << endl;
 		g_utils.handle_type1_error(-1, "inet_aton error: network_setinetsockaddr");
 	}
 }

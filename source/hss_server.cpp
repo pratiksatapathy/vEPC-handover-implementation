@@ -39,13 +39,13 @@ int handle_mme(int conn_fd) {
 	switch (pkt.diameter_hdr.msg_type) {
 		/* Authentication info req */
 		case 1:
-			cout << "hssserver_handlemme:" << " case 1:" << endl;
+			cout << "hssserver_handlemme:" << " case 1: autn info req" << endl;
 			g_hss.handle_autninfo_req(conn_fd, pkt);
 			break;
 
 		/* Location update */
 		case 2:
-			cout << "hssserver_handlemme:" << " case 2:" << endl;
+			cout << "hssserver_handlemme:" << " case 2: loc update" << endl;
 			g_hss.handle_location_update(conn_fd, pkt);
 			break;
 

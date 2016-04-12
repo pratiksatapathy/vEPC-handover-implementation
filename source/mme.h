@@ -118,9 +118,10 @@ private:
 	unordered_map<uint64_t, UeContext> ue_ctx; /* UE context table: guti -> UeContext */
 
 	/* Lock parameters */
-	pthread_mutex_t s1mmeid_mux; /* Handles table1 and ue_count */
+	pthread_mutex_t s1mmeid_mux; /* Handles s1mme_id and ue_count */
 	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
 	
+	void clrstl();
 	void set_crypt_context(uint64_t);
 	void set_integrity_context(uint64_t);
 	void set_pgw_info(uint64_t);

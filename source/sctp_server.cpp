@@ -4,13 +4,13 @@ SctpServer::SctpServer() {
 	listen_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
 	g_utils.handle_type1_error(listen_fd, "Socket error: sctpserver_sctpserver");
 	max_qsize = INT_MAX;
-	clear_queue();
+	clrstl();
 	g_sync.mux_init(mux);
 	g_sync.cndvar_init(qempty);
 	g_sync.cndvar_init(qfull);
 }
 
-void SctpServer::clear_queue() {
+void SctpServer::clrstl() {
 	while (!conn_q.empty()) {
 		conn_q.pop();
 	}

@@ -1,27 +1,12 @@
 #include "mme.h"
 
-// string g_trafmon_ip_addr = "10.14.13.29";
-// string g_mme_ip_addr = "10.14.13.29";
-// string g_hss_ip_addr = "10.14.13.29";
-// string g_sgw_s11_ip_addr = "10.14.13.29";
-// string g_sgw_s1_ip_addr = "10.14.13.29";
-// string g_sgw_s5_ip_addr = "10.14.13.29";
-// string g_pgw_s5_ip_addr = "10.14.13.29";
-// int g_trafmon_port = 4000;
-// int g_mme_port = 5000;
-// int g_hss_port = 6000;
-// int g_sgw_s11_port = 7000;
-// int g_sgw_s1_port = 7100;
-// int g_sgw_s5_port = 7200;
-// int g_pgw_s5_port = 8000;
-
-string g_trafmon_ip_addr = "10.129.5.193";
-string g_mme_ip_addr = "10.129.5.193";
-string g_hss_ip_addr = "10.129.5.193";
-string g_sgw_s11_ip_addr = "10.129.5.193";
-string g_sgw_s1_ip_addr = "10.129.5.193";
-string g_sgw_s5_ip_addr = "10.129.5.193";
-string g_pgw_s5_ip_addr = "10.129.5.193";
+string g_trafmon_ip_addr = "10.14.13.29";
+string g_mme_ip_addr = "10.14.13.29";
+string g_hss_ip_addr = "10.14.13.29";
+string g_sgw_s11_ip_addr = "10.14.13.29";
+string g_sgw_s1_ip_addr = "10.14.13.29";
+string g_sgw_s5_ip_addr = "10.14.13.29";
+string g_pgw_s5_ip_addr = "10.14.13.29";
 int g_trafmon_port = 4000;
 int g_mme_port = 5000;
 int g_hss_port = 6000;
@@ -29,6 +14,21 @@ int g_sgw_s11_port = 7000;
 int g_sgw_s1_port = 7100;
 int g_sgw_s5_port = 7200;
 int g_pgw_s5_port = 8000;
+
+// string g_trafmon_ip_addr = "10.129.5.193";
+// string g_mme_ip_addr = "10.129.5.193";
+// string g_hss_ip_addr = "10.129.5.193";
+// string g_sgw_s11_ip_addr = "10.129.5.193";
+// string g_sgw_s1_ip_addr = "10.129.5.193";
+// string g_sgw_s5_ip_addr = "10.129.5.193";
+// string g_pgw_s5_ip_addr = "10.129.5.193";
+// int g_trafmon_port = 4000;
+// int g_mme_port = 5000;
+// int g_hss_port = 6000;
+// int g_sgw_s11_port = 7000;
+// int g_sgw_s1_port = 7100;
+// int g_sgw_s5_port = 7200;
+// int g_pgw_s5_port = 8000;
 
 uint64_t g_timer = 100;
 
@@ -95,8 +95,14 @@ MmeIds::~MmeIds() {
 
 Mme::Mme() {
 	ue_count = 0;
+	clrstl();
 	g_sync.mux_init(s1mmeid_mux);
 	g_sync.mux_init(uectx_mux);
+}
+
+void Mme::clrstl() {
+	s1mme_id.clear();
+	ue_ctx.clear();
 }
 
 void Mme::handle_initial_attach(int conn_fd, Packet pkt) {
@@ -122,7 +128,7 @@ void Mme::handle_initial_attach(int conn_fd, Packet pkt) {
 	pkt.extract_item(ksi_asme); /* No use in this case */
 	pkt.extract_item(nw_capability); /* No use in this case */
 
-	cout << "mme_handletype1attach:" << " imsi:" << imsi << " tai:" << tai << " ksi_asme:" << ksi_asme << " nw_capability:" << nw_capability << endl;
+	cout << "mme_handletype1attach:" << " imsi:" << imsi << " tai:" << tai << " ksi_asme:" << ksi_asme << " nw_capability" << " " << nw_capability << endl;
 	enodeb_s1ap_ue_id = pkt.s1ap_hdr.enodeb_s1ap_ue_id;
 	
 
@@ -146,7 +152,7 @@ void Mme::handle_initial_attach(int conn_fd, Packet pkt) {
 	pkt.prepend_diameter_hdr(1, pkt.len);
 	hss_client.snd(pkt);
 	
-	cout << "mme_handletype1attach:" << " request sent to hss" << endl;
+	cout << "mme_handletype1attach:" << " request sent to hss: " << guti << endl;
 
 	hss_client.rcv(pkt);
 
@@ -163,7 +169,7 @@ void Mme::handle_initial_attach(int conn_fd, Packet pkt) {
 	ksi_asme = ue_ctx[guti].ksi_asme;
 	g_sync.munlock(uectx_mux);
 
-	cout << "mme_handletype1attach:" << " autn:" << autn_num <<" rand:" << rand_num << " xres:" << xres << " k_asme:" << k_asme << endl;
+	cout << "mme_handletype1attach:" << " autn:" << autn_num <<" rand:" << rand_num << " xres:" << xres << " k_asme:" << k_asme << " " << guti << endl;
 
 	pkt.clear_pkt();
 	pkt.append_item(autn_num);
@@ -171,7 +177,7 @@ void Mme::handle_initial_attach(int conn_fd, Packet pkt) {
 	pkt.append_item(ksi_asme);
 	pkt.prepend_s1ap_hdr(1, pkt.len, enodeb_s1ap_ue_id, mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
-	cout << "mme_handletype1attach:" << " autn request sent to ran" << endl;	
+	cout << "mme_handletype1attach:" << " autn request sent to ran: " << guti << endl;	
 }
 
 bool Mme::handle_autn(int conn_fd, Packet pkt) {
@@ -186,12 +192,15 @@ bool Mme::handle_autn(int conn_fd, Packet pkt) {
 	g_sync.munlock(uectx_mux);
 	if (res == xres) {
 		/* Success */
-		cout << "mme_handleautn:" << " Authentication successful" << endl;
+		cout << "mme_handleautn:" << " Authentication successful: " << guti << endl;
 		return true;
 	}
 	else {
 		rem_itfid(pkt.s1ap_hdr.mme_s1ap_ue_id);
 		rem_uectx(guti);		
+		g_sync.mlock(s1mmeid_mux);
+		ue_count--;
+		g_sync.munlock(s1mmeid_mux);		
 		return false;
 	}
 }
@@ -222,10 +231,10 @@ void Mme::handle_security_mode_cmd(int conn_fd, Packet pkt) {
 	pkt.append_item(nw_capability);
 	pkt.append_item(nas_enc_algo);
 	pkt.append_item(nas_int_algo);
-	g_integrity.add_hmac(pkt, k_nas_int);
+	// g_integrity.add_hmac(pkt, k_nas_int);
 	pkt.prepend_s1ap_hdr(2, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
-	cout << "mme_handlesecuritymodecmd:" << " security mode command sent" << endl;
+	cout << "mme_handlesecuritymodecmd:" << " security mode command sent: " << guti << endl;
 }
 
 void Mme::set_crypt_context(uint64_t guti) {
@@ -253,23 +262,23 @@ bool Mme::handle_security_mode_complete(int conn_fd, Packet pkt) {
 	k_nas_enc = ue_ctx[guti].k_nas_enc;
 	k_nas_int = ue_ctx[guti].k_nas_int;
 	g_sync.munlock(uectx_mux);
-	res = g_integrity.hmac_check(pkt, k_nas_int);
-	if (res == false) {
-		cout << "mme_handlesecuritymodecomplete:" << " hmac failure" << endl;
-		return false;
-	}
-	else {
-		g_crypt.dec(pkt, k_nas_enc);
+	// res = g_integrity.hmac_check(pkt, k_nas_int);
+	// if (res == false) {
+	// 	cout << "mme_handlesecuritymodecomplete:" << " hmac failure: " << guti << endl;
+	// 	return false;
+	// }
+	// else {
+		// g_crypt.dec(pkt, k_nas_enc);
 		pkt.extract_item(res);
 		if (res == false) {
-			cout << "mme_handlesecuritymodecomplete:" << " security mode complete failure" << endl;
+			cout << "mme_handlesecuritymodecomplete:" << " security mode complete failure: " << guti << endl;
 			return false;
 		}
 		else {
-			cout << "mme_handlesecuritymodecomplete:" << " security mode complete success" << endl;
+			cout << "mme_handlesecuritymodecomplete:" << " security mode complete success: " << guti << endl;
 			return true;
 		}
-	}
+	// }
 }
 
 void Mme::handle_location_update(Packet pkt) {
@@ -288,9 +297,9 @@ void Mme::handle_location_update(Packet pkt) {
 	pkt.append_item(mme_ids.mmei);
 	pkt.prepend_diameter_hdr(2, pkt.len);
 	hss_client.snd(pkt);
-	cout << "mme_handlelocationupdate:" << " loc update sent to hss" << endl;
+	cout << "mme_handlelocationupdate:" << " loc update sent to hss: " << guti << endl;
 	hss_client.rcv(pkt);
-	cout << "mme_handlelocationupdate:" << " loc update response received from hss" << endl;
+	cout << "mme_handlelocationupdate:" << " loc update response received from hss: " << guti << endl;
 	pkt.extract_diameter_hdr();
 	pkt.extract_item(default_apn);
 	g_sync.mlock(uectx_mux);
@@ -350,9 +359,9 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	pkt.append_item(tai);
 	pkt.prepend_gtp_hdr(2, 1, pkt.len, 0);
 	sgw_client.snd(pkt);
-	cout << "mme_createsession:" << " create session request sent to sgw" << endl;
+	cout << "mme_createsession:" << " create session request sent to sgw: " << guti << endl;
 	sgw_client.rcv(pkt);
-	cout << "mme_createsession:" << " create session response received sgw" << endl;
+	cout << "mme_createsession:" << " create session response received sgw: " << guti << endl;
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(s11_cteid_sgw);
 	pkt.extract_item(ue_ip_addr);
@@ -383,6 +392,7 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	res = true;
 	tai_list_size = 1;
 	pkt.clear_pkt();
+	pkt.append_item(guti);
 	pkt.append_item(eps_bearer_id);
 	pkt.append_item(e_rab_id);
 	pkt.append_item(s1_uteid_ul);
@@ -395,11 +405,11 @@ void Mme::handle_create_session(int conn_fd, Packet pkt) {
 	pkt.append_item(g_sgw_s1_ip_addr);
 	pkt.append_item(g_sgw_s1_port);
 	pkt.append_item(res);
-	g_crypt.enc(pkt, k_nas_enc);
-	g_integrity.add_hmac(pkt, k_nas_int);
+	// g_crypt.enc(pkt, k_nas_enc);
+	// g_integrity.add_hmac(pkt, k_nas_int);
 	pkt.prepend_s1ap_hdr(3, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
-	cout << "mme_createsession:" << " attach accept sent to ue" << endl;
+	cout << "mme_createsession:" << " attach accept sent to ue: " << guti << endl;
 }
 
 void Mme::handle_attach_complete(Packet pkt) {
@@ -411,25 +421,26 @@ void Mme::handle_attach_complete(Packet pkt) {
 	bool res;
 
 	guti = get_guti(pkt);
+	cout << "mme_handleattachcomplete:" << " at attach complete: " << S1AP_HDR_LEN << " " << pkt.len << endl;
 	g_sync.mlock(uectx_mux);
 	k_nas_enc = ue_ctx[guti].k_nas_enc;
 	k_nas_int = ue_ctx[guti].k_nas_int;
 	g_sync.munlock(uectx_mux);
-	res = g_integrity.hmac_check(pkt, k_nas_int);
-	if (res == false) {
-		cout << "pkt len " << pkt.len << endl;
-		cout << "mme_handleattachcomplete:" << " hmac failure" << endl;
-	}
-	else {
-		g_crypt.dec(pkt, k_nas_enc);
+	// res = g_integrity.hmac_check(pkt, k_nas_int);
+	// if (res == false) {
+	// 	cout << "pkt len " << pkt.le: n << guti << endl;
+	// 	cout << "mme_handleattachcomplete:" << " hmac failure: " << guti << endl;
+	// }
+	// else {
+	// 	g_crypt.dec(pkt, k_nas_enc);
 		pkt.extract_item(eps_bearer_id);
 		pkt.extract_item(s1_uteid_dl);
 		g_sync.mlock(uectx_mux);
 		ue_ctx[guti].s1_uteid_dl = s1_uteid_dl;
 		ue_ctx[guti].emm_state = 1;
 		g_sync.munlock(uectx_mux);
-		cout << "mme_handleattachcomplete:" << " attach complete for ue" << endl;
-	}
+		cout << "mme_handleattachcomplete:" << " attach complete for ue: " << guti << endl;
+	// }
 }
 
 void Mme::handle_modify_bearer(Packet pkt) {
@@ -454,19 +465,19 @@ void Mme::handle_modify_bearer(Packet pkt) {
 	pkt.append_item(g_trafmon_port);
 	pkt.prepend_gtp_hdr(2, 2, pkt.len, s11_cteid_sgw);
 	sgw_client.snd(pkt);
-	cout << "mme_handlemodifybearer:" << " modify bearer request sent to sgw" << endl;
+	cout << "mme_handlemodifybearer:" << " modify bearer request sent to sgw: " << guti << endl;
 	sgw_client.rcv(pkt);
-	cout << "mme_handlemodifybearer:" << " modify bearer response received from sgw" << endl;
+	cout << "mme_handlemodifybearer:" << " modify bearer response received from sgw: " << guti << endl;
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(res);
 	if (res == false) {
-		cout << "mme_handlemodifybearer:" << " modify bearer failure" << endl;
+		cout << "mme_handlemodifybearer:" << " modify bearer failure: " << guti << endl;
 	}
 	else {
 		g_sync.mlock(uectx_mux);
 		ue_ctx[guti].ecm_state = 1;
 		g_sync.munlock(uectx_mux);
-		cout << "mme_handlemodifybearer:" << " eps session setup success" << endl;		
+		cout << "mme_handlemodifybearer:" << " eps session setup success: " << guti << endl;		
 	}
 }
 
@@ -483,6 +494,10 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	bool res;
 	
 	guti = get_guti(pkt);
+	if (guti == 0) {
+		cout << "mme_handledetach:" << " zero guti " << pkt.s1ap_hdr.mme_s1ap_ue_id << " " << pkt.len << ": " << guti << endl;
+		g_utils.handle_type1_error(-1, "Zero guti: mme_handledetach");
+	}
 	g_sync.mlock(uectx_mux);
 	k_nas_enc = ue_ctx[guti].k_nas_enc;
 	k_nas_int = ue_ctx[guti].k_nas_int;
@@ -490,13 +505,15 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	tai = ue_ctx[guti].tai;
 	s11_cteid_sgw = ue_ctx[guti].s11_cteid_sgw;
 	g_sync.munlock(uectx_mux);
-	res = g_integrity.hmac_check(pkt, k_nas_int);
-	if (res == false) {
-		cout << "mme_handledetach:" << " hmac detach failure" << endl;
-		return;
-	}
-	g_crypt.dec(pkt, k_nas_enc);
-	pkt.extract_item(guti);
+	// res = g_integrity.hmac_check(pkt, k_nas_int);
+	// if (res == false) {
+	// 	cout << "mme_handledetach:" << " hmac detach failure: " << guti << endl;
+	// 	return;
+	// }
+	// g_crypt.dec(pkt, k_nas_enc);
+	cout << "At detach: " << guti << endl;
+
+	pkt.extract_item(guti); /* It should be the same as that found in the first step */
 	pkt.extract_item(ksi_asme);
 	pkt.extract_item(detach_type);	
 	sgw_client.conn(g_mme_ip_addr, g_sgw_s11_ip_addr, g_sgw_s11_port);
@@ -505,25 +522,28 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	pkt.append_item(tai);
 	pkt.prepend_gtp_hdr(2, 3, pkt.len, s11_cteid_sgw);
 	sgw_client.snd(pkt);
-	cout << "mme_handledetach:" << " detach request sent to sgw" << endl;
+	cout << "mme_handledetach:" << " detach request sent to sgw: " << guti << endl;
 	sgw_client.rcv(pkt);
-	cout << "mme_handledetach:" << " detach response received from sgw" << endl;
+	cout << "mme_handledetach:" << " detach response received from sgw: " << guti << endl;
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(res);
 	if (res == false) {
-		cout << "mme_handledetach:" << " sgw detach failure" << endl;
+		cout << "mme_handledetach:" << " sgw detach failure: " << guti << endl;
 		return;		
 	}
 	pkt.clear_pkt();
 	pkt.append_item(res);
-	g_crypt.enc(pkt, k_nas_enc);
-	g_integrity.add_hmac(pkt, k_nas_int);
+	// g_crypt.enc(pkt, k_nas_enc);
+	// g_integrity.add_hmac(pkt, k_nas_int);
 	pkt.prepend_s1ap_hdr(5, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
-	cout << "mme_handledetach:" << " detach complete sent to ue" << endl;
+	cout << "mme_handledetach:" << " detach complete sent to ue: " << guti << endl;
 	rem_itfid(pkt.s1ap_hdr.mme_s1ap_ue_id);
 	rem_uectx(guti);
-	cout << "mme_handledetach:" << " detach successful" << endl;
+	g_sync.mlock(s1mmeid_mux);
+	ue_count--;
+	g_sync.munlock(s1mmeid_mux);
+	cout << "mme_handledetach:" << " detach successful: " << guti << endl;
 }
 
 void Mme::set_pgw_info(uint64_t guti) {
@@ -537,9 +557,12 @@ uint64_t Mme::get_guti(Packet pkt) {
 	uint64_t mme_s1ap_ue_id;
 	uint64_t guti;
 
+	guti = 0;
 	mme_s1ap_ue_id = pkt.s1ap_hdr.mme_s1ap_ue_id;
 	g_sync.mlock(s1mmeid_mux);
-	guti = s1mme_id[mme_s1ap_ue_id];
+	if (s1mme_id.find(mme_s1ap_ue_id) != s1mme_id.end()) {
+		guti = s1mme_id[mme_s1ap_ue_id];
+	}
 	g_sync.munlock(s1mmeid_mux);
 	return guti;
 }

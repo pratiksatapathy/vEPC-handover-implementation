@@ -1,10 +1,10 @@
 #include "hss.h"
 
-// string g_hss_ip_addr = "10.14.13.29";
-// int g_hss_port = 6000;
-
-string g_hss_ip_addr = "10.129.5.193";
+string g_hss_ip_addr = "10.14.13.29";
 int g_hss_port = 6000;
+
+// string g_hss_ip_addr = "10.129.5.193";
+// int g_hss_port = 6000;
 
 Hss::Hss() {
 	g_sync.mux_init(mysql_client_mux);
@@ -69,14 +69,14 @@ void Hss::handle_autninfo_req(int conn_fd, Packet &pkt) {
 	pkt.extract_item(num_autn_vectors);
 	pkt.extract_item(nw_type);
 	get_autn_info(imsi, key, rand_num);
-	cout << "hss_handleautoinforeq:" << " retrieved from database" << endl;
+	cout << "hss_handleautoinforeq:" << " retrieved from database: " << imsi << endl;
 	sqn = rand_num + 1;
 	xres = key + sqn + rand_num;
 	autn_num = xres + 1;
 	ck = xres + 2;
 	ik = xres + 3;
 	k_asme = ck + ik + sqn + plmn_id;
-	cout << "hss_handleautoinforeq:" << " autn:" << autn_num << " rand:" << rand_num << " xres:" << xres << " k_asme:" << k_asme << endl;
+	cout << "hss_handleautoinforeq:" << " autn:" << autn_num << " rand:" << rand_num << " xres:" << xres << " k_asme:" << k_asme << " " << imsi << endl;
 	pkt.clear_pkt();
 	pkt.append_item(autn_num);
 	pkt.append_item(rand_num);
@@ -84,7 +84,7 @@ void Hss::handle_autninfo_req(int conn_fd, Packet &pkt) {
 	pkt.append_item(k_asme);
 	pkt.prepend_diameter_hdr(1, pkt.len);
 	server.snd(conn_fd, pkt);
-	cout << "hss_handleautoinforeq:" << " response sent to mme" << endl;
+	cout << "hss_handleautoinforeq:" << " response sent to mme: " << imsi << endl;
 }
 
 void Hss::set_loc_info(uint64_t imsi, uint32_t mmei) {

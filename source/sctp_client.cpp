@@ -7,7 +7,7 @@ SctpClient::SctpClient() {
 
 void SctpClient::conn(string arg_server_ip_addr, int arg_server_port) {
 	init(arg_server_ip_addr, arg_server_port);
-	g_nw.set_rcv_timeout(conn_fd, 1);
+	// g_nw.set_rcv_timeout(conn_fd, 1);
 	connect_with_server();
 }
 
@@ -22,8 +22,18 @@ void SctpClient::init(string arg_server_ip_addr, int arg_server_port) {
 void SctpClient::connect_with_server() {
 	int status;
 
-	status = connect(conn_fd, (struct sockaddr *)&server_sock_addr, sizeof(server_sock_addr));
-	g_utils.handle_type2_error(status, "Connect error: sctpclient_connectwithserver");
+	while (1) {
+		status = connect(conn_fd, (struct sockaddr *)&server_sock_addr, sizeof(server_sock_addr));
+		if (errno == ECONNREFUSED || errno == ETIMEDOUT) {
+			errno = 0;
+			usleep(1000);
+			continue;
+		}
+		else {
+			break;
+		}
+	}
+	g_utils.handle_type1_error(status, "Connect error: sctpclient_connectwithserver");
 }
 
 void SctpClient::snd(Packet pkt) {

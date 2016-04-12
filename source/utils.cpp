@@ -5,6 +5,7 @@ Utils g_utils;
 /* Action - Exit the program */
 void Utils::handle_type1_error(int arg, string msg) {
 	if (arg < 0) {
+		msg = to_string(errno) + ": " + msg;
 		perror(msg.c_str());
 		exit(EXIT_FAILURE);
 	}	
@@ -13,6 +14,7 @@ void Utils::handle_type1_error(int arg, string msg) {
 /* Action - Check for error conditions. Do not exit. */
 void Utils::handle_type2_error(int arg, string msg) {
 	if (arg < 0) {
+		msg = to_string(errno) + ": " + msg;
 		perror(msg.c_str());
 	}
 }

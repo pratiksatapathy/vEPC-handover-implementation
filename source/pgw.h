@@ -57,6 +57,7 @@ private:
 	pthread_mutex_t sgiid_mux; /* Handles sgi_id */
 	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
 	
+	void clrstl();
 	void set_ip_addrs();
 	void update_itfid(int, uint32_t, string, uint64_t);
 	uint64_t get_imsi(int, uint32_t, string);

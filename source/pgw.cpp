@@ -1,22 +1,22 @@
 #include "pgw.h"
 
-// string g_sgw_s5_ip_addr = "10.14.13.29";
-// string g_pgw_s5_ip_addr = "10.14.13.29";
-// string g_pgw_sgi_ip_addr = "10.14.13.29";
-// string g_sink_ip_addr = "10.129.5.193";
-// int g_sgw_s5_port = 7200;
-// int g_pgw_s5_port = 8000;
-// int g_pgw_sgi_port = 8100;
-// int g_sink_port = 8500;
-
-string g_sgw_s5_ip_addr = "10.129.5.193";
-string g_pgw_s5_ip_addr = "10.129.5.193";
-string g_pgw_sgi_ip_addr = "10.129.5.193";
+string g_sgw_s5_ip_addr = "10.14.13.29";
+string g_pgw_s5_ip_addr = "10.14.13.29";
+string g_pgw_sgi_ip_addr = "10.14.13.29";
 string g_sink_ip_addr = "10.129.5.193";
 int g_sgw_s5_port = 7200;
 int g_pgw_s5_port = 8000;
 int g_pgw_sgi_port = 8100;
 int g_sink_port = 8500;
+
+// string g_sgw_s5_ip_addr = "10.129.5.193";
+// string g_pgw_s5_ip_addr = "10.129.5.193";
+// string g_pgw_sgi_ip_addr = "10.129.5.193";
+// string g_sink_ip_addr = "10.129.5.193";
+// int g_sgw_s5_port = 7200;
+// int g_pgw_s5_port = 8000;
+// int g_pgw_sgi_port = 8100;
+// int g_sink_port = 8500;
 
 UeContext::UeContext() {
 	ip_addr = "";
@@ -44,10 +44,18 @@ UeContext::~UeContext() {
 }
 
 Pgw::Pgw() {
+	clrstl();
 	set_ip_addrs();
 	g_sync.mux_init(s5id_mux);	
 	g_sync.mux_init(sgiid_mux);	
 	g_sync.mux_init(uectx_mux);	
+}
+
+void Pgw::clrstl() {
+	s5_id.clear();
+	sgi_id.clear();
+	ue_ctx.clear();
+	ip_addrs.clear();
 }
 
 void Pgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
@@ -82,7 +90,7 @@ void Pgw::handle_create_session(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(ue_ip_addr);
 	pkt.prepend_gtp_hdr(2, 1, pkt.len, s5_cteid_dl);
 	s5_server.snd(src_sock_addr, pkt);
-	cout << "pgw_handlecreatesession:" << " create session response sent to mme" << endl;
+	cout << "pgw_handlecreatesession:" << " create session response sent to mme: " << imsi << endl;
 }
 
 void Pgw::handle_uplink_udata(Packet pkt) {
@@ -109,7 +117,7 @@ void Pgw::handle_downlink_udata(Packet pkt) {
 		pkt.prepend_gtp_hdr(1, 3, pkt.len, s5_uteid_dl);
 		sgw_s5_client.conn(g_pgw_s5_ip_addr, g_sgw_s5_ip_addr, g_sgw_s5_port);
 		sgw_s5_client.snd(pkt);
-		cout << "pgw_handledownlinkudata:" << " downlink udata forwarded to sgw" << endl;
+		cout << "pgw_handledownlinkudata:" << " downlink udata forwarded to sgw: " << imsi << endl;
 	}
 }
 
@@ -135,11 +143,11 @@ void Pgw::handle_detach(struct sockaddr_in src_sock_addr, Packet pkt) {
 	pkt.append_item(res);
 	pkt.prepend_gtp_hdr(2, 4, pkt.len, s5_cteid_dl);
 	s5_server.snd(src_sock_addr, pkt);
-	cout << "pgw_handledetach:" << " detach complete sent to sgw" << endl;
+	cout << "pgw_handledetach:" << " detach complete sent to sgw: " << imsi << endl;
 	rem_itfid(5, s5_cteid_ul, "");
 	rem_itfid(0, 0, ue_ip_addr);
 	rem_uectx(imsi);
-	cout << "pgw_handledetach:" << " detach successful" << endl;
+	cout << "pgw_handledetach:" << " detach successful: " << imsi << endl;
 }
 
 void Pgw::set_ip_addrs() {

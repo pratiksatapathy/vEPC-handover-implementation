@@ -29,7 +29,7 @@ private:
 	pthread_cond_t qempty; /* arg for mwait/msignal - 1 */
 	pthread_cond_t qfull; /* arg for mwait/msignal - 2 */
 
-	void clear_queue();
+	void clrstl();
 	void init(string, int, int, int (*)(int));
 	void create_workers();
 	void worker_func();
