@@ -103,8 +103,44 @@ void TrafficMonitor::handle_downlink_udata() {
 
 	server.rcv(src_sock_addr, pkt);
 	pkt.extract_gtp_hdr();
+
+	//ho changes
+	if(!redirectIfNeeded(pkt)){
+	//ho changes
+
 	pkt.truncate();
 	tun.snd(pkt);
+	}
+}
+
+bool redirectIfNeeded(Packet pkt){
+	Packet pkt;
+		string ip_addr;
+		uint32_t s1_uteid_ul;
+		string sgw_s1_ip_addr;
+		int sgw_s1_port;
+		bool res;
+	if (pkt.gtp_hdr.teid == ranS.ran_ctx.enodeb_s1ap_ue_id && ranS.handover_state == 4)
+	{
+		//send packet back to sgw
+		ip_addr = g_nw.get_dst_ip_addr(pkt);
+		res = get_uplink_info(ip_addr, s1_uteid_ul, sgw_s1_ip_addr, sgw_s1_port);
+
+		//using the indirect tunnel to send data
+		s1_uteid_ul = ranS.ran_ctx.indirect_s1_uteid_ul;
+
+		if (res == true) {
+			UdpClient sgw_s1_client;
+
+			sgw_s1_client.conn(g_ran_ip_addr, sgw_s1_ip_addr, sgw_s1_port);
+			pkt.prepend_gtp_hdr(1, 1, pkt.len,s1_uteid_ul);
+			sgw_s1_client.snd(pkt);
+			}
+		return true;
+	}
+	else{
+		return false;
+	}
 }
 
 void TrafficMonitor::update_uplink_info(string ip_addr, uint32_t s1_uteid_ul, string sgw_s1_ip_addr, int sgw_s1_port) {
@@ -362,12 +398,13 @@ bool Ran::detach() {
 //HO changes start
 void Ran::initiate_handover() {
 
-	this->ran_context.handover_target_eNodeB_id = 2; //some  dummy id
+	this->handover_state = 1; //initiated handover
+	this->ran_ctx.handover_target_eNodeB_id = 2; //some  dummy id
 
 	pkt.clear_pkt();
 	pkt.append_item(0); //handover type : 0 for intra MME
-	pkt.append_item(this->ran_context.eNodeB_id); //source enbid
-	pkt.append_item(this->ran_context.eNodeB_id); //target enbid
+	pkt.append_item(1); //source enbid 1
+	pkt.append_item(2); //target enbid 2
 
 	//taking type 7 as HO type
 	crypt.enc(pkt, ran_ctx.k_nas_enc);
@@ -387,7 +424,7 @@ void Ran::initiate_handover() {
 void Ran::handle_handover(Packet pkt) {
 
 	//thru ran control traffic monitor
-
+	this->handover_state = 2; //HO requested at target RAN
 	pkt.extract_item(ran_ctx.s1_uteid_ul); //need this when we upload data to sgw
 
 	//uplink teid of sgw is now saved in ran_ctx.s1_uteid_ul, and will be used after HO
@@ -407,6 +444,7 @@ void Ran::handle_handover(Packet pkt) {
 			ran_context.mme_s1ap_ue_id);
 
 	mme_client.snd(pkt);
+	this->handover_state = 3;
 	cout << "ran_handover:" << " Handover intiation triggered";
 	//after exchange inform sgw to not to send via ran 1
 
@@ -415,6 +453,7 @@ void Ran::handle_handover(Packet pkt) {
 
 void Ran::indirect_tunnel_complete(Packet pkt) {
 
+	this->handover_state = 4;//HO done now we can redirect packet.
 	pkt.extract_item(ran_ctx.s1_uteid_ul);
 }
 //HO changes end

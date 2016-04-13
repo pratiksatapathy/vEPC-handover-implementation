@@ -606,10 +606,9 @@ void Mme::setup_indirect_tunnel(Packet pkt) {
 	pkt.append_item(s1_uteid_dl_ho);
 	//pkt.append_item(g_enodeb_ip_addr);
 	//pkt.append_item(g_enodeb_port);
-	pkt.prepend_gtp_hdr(2, 3, pkt.len, s11_cteid_sgw);
+	pkt.prepend_gtp_hdr(4, 3, pkt.len, s11_cteid_sgw); //doubt about 4
 	sgw_client.snd(pkt);
 	sgw_client.rcv(pkt);
-
 	//we will now return from here to source enb
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(res);

@@ -21,6 +21,11 @@ extern string g_mme_ip_addr;
 extern int g_trafmon_port;
 extern int g_mme_port;
 
+//HO changes
+Ran ranS;
+Ran ranT;
+//
+
 class RanContext {
 public:
 	/* EMM state 
@@ -152,10 +157,19 @@ public:
 	/* Parameters added for hand-over  */
 	uint16_t eNodeB_id; /* EnodeB identifier */
 	uint16_t handover_target_eNodeB_id; /* EnodeB identifier */
+	int handover_state;
+	/* HO state
+		 * 0 - Not in handover
+		 * 1 - Handover initiated:for Source RAN
+		 * 2 - Handover requested:for Target RAN
+		 * 3 - Handover procedure at target done
+		 * 4 - Handover at source done
+		 */
 
 	//ho methods
 	void Ran::initiate_handover();
-	void Ran::handle_handover(Packet pkt)
+	void Ran::handle_handover(Packet pkt);
+	void Ran::indirect_tunnel_complete(Packet pkt);
 	//
 };
 

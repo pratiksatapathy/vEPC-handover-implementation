@@ -11,6 +11,9 @@ thread g_mon_thread;
 vector<thread> g_threads;
 TrafficMonitor g_traf_mon;
 
+
+
+
 void traffic_monitor() {
 	fd_set rcv_set;
 	int max_fd;
@@ -28,9 +31,11 @@ void traffic_monitor() {
 		}
 		else if (FD_ISSET(g_traf_mon.server.conn_fd, &rcv_set)) {
 			g_traf_mon.handle_downlink_udata();	
+			g_traf_mon.handle_downlink_udata();
 		}
 	}
 }
+
 //handover changes
 void start_signal_monitor() {
 
@@ -40,7 +45,8 @@ void start_signal_monitor() {
 }
 
 int handle_mme(int conn_fd) {
-	Ran ran;
+	//Ran ran; //this is the target ran
+	//ranT.eNodeB_id = 2;
 	bool res;
 	Packet pkt;
 
@@ -53,12 +59,12 @@ int handle_mme(int conn_fd) {
 		/* Initiate Handover */
 		case 7:
 			cout << "ran_simulator_handlemme:" << " case 7:" << endl
-			ran.handle_handover(pkt);
+			ranT.handle_handover(pkt);
 
 			break;
 		case 8:
 			cout << "indirect teid to source enb:" << " case 8:" << endl
-			ran.handle_handover(pkt);
+			ranS.indirect_tunnel_complete(pkt);
 
 			break;
 			/* For error handling */
@@ -137,6 +143,60 @@ void simulate(int arg) {
 		g_sync.munlock(g_mux);
 	}
 }
+void simulateHandover(int arg) {
+
+	ranS.ran_ctx.eNodeB_id = 1;
+	ranT.ran_ctx.eNodeB_id = 2;
+	//to run in separate thred
+	start_signal_monitor();
+
+	CLOCK::time_point	start_time;
+	CLOCK::time_point stop_time;
+	MICROSECONDS time_diff_us;
+
+	int status;
+	int ran_num;
+	bool ok;
+	bool time_exceeded;
+	ranS.handover_state = 0; //not in handover;
+
+	ran_num = arg;
+
+	// HO changes start
+		ranS.ran_context.eNodeB_id = ran_num;
+	// HO changes end
+
+	time_exceeded = false;
+	ranS.init(ran_num);
+	ranS.conn_mme();
+	//while (1) {
+		/* Run duration check */
+		g_utils.time_check(g_start_time, g_req_dur, time_exceeded);
+		if (time_exceeded) {
+			break;
+		}
+
+		/* Start time */
+		start_time = CLOCK::now();
+
+		/* Attach */
+		ranS.initial_attach();
+		ok = ranS.authenticate();
+		if (!ok) {
+			continue;
+		}
+		ok = ranS.set_security();
+		if (!ok) {
+			continue;
+		}
+		ok = ranS.set_eps_session(g_traf_mon);
+		if (!ok) {
+			continue;
+		}
+		ranS.initiate_handover();
+
+
+}
 
 void check_usage(int argc) {
 	if (argc < 3) {
@@ -168,7 +228,7 @@ void run() {
 	// g_traf_mon.server.run(g_trafmon_ip_addr, g_trafmon_port);	
 
 	// g_mon_thread = thread(traffic_monitor);
-	// g_mon_thread.detach();
+	//	 g_mon_thread.detach();
 	for (i = 0; i < g_threads_count; i++) {
 		g_threads[i] = thread(simulate, i);
 	}	
@@ -178,6 +238,8 @@ void run() {
 		}
 	}	
 }
+
+
 
 void print_results() {
 	g_run_dur = difftime(time(0), g_start_time);
