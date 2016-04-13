@@ -568,6 +568,101 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	cout << "mme_handledetach:" << " detach successful: " << guti << endl;
 }
 
+/* handover changes start */
+void Mme::handle_handover(Packet pkt) {
+
+	//anything else need to be done ??
+
+	//new sctp client
+
+	//need to store the t_ran_ip_addr.c_str(), t_ran_port somewhere in config-constants maybe
+
+	SctpClient to_target_ran_client;
+	to_target_ran_client.conn(t_ran_ip_addr.c_str(), t_ran_port);
+
+	request_target_RAN(pkt);
+
+}
+void Mme::setup_indirect_tunnel(Packet pkt) {
+
+	UdpClient sgw_client;
+	uint64_t guti;
+	uint32_t s1_uteid_dl_ho; //ran 2 has sent its id, dl id for sgw to send data
+	uint32_t s1_uteid_ul;
+	uint32_t enodeb_s1ap_ue_id;
+	bool res;
+
+	pkt.extract_item(s1_uteid_dl_ho);
+
+	sgw_client.conn(g_sgw_s11_ip_addr.c_str(), g_sgw_s11_port);
+	guti = get_guti(pkt);
+	g_sync.mlock(table2_mux);
+	//eps_bearer_id = table2[guti].eps_bearer_id;
+	//s1_uteid_dl = table2[guti].s1_uteid_dl;
+	s11_cteid_sgw = table2[guti].s11_cteid_sgw;
+	g_sync.munlock(table2_mux);
+	pkt.clear_pkt();
+	//pkt.append_item(eps_bearer_id);
+	pkt.append_item(s1_uteid_dl_ho);
+	//pkt.append_item(g_enodeb_ip_addr);
+	//pkt.append_item(g_enodeb_port);
+	pkt.prepend_gtp_hdr(2, 3, pkt.len, s11_cteid_sgw);
+	sgw_client.snd(pkt);
+	sgw_client.rcv(pkt);
+
+	//we will now return from here to source enb
+	pkt.extract_gtp_hdr();
+	pkt.extract_item(res);
+	pkt.extract_item(s1_uteid_ul);
+
+	SctpClient to_source_ran_client;
+	to_source_ran_client.conn(s_ran_ip_addr.c_str(), s_ran_port);
+
+	if (res == true) {
+
+		pkt.clear_pkt();
+		pkt.append_item(s1_uteid_ul);
+
+		//8 for msg for source ran
+		pkt.prepend_s1ap_hdr(8, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+
+		to_source_ran_client.snd(pkt);
+
+	}
+	cout << "mme_handlemodifybearer:" << " eps session setup success" << endl;
+
+}
+void Mme::request_target_RAN(SctpClient to_target_ran_client, Packet pkt) {
+
+	int handover_type;
+	uint16_t s_enb;
+	uint16_t t_enb;
+	uint64_t guti;
+
+	pkt.extract_item(handover_type);
+	pkt.extract_item(s_enb);
+	pkt.extract_item(t_enb);
+
+	guti = get_guti(pkt);
+
+	pkt.clear_pkt();
+
+	pkt.append_item(t_enb);
+
+	//lock
+	g_sync.mlock(table2_mux);
+	pkt.append_item(table2[guti].s1_uteid_ul);
+	g_sync.munlock(table2_mux);
+	//unlock
+
+	pkt.prepend_s1ap_hdr(7, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+
+
+	to_target_ran_client.snd(pkt);
+
+}
+
+/* handover changes end */
 void Mme::set_pgw_info(uint64_t guti) {
 	g_sync.mlock(uectx_mux);
 	ue_ctx[guti].pgw_s5_port = g_pgw_s5_port;

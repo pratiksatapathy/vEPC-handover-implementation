@@ -31,7 +31,46 @@ void traffic_monitor() {
 		}
 	}
 }
+//handover changes
+void start_signal_monitor() {
 
+	//creating an sctp server
+	g_server.run(g_mme_ip_addr.c_str(), g_mme_port, g_workers_count,handle_mme);
+
+}
+
+int handle_mme(int conn_fd) {
+	Ran ran;
+	bool res;
+	Packet pkt;
+
+	g_server.rcv(conn_fd, pkt);
+
+	pkt.extract_s1ap_hdr();
+	if (pkt.s1ap_hdr.mme_s1ap_ue_id > 0) {
+		switch (pkt.s1ap_hdr.msg_type) {
+
+		/* Initiate Handover */
+		case 7:
+			cout << "ran_simulator_handlemme:" << " case 7:" << endl
+			ran.handle_handover(pkt);
+
+			break;
+		case 8:
+			cout << "indirect teid to source enb:" << " case 8:" << endl
+			ran.handle_handover(pkt);
+
+			break;
+			/* For error handling */
+		default:
+			cout << "ran_simulator_handlemme:" << " default case: handover" << endl;
+			break;
+		}
+	}
+	return 1;
+}
+
+//
 void simulate(int arg) {
 	CLOCK::time_point	start_time;
 	CLOCK::time_point stop_time;
@@ -43,6 +82,11 @@ void simulate(int arg) {
 	bool time_exceeded;
 
 	ran_num = arg;
+
+	// HO changes start
+	//	ran.ran_context.eNodeB_id = ran_num;
+	// HO changes end
+
 	time_exceeded = false;
 	ran.init(ran_num);
 	ran.conn_mme();

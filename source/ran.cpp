@@ -357,3 +357,64 @@ bool Ran::detach() {
 	cout << "ran_detach:" << " detach successful: " << ran_ctx.imsi << endl;
 	return true;
 }
+
+
+//HO changes start
+void Ran::initiate_handover() {
+
+	this->ran_context.handover_target_eNodeB_id = 2; //some  dummy id
+
+	pkt.clear_pkt();
+	pkt.append_item(0); //handover type : 0 for intra MME
+	pkt.append_item(this->ran_context.eNodeB_id); //source enbid
+	pkt.append_item(this->ran_context.eNodeB_id); //target enbid
+
+	//taking type 7 as HO type
+	crypt.enc(pkt, ran_ctx.k_nas_enc);
+	integrity.add_hmac(pkt, ran_ctx.k_nas_int);
+	pkt.prepend_s1ap_hdr(7, pkt.len, ran_context.enodeb_s1ap_ue_id,
+			ran_context.mme_s1ap_ue_id);
+
+	//encryption step yet to be done
+	mme_client.snd(pkt);
+	cout << "ran_handover:" << " Handover intiation triggered";
+
+	//	//ideally a polling for message like mme needs to be implememnted which detects packet type
+	//	//doubt for the next line
+	//	g_enodeb_target.receive_handover_request()
+
+}
+void Ran::handle_handover(Packet pkt) {
+
+	//thru ran control traffic monitor
+
+	pkt.extract_item(ran_ctx.s1_uteid_ul); //need this when we upload data to sgw
+
+	//uplink teid of sgw is now saved in ran_ctx.s1_uteid_ul, and will be used after HO
+
+
+	//now we will send enodeb_s1ap_ue_id to mme and sgw for it to store as an indirect tunn
+
+	pkt.clear_pkt();
+	//not needed here pkt.append_item(0); //handover type : 0 for intra MME
+	pkt.append_item(this->ran_ctx.enodeb_s1ap_ue_id); //source enbid
+	//pkt.append_item(this->ran_context.eNodeB_id); //target enbid
+
+	//mme_s1ap_ue_id = will be zero
+	//taking type 8 as Indirect tunnel setup type
+
+	pkt.prepend_s1ap_hdr(8, pkt.len, ran_context.enodeb_s1ap_ue_id,
+			ran_context.mme_s1ap_ue_id);
+
+	mme_client.snd(pkt);
+	cout << "ran_handover:" << " Handover intiation triggered";
+	//after exchange inform sgw to not to send via ran 1
+
+	//done
+}
+
+void Ran::indirect_tunnel_complete(Packet pkt) {
+
+	pkt.extract_item(ran_ctx.s1_uteid_ul);
+}
+//HO changes end

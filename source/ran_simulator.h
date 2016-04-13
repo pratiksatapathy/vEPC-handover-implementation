@@ -27,6 +27,10 @@ extern thread g_mon_thread;
 extern vector<thread> g_threads;
 extern TrafficMonitor g_traf_mon;
 
+//handover changes
+extern SctpServer g_server;
+//
+
 void simulate(int);
 void check_usage(int);
 void init(char**);

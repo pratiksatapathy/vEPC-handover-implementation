@@ -56,7 +56,10 @@ private:
 	unordered_map<uint32_t, uint64_t> s1_id; /* S1 UE identification table: s1_uteid_ul -> imsi */
 	unordered_map<uint32_t, uint64_t> s5_id; /* S5 UE identification table: s5_uteid_dl -> imsi */
 	unordered_map<uint64_t, UeContext> ue_ctx; /* UE context table: imsi -> UeContext */
+	//HO changes
+		unordered_map<uint32_t, UeContext> ho_ue_ctx; /* UE context table: imsi -> UeContext */
 
+		//HO changes
 	/* Lock parameters */
 	pthread_mutex_t s11id_mux; /* Handles s11_id */
 	pthread_mutex_t s1id_mux; /* Handles s1_id */
@@ -82,6 +85,12 @@ public:
 	void handle_uplink_udata(Packet);
 	void handle_downlink_udata(Packet);
 	void handle_detach(struct sockaddr_in, Packet);
+
+	//handover changes
+		void Sgw::handle_indirect_tunnel_setup(struct sockaddr_in src_sock_addr, Packet pkt);
+
+		//
+
 	~Sgw();
 };
 

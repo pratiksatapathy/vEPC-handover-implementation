@@ -92,6 +92,10 @@ void handle_s11_traffic() {
 				cout << "sgwserver_handles11traffic:" << " case 3: detach" << endl;
 				g_sgw.handle_detach(src_sock_addr, pkt);
 				break;
+			/* Indirect tunnel */
+			case 4:
+				g_sgw.handle_indirect_tunnel_setup(src_sock_addr, pkt);
+				break;
 
 			/* For error handling */
 			default:

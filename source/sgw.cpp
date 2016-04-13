@@ -169,7 +169,39 @@ void Sgw::handle_modify_bearer(struct sockaddr_in src_sock_addr, Packet pkt) {
 	s11_server.snd(src_sock_addr, pkt);
 	cout << "sgw_handlemodifybearer:" << " modify bearer response sent to mme: " << imsi << endl;
 }
+//HO code start
 
+void Sgw::handle_indirect_tunnel_setup(struct sockaddr_in src_sock_addr, Packet pkt) {
+	//uint64_t imsi;
+	uint32_t s1_uteid_dl;
+	uint32_t s1_uteid_ul;
+
+	uint32_t s11_cteid_mme;
+	uint8_t eps_bearer_id;
+	string enodeb_ip_addr;
+	uint64_t enodeb_port;
+	bool res;
+
+	imsi = get_imsi(11, pkt.gtp_hdr.teid);
+	pkt.extract_item(s1_uteid_dl);
+	s1_uteid_ul = s11_cteid_mme + 1; //using as indirect tunnel end point id
+	//update to s1 map
+	update_itfid(1, s1_uteid_ul, imsi);
+
+
+	g_sync.mlock(uectx_mux);
+	ho_ue_ctx[imsi].s1_uteid_dl = s1_uteid_dl; //lock ??
+	s11_cteid_mme = ue_ctx[imsi].s11_cteid_mme;
+	g_sync.munlock(uectx_mux);
+	res = true;
+	pkt.clear_pkt();
+	pkt.append_item(res);
+	pkt.append_item(s1_uteid_ul);
+	pkt.prepend_gtp_hdr(2, 3, pkt.len, s11_cteid_mme);
+	s11_server.snd(src_sock_addr, pkt);
+}
+
+//HO code end
 void Sgw::handle_uplink_udata(Packet pkt) {
 	uint64_t imsi;
 	uint32_t s5_uteid_ul;

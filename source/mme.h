@@ -143,6 +143,13 @@ public:
 	void handle_attach_complete(Packet);
 	void handle_modify_bearer(Packet);
 	void handle_detach(int, Packet);
+
+	//handover changes
+			void Mme::handle_handover(Packet);
+			void Mme::request_target_RAN(Packet);
+			void Mme::setup_indirect_tunnel(Packet pkt);
+		//
+
 	~Mme();
 };
 

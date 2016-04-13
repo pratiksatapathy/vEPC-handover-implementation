@@ -26,7 +26,7 @@ public:
 	/* EMM state 
 	 * 0 - Deregistered
 	 * 1 - Registered 
-	 */	
+	 */
 	int emm_state; /* EPS Mobililty Management state */
 
 	/* ECM state 
@@ -70,40 +70,51 @@ public:
 	/* Network Operator info */
 	uint16_t mcc; /* Mobile Country Code */
 	uint16_t mnc; /* Mobile Network Code */
-	uint16_t plmn_id; /* Public Land Mobile Network ID */	
+	uint16_t plmn_id; /* Public Land Mobile Network ID */
 	uint64_t msisdn; /* Mobile Station International Subscriber Directory Number - Mobile number */
 	uint16_t nw_capability;
 
-	RanContext();
-	void init(uint32_t);
-	~RanContext();	
-};
+	/* Parameters added for hand-over  */
+	uint16_t eNodeB_id; /* EnodeB identifier */ // we could send this at all msg
+	uint16_t handover_target_eNodeB_id; /* EnodeB identifier */
 
-class EpcAddrs {
-public:
-	int mme_port;
-	int sgw_s1_port;
-	string mme_ip_addr;
-	string sgw_s1_ip_addr;
+	bool inHandover; /* handover phase*/
 
-	EpcAddrs();
-	~EpcAddrs();
-};
+	//when inHandover = true use the below uplink
+	uint32_t indirect_s1_uteid_ul;
+	/* handover changes end/
 
-class UplinkInfo {
-public:
-	uint32_t s1_uteid_ul;
-	string sgw_s1_ip_addr;
-	int sgw_s1_port;
 
-	void init(uint32_t, string, int);
-};
+	 RanContext();
+	 void init(uint32_t);
+	 ~RanContext();
+	 };
 
-class TrafficMonitor {
-private:
-	unordered_map<string, UplinkInfo> uplink_info;
-	
-	/* Lock parameter */
+	 class EpcAddrs {
+	 public:
+	 int mme_port;
+	 int sgw_s1_port;
+	 string mme_ip_addr;
+	 string sgw_s1_ip_addr;
+
+	 EpcAddrs();
+	 ~EpcAddrs();
+	 };
+
+	 class UplinkInfo {
+	 public:
+	 uint32_t s1_uteid_ul;
+	 string sgw_s1_ip_addr;
+	 int sgw_s1_port;
+
+	 void init(uint32_t, string, int);
+	 };
+
+	 class TrafficMonitor {
+	 private:
+	 unordered_map<string, UplinkInfo> uplink_info;
+
+	 /* Lock parameter */
 	pthread_mutex_t uplinkinfo_mux; /* Handles uplink_info */
 
 	bool get_uplink_info(string, uint32_t&, string&, int&);
@@ -115,8 +126,7 @@ public:
 	TrafficMonitor();
 	void handle_uplink_udata();
 	void handle_downlink_udata();
-	void update_uplink_info(string, uint32_t, string, int);
-	~TrafficMonitor();
+	void update_uplink_info(string, uint32_t, string, int);~TrafficMonitor();
 };
 
 class Ran {
@@ -128,7 +138,7 @@ private:
 
 	void set_crypt_context();
 	void set_integrity_context();
-	
+
 public:
 	void init(int);
 	void conn_mme();
@@ -137,7 +147,16 @@ public:
 	bool set_security();
 	bool set_eps_session(TrafficMonitor&);
 	void transfer_data();
-	bool detach();	
+	bool detach();
+
+	/* Parameters added for hand-over  */
+	uint16_t eNodeB_id; /* EnodeB identifier */
+	uint16_t handover_target_eNodeB_id; /* EnodeB identifier */
+
+	//ho methods
+	void Ran::initiate_handover();
+	void Ran::handle_handover(Packet pkt)
+	//
 };
 
 #endif /* RAN_H */
