@@ -49,7 +49,7 @@ int handle_ue(int conn_fd) {
 		/* Authentication response */
 		case 2:
 			cout << "mmeserver_handleue:" << " case 2: authentication response"
-					<< endl;
+			<< endl;
 			res = g_mme.handle_autn(conn_fd, pkt);
 			if (res) {
 				g_mme.handle_security_mode_cmd(conn_fd, pkt);
@@ -59,7 +59,7 @@ int handle_ue(int conn_fd) {
 			/* Security Mode Complete */
 		case 3:
 			cout << "mmeserver_handleue:" << " case 3: security mode complete"
-					<< endl;
+			<< endl;
 			res = g_mme.handle_security_mode_complete(conn_fd, pkt);
 			if (res) {
 				g_mme.handle_location_update(pkt);
@@ -88,6 +88,11 @@ int handle_ue(int conn_fd) {
 		case 8:
 			cout << "mmeserver_handleue:" << " case 8:" << endl
 			g_mme.setup_indirect_tunnel(pkt);
+
+			break;
+		case 9:
+			cout << "mmeserver_handleue:" << " case 9:" << endl
+			g_mme.handle_handover_completion(pkt);
 
 			break;
 			/* For error handling */

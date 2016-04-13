@@ -456,4 +456,29 @@ void Ran::indirect_tunnel_complete(Packet pkt) {
 	this->handover_state = 4;//HO done now we can redirect packet.
 	pkt.extract_item(ran_ctx.s1_uteid_ul);
 }
+void Ran::complete_handover() {
+
+	//this->handover_state = 1; //initiated handover
+	//this->ran_ctx.handover_target_eNodeB_id = 2; //some  dummy id
+
+	pkt.clear_pkt();
+	//pkt.append_item(0); //handover type : 0 for intra MME
+	//pkt.append_item(1); //source enbid 1
+	//pkt.append_item(2); //target enbid 2
+
+	//taking type 7 as HO type
+
+	//are these thing correct ???
+	pkt.prepend_s1ap_hdr(7, pkt.len, ran_context.enodeb_s1ap_ue_id,
+			ran_context.mme_s1ap_ue_id);
+
+	//encryption step yet to be done
+	mme_client.snd(pkt);
+	cout << "ran_handover:" << " Handover intiation triggered";
+
+	//	//ideally a polling for message like mme needs to be implememnted which detects packet type
+	//	//doubt for the next line
+	//	g_enodeb_target.receive_handover_request()
+
+}
 //HO changes end

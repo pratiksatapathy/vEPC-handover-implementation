@@ -170,6 +170,7 @@ public:
 	void Ran::initiate_handover();
 	void Ran::handle_handover(Packet pkt);
 	void Ran::indirect_tunnel_complete(Packet pkt);
+	void Ran::complete_handover();
 	//
 };
 

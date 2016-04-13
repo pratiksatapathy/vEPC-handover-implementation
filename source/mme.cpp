@@ -599,6 +599,9 @@ void Mme::setup_indirect_tunnel(Packet pkt) {
 	g_sync.mlock(table2_mux);
 	//eps_bearer_id = table2[guti].eps_bearer_id;
 	//s1_uteid_dl = table2[guti].s1_uteid_dl;
+	//s1mme_id[enodeb_s1ap_ue_id] = ??
+
+
 	s11_cteid_sgw = table2[guti].s11_cteid_sgw;
 	g_sync.munlock(table2_mux);
 	pkt.clear_pkt();
@@ -658,6 +661,54 @@ void Mme::request_target_RAN(SctpClient to_target_ran_client, Packet pkt) {
 
 
 	to_target_ran_client.snd(pkt);
+
+}
+void Mme::handle_handover_completion(Packet pkt) {
+	UdpClient sgw_client;
+		uint64_t guti;
+		//uint32_t s1_uteid_dl_ho; //ran 2 has sent its id, dl id for sgw to send data
+		uint32_t s1_uteid_ul;
+		uint32_t enodeb_s1ap_ue_id;
+		bool res;
+
+		//pkt.extract_item(s1_uteid_dl_ho);
+
+		sgw_client.conn(g_sgw_s11_ip_addr.c_str(), g_sgw_s11_port);
+		guti = get_guti(pkt);
+		g_sync.mlock(table2_mux);
+		//eps_bearer_id = table2[guti].eps_bearer_id;
+		//s1_uteid_dl = table2[guti].s1_uteid_dl;
+		s11_cteid_sgw = table2[guti].s11_cteid_sgw;
+		g_sync.munlock(table2_mux);
+		pkt.clear_pkt();
+		//pkt.append_item(eps_bearer_id);
+		pkt.append_item(s1_uteid_dl_ho);
+		//pkt.append_item(g_enodeb_ip_addr);
+		//pkt.append_item(g_enodeb_port);
+		pkt.prepend_gtp_hdr(4, 3, pkt.len, s11_cteid_sgw); //doubt about 4
+		sgw_client.snd(pkt);
+		sgw_client.rcv(pkt);
+		//we will now return from here to source enb
+		pkt.extract_gtp_hdr();
+		pkt.extract_item(res);
+		pkt.extract_item(s1_uteid_ul);
+
+		SctpClient to_source_ran_client;
+		to_source_ran_client.conn(s_ran_ip_addr.c_str(), s_ran_port);
+
+		if (res == true) {
+
+			pkt.clear_pkt();
+			pkt.append_item(s1_uteid_ul);
+
+			//8 for msg for source ran
+			pkt.prepend_s1ap_hdr(8, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+
+			to_source_ran_client.snd(pkt);
+
+		}
+		cout << "mme_handlemodifybearer:" << " eps session setup success" << endl;
+
 
 }
 

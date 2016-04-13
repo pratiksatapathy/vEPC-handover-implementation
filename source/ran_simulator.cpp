@@ -195,6 +195,9 @@ void simulateHandover(int arg) {
 		}
 		ranS.initiate_handover();
 
+		//sleep for some time
+
+		ranT.complete_handover();
 
 }
 
