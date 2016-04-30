@@ -172,10 +172,6 @@ public:
 	//
 };
 
-//HO changes
-//Ran ranS;
-//Ran ranT;
-//
 
 
 #endif /* RAN_H */

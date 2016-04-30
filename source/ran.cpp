@@ -98,35 +98,39 @@ void TrafficMonitor::handle_uplink_udata() {
 		sgw_s1_client.snd(pkt);
 	}
 }
-//bool redirectIfNeeded(Packet pkt){
-//
-//		string ip_addr;
-//		uint32_t s1_uteid_ul;
-//		string sgw_s1_ip_addr;
-//		int sgw_s1_port;
-//		bool res;
-//	if (pkt.gtp_hdr.teid == ran_ctx.enodeb_s1ap_ue_id && handover_state == 4)
-//	{
-//		//send packet back to sgw
-//		ip_addr = g_nw.get_dst_ip_addr(pkt);
-//		res = get_uplink_info(ip_addr, s1_uteid_ul, sgw_s1_ip_addr, sgw_s1_port);
-//
-//		//using the indirect tunnel to send data
-//		s1_uteid_ul = ranS.ran_ctx.indirect_s1_uteid_ul;
-//
-//		if (res == true) {
-//			UdpClient sgw_s1_client;
-//
-//			sgw_s1_client.conn(g_ran_ip_addr, sgw_s1_ip_addr, sgw_s1_port);
-//			pkt.prepend_gtp_hdr(1, 1, pkt.len,s1_uteid_ul);
-//			sgw_s1_client.snd(pkt);
-//			}
-//		return true;
-//	}
-//	else{
-//		return false;
-//	}
-//}
+/*
+ *
+bool redirectIfNeeded(TrafficMonitor t, Packet pkt){
+
+		Ran ranS;
+		string ip_addr;
+		uint32_t s1_uteid_ul;
+		string sgw_s1_ip_addr;
+		int sgw_s1_port;
+		bool res;
+	if (pkt.gtp_hdr.teid == ranS.ran_ctx.enodeb_s1ap_ue_id && handover_state == 4)
+	{
+		//send packet back to sgw
+		ip_addr = g_nw.get_dst_ip_addr(pkt);
+		res = get_uplink_info(ip_addr, s1_uteid_ul, sgw_s1_ip_addr, sgw_s1_port);
+
+		//using the indirect tunnel to send data
+		s1_uteid_ul = ranS.ran_ctx.indirect_s1_uteid_ul;
+
+		if (res == true) {
+			UdpClient sgw_s1_client;
+
+			sgw_s1_client.conn(g_ran_ip_addr, sgw_s1_ip_addr, sgw_s1_port);
+			pkt.prepend_gtp_hdr(1, 1, pkt.len,s1_uteid_ul);
+			sgw_s1_client.snd(pkt);
+			}
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+*/
 void TrafficMonitor::handle_downlink_udata() {
 	Packet pkt;
 	struct sockaddr_in src_sock_addr;
@@ -134,9 +138,11 @@ void TrafficMonitor::handle_downlink_udata() {
 	server.rcv(src_sock_addr, pkt);
 	pkt.extract_gtp_hdr();
 
-	//ho changes dont do this for demo
-	//if(!redirectIfNeeded(pkt)){
-	//ho changes
+	//ho changes for data plane
+	/*
+	if(!redirectIfNeeded(this,pkt)){
+	*/
+	//ho changes for data plane
 
 	pkt.truncate();
 	tun.snd(pkt);

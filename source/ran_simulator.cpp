@@ -31,7 +31,7 @@ void traffic_monitor() {
 			g_traf_mon.handle_uplink_udata();
 		}
 		else if (FD_ISSET(g_traf_mon.server.conn_fd, &rcv_set)) {
-			g_traf_mon.handle_downlink_udata();	
+			g_traf_mon.handle_downlink_udata();
 			g_traf_mon.handle_downlink_udata();
 		}
 	}
@@ -92,10 +92,6 @@ void simulate(int arg) {
 	bool time_exceeded;
 
 	ran_num = arg;
-
-	// HO changes start
-	//	ran.ran_context.eNodeB_id = ran_num;
-	// HO changes end
 
 	time_exceeded = false;
 	ran.init(ran_num);
