@@ -7,9 +7,9 @@
 // int g_sgw_s1_port = 7100;
 // int g_sgw_s5_port = 7200;
 
-string g_sgw_s11_ip_addr = "10.129.5.193";
-string g_sgw_s1_ip_addr = "10.129.5.193";
-string g_sgw_s5_ip_addr = "10.129.5.193";
+string g_sgw_s11_ip_addr = "127.0.0.1";
+string g_sgw_s1_ip_addr = "127.0.0.1";
+string g_sgw_s5_ip_addr = "127.0.0.1";
 int g_sgw_s11_port = 7000;
 int g_sgw_s1_port = 7100;
 int g_sgw_s5_port = 7200;
@@ -184,32 +184,95 @@ void Sgw::handle_modify_bearer(struct sockaddr_in src_sock_addr, Packet pkt) {
 
 void Sgw::handle_indirect_tunnel_setup(struct sockaddr_in src_sock_addr,
 		Packet pkt) {
-	//uint64_t imsi;
+
+	uint64_t imsi;
 	uint32_t s1_uteid_dl;
 	uint32_t s1_uteid_ul;
 
 	uint32_t s11_cteid_mme;
-	uint8_t eps_bearer_id;
-	string enodeb_ip_addr;
-	uint64_t enodeb_port;
+
 	bool res;
 
 	imsi = get_imsi(11, pkt.gtp_hdr.teid);
+
 	pkt.extract_item(s1_uteid_dl);
-	s1_uteid_ul = s11_cteid_mme + 1; //using as indirect tunnel end point id
 	//update to s1 map
+
 	update_itfid(1, s1_uteid_ul, imsi);
 
 	g_sync.mlock(uectx_mux);
-	ho_ue_ctx[imsi].s1_uteid_dl = s1_uteid_dl; //lock ??
+	ho_ue_ctx[imsi].s1_uteid_dl = s1_uteid_dl; //lock ??//dl to sent uplink data to tRan
 	s11_cteid_mme = ue_ctx[imsi].s11_cteid_mme;
 	g_sync.munlock(uectx_mux);
 	res = true;
+
+	s1_uteid_ul = s11_cteid_mme + 1; //create an indirect tunnel end point
+
 	pkt.clear_pkt();
 	pkt.append_item(res);
 	pkt.append_item(s1_uteid_ul);
-	pkt.prepend_gtp_hdr(2, 3, pkt.len, s11_cteid_mme);
+	pkt.prepend_gtp_hdr(2, 4, pkt.len, s11_cteid_mme);
 	s11_server.snd(src_sock_addr, pkt);
+	cout<<"indirect tunnel set up done at sgw"<<"\n";
+}
+void Sgw::handle_handover_completion(struct sockaddr_in src_sock_addr,Packet pkt) {
+
+	//change the downlink of indirect tunnel
+
+	uint64_t imsi;
+	uint32_t s1_uteid_dl;
+	uint32_t s1_uteid_ul;
+
+	uint32_t s11_cteid_mme;
+
+	bool res;
+
+	imsi = get_imsi(11, pkt.gtp_hdr.teid);
+
+	//reassign the indirect tunnel as direct tunnel
+	g_sync.mlock(uectx_mux);
+	ue_ctx[imsi].s1_uteid_dl =  ho_ue_ctx[imsi].s1_uteid_dl ; //lock ??
+	s11_cteid_mme = ue_ctx[imsi].s11_cteid_mme;
+	g_sync.munlock(uectx_mux);
+	res = true;
+
+	//remove from handover entry
+	ho_ue_ctx.erase(imsi);
+
+	pkt.clear_pkt();
+	pkt.append_item(res);
+	pkt.prepend_gtp_hdr(2, 5, pkt.len, s11_cteid_mme);
+	s11_server.snd(src_sock_addr, pkt);
+
+	cout<<"switched downlink for the particular UE, removed entry from HO context \n";
+
+}
+void Sgw::handle_indirect_tunnel_teardown_(struct sockaddr_in src_sock_addr,Packet pkt) {
+
+
+	uint64_t imsi;
+	uint32_t s1_uteid_ul_indirect;
+
+	uint32_t s11_cteid_mme;
+
+	bool res;
+
+	imsi = get_imsi(11, pkt.gtp_hdr.teid);
+	s11_cteid_mme = ue_ctx[imsi].s11_cteid_mme;
+
+
+	pkt.extract_item(s1_uteid_ul_indirect);
+	rem_itfid(1, s1_uteid_ul_indirect);//tearing down the indirect tunnel
+
+
+
+	res = true;
+	pkt.clear_pkt();
+	pkt.append_item(res);
+	pkt.prepend_gtp_hdr(2, 6, pkt.len, s11_cteid_mme);
+	s11_server.snd(src_sock_addr, pkt);
+	cout<<"teardown of indirect uplink teid complete at sgw \n";
+
 }
 
 //HO code end
@@ -219,6 +282,7 @@ void Sgw::handle_uplink_udata(Packet pkt) {
 
 	uint64_t imsi;
 	uint32_t s5_uteid_ul;
+	uint32_t s1_uteid_dl;
 	string pgw_s5_ip_addr;
 	int pgw_s5_port;
 	bool res;
@@ -243,8 +307,7 @@ void Sgw::handle_uplink_udata(Packet pkt) {
 		enodeb_client.conn(g_sgw_s1_ip_addr, enodeb_ip_addr, enodeb_port);
 		enodeb_client.snd(pkt);
 		cout << "sgw_handledownlinkudata:"
-				<< " downlink udata forwarded to enodeb: " << imsi << endl;
-
+				<< " downlink udata forwarded to enodeb through indirect tunnel: " << imsi << endl;
 
 
 	} else {

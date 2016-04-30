@@ -11,7 +11,8 @@ thread g_mon_thread;
 vector<thread> g_threads;
 TrafficMonitor g_traf_mon;
 
-
+Ran ranS; //source Ran
+Ran ranT; //target Ran
 
 
 void traffic_monitor() {
@@ -36,47 +37,50 @@ void traffic_monitor() {
 	}
 }
 
-//handover changes
-void start_signal_monitor() {
+/* handover changes starts */
 
-	//creating an sctp server
-	g_server.run(g_mme_ip_addr.c_str(), g_mme_port, g_workers_count,handle_mme);
 
-}
+int handle_mme_conn(int conn_fd) {
 
-int handle_mme(int conn_fd) {
-	//Ran ran; //this is the target ran
-	//ranT.eNodeB_id = 2;
 	bool res;
 	Packet pkt;
 
-	g_server.rcv(conn_fd, pkt);
+	server.rcv(conn_fd, pkt);
 
 	pkt.extract_s1ap_hdr();
 	if (pkt.s1ap_hdr.mme_s1ap_ue_id > 0) {
 		switch (pkt.s1ap_hdr.msg_type) {
 
-		/* Initiate Handover */
 		case 7:
-			cout << "ran_simulator_handlemme:" << " case 7:" << endl
+			cout << "Target Ran: handle handover request:" << " case 7:" << endl;
 			ranT.handle_handover(pkt);
 
 			break;
 		case 8:
-			cout << "indirect teid to source enb:" << " case 8:" << endl
+			cout << "Source Ran:receive indirect teid from sgw:" << " case 8:" << endl;
 			ranS.indirect_tunnel_complete(pkt);
+			break;
+		case 9:
+			cout << "Source Ran to intiate a teardown for indirect teid:" << " case 9:" << endl;
+			ranS.request_tear_down(pkt);
 
 			break;
 			/* For error handling */
 		default:
-			cout << "ran_simulator_handlemme:" << " default case: handover" << endl;
+			cout << "ran_simulator_handle_mme:" << " default case: handover" << endl;
 			break;
 		}
 	}
 	return 1;
 }
+//server created to receive mme initiated incoming connection to Ran
+void start_signal_monitor(int a) {
 
-//
+	int threadCount = 2;//some value,1 is also enough
+	server.run(g_ran_sctp_ip_addr, g_ran_port, threadCount, handle_mme_conn);
+
+}
+
 void simulate(int arg) {
 	CLOCK::time_point	start_time;
 	CLOCK::time_point stop_time;
@@ -145,12 +149,9 @@ void simulate(int arg) {
 }
 void simulateHandover(int arg) {
 
-	ranS.ran_ctx.eNodeB_id = 1;
-	ranT.ran_ctx.eNodeB_id = 2;
-	//to run in separate thred
-	start_signal_monitor();
+	cout<<"simulating.Handover between sRan and tRan\n";
 
-	CLOCK::time_point	start_time;
+	CLOCK::time_point start_time;
 	CLOCK::time_point stop_time;
 	MICROSECONDS time_diff_us;
 
@@ -160,43 +161,39 @@ void simulateHandover(int arg) {
 	bool time_exceeded;
 	ranS.handover_state = 0; //not in handover;
 
-	ran_num = arg;
-
-	// HO changes start
-		ranS.ran_context.eNodeB_id = ran_num;
-	// HO changes end
-
 	time_exceeded = false;
-	ranS.init(ran_num);
+
+	ranS.init(1);// source enodeb intialization
+	ranT.init(2); // target enodeb initialization
+
 	ranS.conn_mme();
-	//while (1) {
-		/* Run duration check */
-		g_utils.time_check(g_start_time, g_req_dur, time_exceeded);
-		if (time_exceeded) {
-			break;
-		}
 
-		/* Start time */
-		start_time = CLOCK::now();
 
-		/* Attach */
+	//attaching ranS
+
+
 		ranS.initial_attach();
 		ok = ranS.authenticate();
 		if (!ok) {
-			continue;
+			cout<<"auth_error";
 		}
 		ok = ranS.set_security();
 		if (!ok) {
-			continue;
+			cout<<"set_Sec_error";
 		}
 		ok = ranS.set_eps_session(g_traf_mon);
 		if (!ok) {
-			continue;
+			cout<<"set_eps_error";
 		}
+	//attach complete
+		cout<<"initiate Handover\n";
+
 		ranS.initiate_handover();
-
 		//sleep for some time
+		usleep(10000000);
 
+		//here ranT signals that ue has connected to tRan and its ready to take over
+		//this resultss in switching of down link to target enodeb and tearing down of indirect tunnel
 		ranT.complete_handover();
 
 }
@@ -221,7 +218,8 @@ void init(char *argv[]) {
 
 void run() {
 	int i;
-
+	g_threads_count = 1;
+	cout<<"inside run  \n";
 	/* Tun */
 	// g_traf_mon.tun.set_itf("tun1", "172.16.0.1/16");
 	// g_traf_mon.tun.conn("tun1");
@@ -232,10 +230,13 @@ void run() {
 
 	// g_mon_thread = thread(traffic_monitor);
 	//	 g_mon_thread.detach();
-	for (i = 0; i < g_threads_count; i++) {
-		g_threads[i] = thread(simulate, i);
-	}	
-	for (i = 0; i < g_threads_count; i++) {
+
+		g_threads[0] = thread(start_signal_monitor, 0);
+		g_threads[1] = thread(simulateHandover, 0);
+
+
+
+	for (i = 0; i < 3; i++) {
 		if (g_threads[i].joinable()) {
 			g_threads[i].join();
 		}
@@ -254,9 +255,13 @@ void print_results() {
 }
 
 int main(int argc, char *argv[]) {
-	check_usage(argc);
+	cout<<"simulation start...\n"<<endl;
+	//check_usage(argc);
 	init(argv);
 	run();
-	print_results();
+
+	cout<<"261..<<endl";
+
+	//print_results();
 	return 0;
 }

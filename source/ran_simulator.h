@@ -9,6 +9,8 @@
 #include "s1ap.h"
 #include "security.h"
 #include "sctp_client.h"
+#include "sctp_server.h"
+
 #include "sync.h"
 #include "telecom.h"
 #include "tun.h"
@@ -28,13 +30,26 @@ extern vector<thread> g_threads;
 extern TrafficMonitor g_traf_mon;
 
 //handover changes
-extern SctpServer g_server;
+SctpServer server;
+
+//Ran ranS;
+//Ran ranT;
+string g_ran_sctp_ip_addr = "127.0.0.1";
+int g_ran_port = 4901;
+
+
 //
+
 
 void simulate(int);
 void check_usage(int);
 void init(char**);
 void run();
 void print_results();
+
+//hochanges
+int handle_mme_conn(int conn_fd);
+void simulateHandover(int arg);
+
 
 #endif /* RAN_SIMULATOR_H */

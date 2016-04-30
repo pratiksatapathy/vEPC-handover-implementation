@@ -145,9 +145,13 @@ public:
 	void handle_detach(int, Packet);
 
 	//handover changes
-			void Mme::handle_handover(Packet);
-			void Mme::request_target_RAN(Packet);
-			void Mme::setup_indirect_tunnel(Packet pkt);
+			void handle_handover(Packet);
+			void handle_handover_completion(Packet);
+			void setup_indirect_tunnel(Packet pkt);
+			void request_target_RAN( Packet pkt);
+			void teardown_indirect_tunnel(Packet pkt);
+
+
 		//
 
 	~Mme();

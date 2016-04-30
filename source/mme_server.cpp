@@ -24,9 +24,14 @@ void run() {
 int handle_ue(int conn_fd) {
 	bool res;
 	Packet pkt;
-
+	//cout<<"waiting..\n";
 	g_mme.server.rcv(conn_fd, pkt);
+	//cout<<"waiting2..\n";
+
+	//cout <<"ransimulator ln 49"<<pkt.s1ap_hdr.msg_type<<"\n";
+
 	if (pkt.len <= 0) {
+		cout<<"packet length:"<<pkt.len<<"\n";
 		cout << "mmeserver_handleue:" << " Connection closed" << endl;
 		return 0;
 	}
@@ -45,8 +50,10 @@ int handle_ue(int conn_fd) {
 			break;
 		}
 	} else if (pkt.s1ap_hdr.mme_s1ap_ue_id > 0) {
+		cout<<"msgtype :"<<pkt.s1ap_hdr.msg_type<<"\n";
 		switch (pkt.s1ap_hdr.msg_type) {
 		/* Authentication response */
+
 		case 2:
 			cout << "mmeserver_handleue:" << " case 2: authentication response"
 			<< endl;
@@ -81,20 +88,25 @@ int handle_ue(int conn_fd) {
 			break;
 			/* Initiate Handover */
 		case 7:
-			cout << "mmeserver_handleue:" << " case 7:" << endl
+			cout << "mmeserver_handleue:" << " case 7:" << endl;
 			g_mme.handle_handover(pkt);
 
 			break;
 		case 8:
-			cout << "mmeserver_handleue:" << " case 8:" << endl
+			cout << "mmeserver_handleue:" << " case 8:" << endl;
 			g_mme.setup_indirect_tunnel(pkt);
 
 			break;
 		case 9:
-			cout << "mmeserver_handleue:" << " case 9:" << endl
+			cout << "mmeserver_handleue:" << " case 9:" << endl;
 			g_mme.handle_handover_completion(pkt);
 
 			break;
+		case 10:
+			cout << "send indirect tunnel teardwn req:" << " case 10:" << endl;
+			g_mme.teardown_indirect_tunnel(pkt);
+
+					break;
 			/* For error handling */
 			/* For error handling */
 		default:

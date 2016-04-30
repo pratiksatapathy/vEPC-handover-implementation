@@ -87,7 +87,10 @@ public:
 	void handle_detach(struct sockaddr_in, Packet);
 
 	//handover changes
-		void Sgw::handle_indirect_tunnel_setup(struct sockaddr_in src_sock_addr, Packet pkt);
+	void handle_indirect_tunnel_setup(struct sockaddr_in src_sock_addr, Packet pkt);
+	void handle_handover_completion(struct sockaddr_in src_sock_addr,Packet pkt);
+	void handle_indirect_tunnel_teardown_(struct sockaddr_in src_sock_addr,Packet pkt);
+	//
 
 		//
 

@@ -31,6 +31,8 @@ int handle_mme(int conn_fd) {
 	Packet pkt;
 
 	g_hss.server.rcv(conn_fd, pkt);
+
+
 	if (pkt.len <= 0) {
 		cout << "hssserver_handlemme:" << " Connection closed" << endl;
 		return 0;

@@ -15,13 +15,20 @@
 // int g_sgw_s5_port = 7200;
 // int g_pgw_s5_port = 8000;
 
-string g_trafmon_ip_addr = "10.129.5.193";
-string g_mme_ip_addr = "10.129.5.193";
-string g_hss_ip_addr = "10.129.5.193";
-string g_sgw_s11_ip_addr = "10.129.5.193";
-string g_sgw_s1_ip_addr = "10.129.5.193";
-string g_sgw_s5_ip_addr = "10.129.5.193";
-string g_pgw_s5_ip_addr = "10.129.5.193";
+string g_trafmon_ip_addr = "127.0.0.1";
+string g_mme_ip_addr = "127.0.0.1";
+string g_hss_ip_addr = "127.0.0.1";
+string g_sgw_s11_ip_addr = "127.0.0.1";
+string g_sgw_s1_ip_addr = "127.0.0.1";
+string g_sgw_s5_ip_addr = "127.0.0.1";
+string g_pgw_s5_ip_addr = "127.0.0.1";
+//ho changes
+string t_ran_ip_addr = "127.0.0.1";
+int t_ran_port = 4901;
+
+string s_ran_ip_addr = "127.0.0.1";
+int s_ran_port = 4901;
+//ho changes
 int g_trafmon_port = 4000;
 int g_mme_port = 5000;
 int g_hss_port = 6000;
@@ -90,7 +97,7 @@ MmeIds::MmeIds() {
 }
 
 MmeIds::~MmeIds() {
-	
+
 }
 
 Mme::Mme() {
@@ -140,7 +147,7 @@ void Mme::handle_initial_attach(int conn_fd, Packet pkt) {
 
 	cout << "mme_handletype1attach:" << " imsi:" << imsi << " tai:" << tai << " ksi_asme:" << ksi_asme << " nw_capability" << " " << nw_capability << endl;
 	enodeb_s1ap_ue_id = pkt.s1ap_hdr.enodeb_s1ap_ue_id;
-	
+
 
 	guti = g_telecom.get_guti(mme_ids.gummei, imsi);
 	g_sync.mlock(s1mmeid_mux);
@@ -161,7 +168,7 @@ void Mme::handle_initial_attach(int conn_fd, Packet pkt) {
 	pkt.append_item(nw_type);
 	pkt.prepend_diameter_hdr(1, pkt.len);
 	hss_client.snd(pkt);
-	
+
 	cout << "mme_handletype1attach:" << " request sent to hss: " << guti << endl;
 
 	hss_client.rcv(pkt);
@@ -240,9 +247,9 @@ void Mme::handle_security_mode_cmd(int conn_fd, Packet pkt) {
 	pkt.append_item(nw_capability);
 	pkt.append_item(nas_enc_algo);
 	pkt.append_item(nas_int_algo);
-	
+
 	// g_integrity.add_hmac(pkt, k_nas_int);
-	
+
 	pkt.prepend_s1ap_hdr(2, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
 	cout << "mme_handlesecuritymodecmd:" << " security mode command sent: " << guti << endl;
@@ -282,15 +289,15 @@ bool Mme::handle_security_mode_complete(int conn_fd, Packet pkt) {
 	// else {
 	// 	g_crypt.dec(pkt, k_nas_enc);
 
-		pkt.extract_item(res);
-		if (res == false) {
-			cout << "mme_handlesecuritymodecomplete:" << " security mode complete failure: " << guti << endl;
-			return false;
-		}
-		else {
-			cout << "mme_handlesecuritymodecomplete:" << " security mode complete success: " << guti << endl;
-			return true;
-		}
+	pkt.extract_item(res);
+	if (res == false) {
+		cout << "mme_handlesecuritymodecomplete:" << " security mode complete failure: " << guti << endl;
+		return false;
+	}
+	else {
+		cout << "mme_handlesecuritymodecomplete:" << " security mode complete success: " << guti << endl;
+		return true;
+	}
 
 	// }
 
@@ -452,13 +459,13 @@ void Mme::handle_attach_complete(Packet pkt) {
 	// else {
 	// 	g_crypt.dec(pkt, k_nas_enc);
 
-		pkt.extract_item(eps_bearer_id);
-		pkt.extract_item(s1_uteid_dl);
-		g_sync.mlock(uectx_mux);
-		ue_ctx[guti].s1_uteid_dl = s1_uteid_dl;
-		ue_ctx[guti].emm_state = 1;
-		g_sync.munlock(uectx_mux);
-		cout << "mme_handleattachcomplete:" << " attach complete for ue: " << guti << endl;
+	pkt.extract_item(eps_bearer_id);
+	pkt.extract_item(s1_uteid_dl);
+	g_sync.mlock(uectx_mux);
+	ue_ctx[guti].s1_uteid_dl = s1_uteid_dl;
+	ue_ctx[guti].emm_state = 1;
+	g_sync.munlock(uectx_mux);
+	cout << "mme_handleattachcomplete:" << " attach complete for ue: " << guti << endl;
 
 	// }
 
@@ -513,7 +520,7 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	uint32_t s11_cteid_sgw;
 	uint8_t eps_bearer_id;
 	bool res;
-	
+
 	guti = get_guti(pkt);
 	if (guti == 0) {
 		cout << "mme_handledetach:" << " zero guti " << pkt.s1ap_hdr.mme_s1ap_ue_id << " " << pkt.len << ": " << guti << endl;
@@ -556,10 +563,10 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 	}
 	pkt.clear_pkt();
 	pkt.append_item(res);
-	
+
 	// g_crypt.enc(pkt, k_nas_enc);
 	// g_integrity.add_hmac(pkt, k_nas_int);
-	
+
 	pkt.prepend_s1ap_hdr(5, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 	server.snd(conn_fd, pkt);
 	cout << "mme_handledetach:" << " detach complete sent to ue: " << guti << endl;
@@ -571,47 +578,128 @@ void Mme::handle_detach(int conn_fd, Packet pkt) {
 /* handover changes start */
 void Mme::handle_handover(Packet pkt) {
 
-	//anything else need to be done ??
-
-	//new sctp client
-
-	//need to store the t_ran_ip_addr.c_str(), t_ran_port somewhere in config-constants maybe
-
-	SctpClient to_target_ran_client;
-	to_target_ran_client.conn(t_ran_ip_addr.c_str(), t_ran_port);
+	cout<<"msg state 7 at mme \n";
 
 	request_target_RAN(pkt);
 
 }
 void Mme::setup_indirect_tunnel(Packet pkt) {
 
-	UdpClient sgw_client;
-	uint64_t guti;
+	cout<<"set-up indirect tunnel at mme \n";
+
+	UdpClient sgw_client; //
+	uint64_t guti; //
 	uint32_t s1_uteid_dl_ho; //ran 2 has sent its id, dl id for sgw to send data
 	uint32_t s1_uteid_ul;
-	uint32_t enodeb_s1ap_ue_id;
+	//uint32_t enodeb_s1ap_ue_id;
+	uint32_t s11_cteid_sgw;
 	bool res;
 
 	pkt.extract_item(s1_uteid_dl_ho);
 
-	sgw_client.conn(g_sgw_s11_ip_addr.c_str(), g_sgw_s11_port);
+	sgw_client.conn(g_mme_ip_addr, g_sgw_s11_ip_addr, g_sgw_s11_port);
 	guti = get_guti(pkt);
-	g_sync.mlock(table2_mux);
-	//eps_bearer_id = table2[guti].eps_bearer_id;
-	//s1_uteid_dl = table2[guti].s1_uteid_dl;
-	//s1mme_id[enodeb_s1ap_ue_id] = ??
+	g_sync.mlock(uectx_mux);
 
-
-	s11_cteid_sgw = table2[guti].s11_cteid_sgw;
-	g_sync.munlock(table2_mux);
+	s11_cteid_sgw = ue_ctx[guti].s11_cteid_sgw;
+	g_sync.munlock(uectx_mux);
 	pkt.clear_pkt();
-	//pkt.append_item(eps_bearer_id);
 	pkt.append_item(s1_uteid_dl_ho);
-	//pkt.append_item(g_enodeb_ip_addr);
-	//pkt.append_item(g_enodeb_port);
-	pkt.prepend_gtp_hdr(4, 3, pkt.len, s11_cteid_sgw); //doubt about 4
+	pkt.prepend_gtp_hdr(2, 4, pkt.len, s11_cteid_sgw); //doubt about 4
 	sgw_client.snd(pkt);
 	sgw_client.rcv(pkt);
+
+	//new indirect tunnel was setup at sgw and sent to the senb for use
+
+	pkt.extract_gtp_hdr();
+	pkt.extract_item(res);//this is the indirect uplink teid for senb
+	pkt.extract_item(s1_uteid_ul);
+	cout << "indirect tunnel id: "<<s1_uteid_ul<<"\n";
+
+	SctpClient to_source_ran_client;
+	to_source_ran_client.conn(s_ran_ip_addr, s_ran_port);
+
+	if (res == true) {
+
+		pkt.clear_pkt();
+		pkt.append_item(s1_uteid_ul);
+
+		//for msg for source ran with 8 as uid
+		pkt.prepend_s1ap_hdr(8, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+
+		to_source_ran_client.snd(pkt);//send to source RAN
+
+	}
+	cout << "indirect tunnel setup complete at mme:"<< endl;
+
+}
+void Mme::request_target_RAN( Packet pkt) {
+
+	int handover_type;
+	uint16_t s_enb;
+	uint16_t t_enb;
+	uint64_t guti;
+
+	uint32_t enodeb_s1ap_ue_id; /* eNodeB S1AP UE ID */
+	uint32_t mme_s1ap_ue_id;
+
+	pkt.extract_item(handover_type);
+	pkt.extract_item(s_enb);
+	pkt.extract_item(t_enb);
+	pkt.extract_item(enodeb_s1ap_ue_id);
+	pkt.extract_item(mme_s1ap_ue_id);
+	guti = get_guti(pkt);
+
+
+	//send s1ap headers to target enb for use
+
+	pkt.clear_pkt();
+
+	pkt.append_item(t_enb);
+	pkt.append_item(enodeb_s1ap_ue_id);
+	pkt.append_item(mme_s1ap_ue_id);
+	//lock
+	g_sync.mlock(uectx_mux);
+	pkt.append_item(ue_ctx[guti].s1_uteid_ul); //give your uplink id to target ran
+	g_sync.munlock(uectx_mux);
+	//unlock
+
+	pkt.prepend_s1ap_hdr(7, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+
+
+	SctpClient to_target_ran_client;
+	to_target_ran_client.conn(t_ran_ip_addr, t_ran_port);
+	to_target_ran_client.snd(pkt);
+
+}
+void Mme::handle_handover_completion(Packet pkt) {
+
+	cout<<"handover completion \n";
+
+	UdpClient sgw_client;
+	uint64_t guti;
+	uint32_t s1_uteid_dl_ho; //ran 2 has sent its id, dl id for sgw to send data
+	uint32_t s1_uteid_ul;
+	//uint32_t enodeb_s1ap_ue_id;
+
+	uint32_t s11_cteid_sgw;
+	bool res;
+
+	//pkt.extract_item(s1_uteid_dl_ho);
+
+	sgw_client.conn(g_mme_ip_addr, g_sgw_s11_ip_addr, g_sgw_s11_port);
+	guti = get_guti(pkt);
+	g_sync.mlock(uectx_mux);
+
+	s11_cteid_sgw = ue_ctx[guti].s11_cteid_sgw;
+	g_sync.munlock(uectx_mux);
+	pkt.clear_pkt();
+	pkt.append_item(1);
+
+	pkt.prepend_gtp_hdr(2, 5, pkt.len, s11_cteid_sgw);
+	sgw_client.snd(pkt);
+	sgw_client.rcv(pkt);
+
 	//we will now return from here to source enb
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(res);
@@ -623,94 +711,61 @@ void Mme::setup_indirect_tunnel(Packet pkt) {
 	if (res == true) {
 
 		pkt.clear_pkt();
-		pkt.append_item(s1_uteid_ul);
+		pkt.append_item(res);
 
-		//8 for msg for source ran
-		pkt.prepend_s1ap_hdr(8, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
+		//9 for msg for source ran with the indirect tunnel id.
+		pkt.prepend_s1ap_hdr(9, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
 
 		to_source_ran_client.snd(pkt);
 
 	}
-	cout << "mme_handlemodifybearer:" << " eps session setup success" << endl;
+	cout << "handle_handover_completion:" << " handover setup completed" << endl;
+
 
 }
-void Mme::request_target_RAN(SctpClient to_target_ran_client, Packet pkt) {
+void Mme::teardown_indirect_tunnel(Packet pkt) {
 
-	int handover_type;
-	uint16_t s_enb;
-	uint16_t t_enb;
+	cout<<"tear down at mme \n";
+
+
+	bool res;
+	UdpClient sgw_client;
 	uint64_t guti;
+	uint32_t s1_uteid_dl_ho; //ran 2 has sent its id, dl id for sgw to send data
+	uint32_t s1_uteid_ul;
 
-	pkt.extract_item(handover_type);
-	pkt.extract_item(s_enb);
-	pkt.extract_item(t_enb);
+	//uint32_t enodeb_s1ap_ue_id;
 
+	uint32_t s11_cteid_sgw;
+
+	uint32_t s1_uteid_ul_ho; //being used now
+	pkt.extract_item(s1_uteid_ul_ho);
+
+	//we have to remove this teid from sgw
+
+	sgw_client.conn(g_mme_ip_addr, g_sgw_s11_ip_addr, g_sgw_s11_port);
 	guti = get_guti(pkt);
 
+	g_sync.mlock(uectx_mux);
+	s11_cteid_sgw = ue_ctx[guti].s11_cteid_sgw;
+	g_sync.munlock(uectx_mux);
+
 	pkt.clear_pkt();
+	pkt.append_item(s1_uteid_ul_ho);
 
-	pkt.append_item(t_enb);
+	pkt.prepend_gtp_hdr(2, 6, pkt.len, s11_cteid_sgw);
 
-	//lock
-	g_sync.mlock(table2_mux);
-	pkt.append_item(table2[guti].s1_uteid_ul);
-	g_sync.munlock(table2_mux);
-	//unlock
+	sgw_client.snd(pkt);
+	sgw_client.rcv(pkt);
+	pkt.extract_gtp_hdr();
+	pkt.extract_item(res);
 
-	pkt.prepend_s1ap_hdr(7, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
-
-
-	to_target_ran_client.snd(pkt);
-
-}
-void Mme::handle_handover_completion(Packet pkt) {
-	UdpClient sgw_client;
-		uint64_t guti;
-		//uint32_t s1_uteid_dl_ho; //ran 2 has sent its id, dl id for sgw to send data
-		uint32_t s1_uteid_ul;
-		uint32_t enodeb_s1ap_ue_id;
-		bool res;
-
-		//pkt.extract_item(s1_uteid_dl_ho);
-
-		sgw_client.conn(g_sgw_s11_ip_addr.c_str(), g_sgw_s11_port);
-		guti = get_guti(pkt);
-		g_sync.mlock(table2_mux);
-		//eps_bearer_id = table2[guti].eps_bearer_id;
-		//s1_uteid_dl = table2[guti].s1_uteid_dl;
-		s11_cteid_sgw = table2[guti].s11_cteid_sgw;
-		g_sync.munlock(table2_mux);
-		pkt.clear_pkt();
-		//pkt.append_item(eps_bearer_id);
-		pkt.append_item(s1_uteid_dl_ho);
-		//pkt.append_item(g_enodeb_ip_addr);
-		//pkt.append_item(g_enodeb_port);
-		pkt.prepend_gtp_hdr(4, 3, pkt.len, s11_cteid_sgw); //doubt about 4
-		sgw_client.snd(pkt);
-		sgw_client.rcv(pkt);
-		//we will now return from here to source enb
-		pkt.extract_gtp_hdr();
-		pkt.extract_item(res);
-		pkt.extract_item(s1_uteid_ul);
-
-		SctpClient to_source_ran_client;
-		to_source_ran_client.conn(s_ran_ip_addr.c_str(), s_ran_port);
-
-		if (res == true) {
-
-			pkt.clear_pkt();
-			pkt.append_item(s1_uteid_ul);
-
-			//8 for msg for source ran
-			pkt.prepend_s1ap_hdr(8, pkt.len, pkt.s1ap_hdr.enodeb_s1ap_ue_id, pkt.s1ap_hdr.mme_s1ap_ue_id);
-
-			to_source_ran_client.snd(pkt);
-
-		}
-		cout << "mme_handlemodifybearer:" << " eps session setup success" << endl;
+	if(res)
+	cout << "tear down completed:" << " " << endl;
 
 
 }
+
 
 /* handover changes end */
 void Mme::set_pgw_info(uint64_t guti) {

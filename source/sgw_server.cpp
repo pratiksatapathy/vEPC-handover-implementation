@@ -71,35 +71,45 @@ void handle_s11_traffic() {
 	struct sockaddr_in src_sock_addr;
 	Packet pkt;
 
+
 	while (1) {
 		g_sgw.s11_server.rcv(src_sock_addr, pkt);
 		pkt.extract_gtp_hdr();
 		switch(pkt.gtp_hdr.msg_type) {
-			/* Create session */
-			case 1:
-				cout << "sgwserver_handles11traffic:" << " case 1: create session" << endl;
-				g_sgw.handle_create_session(src_sock_addr, pkt);
-				break;
+		/* Create session */
+		case 1:
+			cout << "sgwserver_handles11traffic:" << " case 1: create session" << endl;
+			g_sgw.handle_create_session(src_sock_addr, pkt);
+			break;
 
 			/* Modify bearer */
-			case 2:
-				cout << "sgwserver_handles11traffic:" << " case 2: modify bearer" << endl;
-				g_sgw.handle_modify_bearer(src_sock_addr, pkt);
-				break;
+		case 2:
+			cout << "sgwserver_handles11traffic:" << " case 2: modify bearer" << endl;
+			g_sgw.handle_modify_bearer(src_sock_addr, pkt);
+			break;
 
 			/* Detach */
-			case 3:
-				cout << "sgwserver_handles11traffic:" << " case 3: detach" << endl;
-				g_sgw.handle_detach(src_sock_addr, pkt);
-				break;
+		case 3:
+			cout << "sgwserver_handles11traffic:" << " case 3: detach" << endl;
+			g_sgw.handle_detach(src_sock_addr, pkt);
+			break;
 			/* Indirect tunnel */
-			case 4:
-				g_sgw.handle_indirect_tunnel_setup(src_sock_addr, pkt);
-				break;
+		case 4:
+			cout << "handle indirec tunnel setup:" << " case 4: handle_indirect_tunnel_setup" << endl;
+			g_sgw.handle_indirect_tunnel_setup(src_sock_addr, pkt);
+			break;
+		case 5:
+			cout << "switch downlink tunnel id to target ran:" << " case 5: handle completion mark" << endl;
+			g_sgw.handle_handover_completion(src_sock_addr, pkt);
+			break;
+		case 6:
+			cout << "remove the uplink indirect tunnel id" << " case 6: handle tear down" << endl;
+			g_sgw.handle_indirect_tunnel_teardown_(src_sock_addr, pkt);
+			break;
 
 			/* For error handling */
-			default:
-				cout << "sgwserver_handles11traffic:" << " default case:" << endl;
+		default:
+			cout << "sgwserver_handles11traffic:" << " default case:" << endl;
 		}		
 	}
 }
@@ -112,15 +122,15 @@ void handle_s1_traffic() {
 		g_sgw.s1_server.rcv(src_sock_addr, pkt);
 		pkt.extract_gtp_hdr();
 		switch(pkt.gtp_hdr.msg_type) {
-			/* Uplink userplane data */
-			case 1:
-				cout << "sgwserver_handles1traffic:" << " case 1: uplink udata" << endl;
-				g_sgw.handle_uplink_udata(pkt);
-				break;
+		/* Uplink userplane data */
+		case 1:
+			cout << "sgwserver_handles1traffic:" << " case 1: uplink udata" << endl;
+			g_sgw.handle_uplink_udata(pkt);
+			break;
 
 			/* For error handling */
-			default:
-				cout << "sgwserver_handles1traffic:" << " default case:" << endl;
+		default:
+			cout << "sgwserver_handles1traffic:" << " default case:" << endl;
 		}		
 	}		
 }
@@ -133,15 +143,15 @@ void handle_s5_traffic() {
 		g_sgw.s5_server.rcv(src_sock_addr, pkt);
 		pkt.extract_gtp_hdr();
 		switch(pkt.gtp_hdr.msg_type) {
-			/* Downlink userplane data */
-			case 3:
-				cout << "sgwserver_handles5traffic:" << " case 3: downlink udata" << endl;
-				g_sgw.handle_downlink_udata(pkt);
-				break;
+		/* Downlink userplane data */
+		case 3:
+			cout << "sgwserver_handles5traffic:" << " case 3: downlink udata" << endl;
+			g_sgw.handle_downlink_udata(pkt);
+			break;
 
 			/* For error handling */
-			default:
-				cout << "sgwserver_handles5traffic:" << " default case:" << endl;	
+		default:
+			cout << "sgwserver_handles5traffic:" << " default case:" << endl;
 		}		
 	}			
 }

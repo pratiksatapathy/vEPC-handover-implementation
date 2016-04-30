@@ -6,9 +6,11 @@
 // int g_trafmon_port = 4000;
 // int g_mme_port = 5000;
 
-string g_ran_ip_addr = "10.129.5.193";
-string g_trafmon_ip_addr = "10.129.5.193";
-string g_mme_ip_addr = "10.129.5.193";
+string g_ran_ip_addr = "127.0.0.1";
+string g_trafmon_ip_addr = "127.0.0.1";
+string g_mme_ip_addr = "127.0.0.1";
+
+
 int g_trafmon_port = 4000;
 int g_mme_port = 5000;
 
@@ -96,7 +98,35 @@ void TrafficMonitor::handle_uplink_udata() {
 		sgw_s1_client.snd(pkt);
 	}
 }
-
+//bool redirectIfNeeded(Packet pkt){
+//
+//		string ip_addr;
+//		uint32_t s1_uteid_ul;
+//		string sgw_s1_ip_addr;
+//		int sgw_s1_port;
+//		bool res;
+//	if (pkt.gtp_hdr.teid == ran_ctx.enodeb_s1ap_ue_id && handover_state == 4)
+//	{
+//		//send packet back to sgw
+//		ip_addr = g_nw.get_dst_ip_addr(pkt);
+//		res = get_uplink_info(ip_addr, s1_uteid_ul, sgw_s1_ip_addr, sgw_s1_port);
+//
+//		//using the indirect tunnel to send data
+//		s1_uteid_ul = ranS.ran_ctx.indirect_s1_uteid_ul;
+//
+//		if (res == true) {
+//			UdpClient sgw_s1_client;
+//
+//			sgw_s1_client.conn(g_ran_ip_addr, sgw_s1_ip_addr, sgw_s1_port);
+//			pkt.prepend_gtp_hdr(1, 1, pkt.len,s1_uteid_ul);
+//			sgw_s1_client.snd(pkt);
+//			}
+//		return true;
+//	}
+//	else{
+//		return false;
+//	}
+//}
 void TrafficMonitor::handle_downlink_udata() {
 	Packet pkt;
 	struct sockaddr_in src_sock_addr;
@@ -104,44 +134,16 @@ void TrafficMonitor::handle_downlink_udata() {
 	server.rcv(src_sock_addr, pkt);
 	pkt.extract_gtp_hdr();
 
-	//ho changes
-	if(!redirectIfNeeded(pkt)){
+	//ho changes dont do this for demo
+	//if(!redirectIfNeeded(pkt)){
 	//ho changes
 
 	pkt.truncate();
 	tun.snd(pkt);
-	}
+	//}
 }
 
-bool redirectIfNeeded(Packet pkt){
-	Packet pkt;
-		string ip_addr;
-		uint32_t s1_uteid_ul;
-		string sgw_s1_ip_addr;
-		int sgw_s1_port;
-		bool res;
-	if (pkt.gtp_hdr.teid == ranS.ran_ctx.enodeb_s1ap_ue_id && ranS.handover_state == 4)
-	{
-		//send packet back to sgw
-		ip_addr = g_nw.get_dst_ip_addr(pkt);
-		res = get_uplink_info(ip_addr, s1_uteid_ul, sgw_s1_ip_addr, sgw_s1_port);
 
-		//using the indirect tunnel to send data
-		s1_uteid_ul = ranS.ran_ctx.indirect_s1_uteid_ul;
-
-		if (res == true) {
-			UdpClient sgw_s1_client;
-
-			sgw_s1_client.conn(g_ran_ip_addr, sgw_s1_ip_addr, sgw_s1_port);
-			pkt.prepend_gtp_hdr(1, 1, pkt.len,s1_uteid_ul);
-			sgw_s1_client.snd(pkt);
-			}
-		return true;
-	}
-	else{
-		return false;
-	}
-}
 
 void TrafficMonitor::update_uplink_info(string ip_addr, uint32_t s1_uteid_ul, string sgw_s1_ip_addr, int sgw_s1_port) {
 	g_sync.mlock(uplinkinfo_mux);
@@ -163,7 +165,7 @@ bool TrafficMonitor::get_uplink_info(string ip_addr, uint32_t &s1_uteid_ul, stri
 	return res;
 }
 
-TrafficMonitor::~TrafficMonitor() {
+TrafficMonitor :: ~TrafficMonitor() {
 
 }
 
@@ -396,89 +398,104 @@ bool Ran::detach() {
 
 
 //HO changes start
+//for source Ran
 void Ran::initiate_handover() {
 
 	this->handover_state = 1; //initiated handover
-	this->ran_ctx.handover_target_eNodeB_id = 2; //some  dummy id
+	this->ran_ctx.eNodeB_id = 1;
+	int handover_type = 0; //handover type : 0 for intra MME
+	this->ran_ctx.handover_target_eNodeB_id = 2; //handover to ran with id 2
+
 
 	pkt.clear_pkt();
-	pkt.append_item(0); //handover type : 0 for intra MME
-	pkt.append_item(1); //source enbid 1
-	pkt.append_item(2); //target enbid 2
+	pkt.append_item(handover_type);
+	pkt.append_item(eNodeB_id); //source enbid 1
+	pkt.append_item(ran_ctx.handover_target_eNodeB_id); //target enbid 2
+	pkt.append_item(ran_ctx.enodeb_s1ap_ue_id);
+	pkt.append_item(ran_ctx.mme_s1ap_ue_id);
 
-	//taking type 7 as HO type
-	crypt.enc(pkt, ran_ctx.k_nas_enc);
-	integrity.add_hmac(pkt, ran_ctx.k_nas_int);
-	pkt.prepend_s1ap_hdr(7, pkt.len, ran_context.enodeb_s1ap_ue_id,
-			ran_context.mme_s1ap_ue_id);
+	pkt.prepend_s1ap_hdr(7, pkt.len, ran_ctx.enodeb_s1ap_ue_id,
+			ran_ctx.mme_s1ap_ue_id);
 
-	//encryption step yet to be done
 	mme_client.snd(pkt);
 	cout << "ran_handover:" << " Handover intiation triggered";
 
-	//	//ideally a polling for message like mme needs to be implememnted which detects packet type
-	//	//doubt for the next line
-	//	g_enodeb_target.receive_handover_request()
 
 }
+//for target Ran
 void Ran::handle_handover(Packet pkt) {
 
+	uint16_t t_enb;
 	//thru ran control traffic monitor
 	this->handover_state = 2; //HO requested at target RAN
-	pkt.extract_item(ran_ctx.s1_uteid_ul); //need this when we upload data to sgw
+
+	//receive s1ap headers for the UE
+	pkt.extract_item(t_enb);
+	pkt.extract_item(ran_ctx.enodeb_s1ap_ue_id);
+	pkt.extract_item(ran_ctx.mme_s1ap_ue_id);
+
+	//need this when we upload data to sgw, after handover completes
+	pkt.extract_item(ran_ctx.s1_uteid_ul);
 
 	//uplink teid of sgw is now saved in ran_ctx.s1_uteid_ul, and will be used after HO
 
 
-	//now we will send enodeb_s1ap_ue_id to mme and sgw for it to store as an indirect tunn
-
 	pkt.clear_pkt();
-	//not needed here pkt.append_item(0); //handover type : 0 for intra MME
-	pkt.append_item(this->ran_ctx.enodeb_s1ap_ue_id); //source enbid
-	//pkt.append_item(this->ran_context.eNodeB_id); //target enbid
+	//now we will send enodeb_s1ap_ue_id to mme and sgw for it to store as an indirect tunnel dl
+	//post handover it will be used as a primary downlink
+	pkt.append_item(this->ran_ctx.enodeb_s1ap_ue_id);
 
-	//mme_s1ap_ue_id = will be zero
-	//taking type 8 as Indirect tunnel setup type
+	pkt.prepend_s1ap_hdr(8, pkt.len, ran_ctx.enodeb_s1ap_ue_id,
+			ran_ctx.mme_s1ap_ue_id);
 
-	pkt.prepend_s1ap_hdr(8, pkt.len, ran_context.enodeb_s1ap_ue_id,
-			ran_context.mme_s1ap_ue_id);
-
+	mme_client.conn(epc_addrs.mme_ip_addr, epc_addrs.mme_port);
 	mme_client.snd(pkt);
+
 	this->handover_state = 3;
-	cout << "ran_handover:" << " Handover intiation triggered";
-	//after exchange inform sgw to not to send via ran 1
+	cout << "target Ran acknowledges handover :" << " Handover intiation triggered 452\n";
 
 	//done
 }
 
+//for source RAN, it receives the indirect uplink teid
 void Ran::indirect_tunnel_complete(Packet pkt) {
 
-	this->handover_state = 4;//HO done now we can redirect packet.
+	this->handover_state = 4;//HO done now we can redirect packet through indirect tunnel id
 	pkt.extract_item(ran_ctx.s1_uteid_ul);
+	cout<<"indirect tunnel setup complete\n";
 }
+
+//target ran marks completion of indirect tunnel setup
 void Ran::complete_handover() {
 
-	//this->handover_state = 1; //initiated handover
-	//this->ran_ctx.handover_target_eNodeB_id = 2; //some  dummy id
-
+	//we ned not append any data to packet, only signal and s1ap header is necessary
 	pkt.clear_pkt();
-	//pkt.append_item(0); //handover type : 0 for intra MME
-	//pkt.append_item(1); //source enbid 1
-	//pkt.append_item(2); //target enbid 2
 
-	//taking type 7 as HO type
+	pkt.prepend_s1ap_hdr(9, pkt.len, ran_ctx.enodeb_s1ap_ue_id,
+				ran_ctx.mme_s1ap_ue_id);
 
-	//are these thing correct ???
-	pkt.prepend_s1ap_hdr(7, pkt.len, ran_context.enodeb_s1ap_ue_id,
-			ran_context.mme_s1ap_ue_id);
-
-	//encryption step yet to be done
 	mme_client.snd(pkt);
-	cout << "ran_handover:" << " Handover intiation triggered";
+	cout << "ran_handover:" << " teardown initiated from target ran \n";
 
-	//	//ideally a polling for message like mme needs to be implememnted which detects packet type
-	//	//doubt for the next line
-	//	g_enodeb_target.receive_handover_request()
+}
+//for source Ran
+void Ran::request_tear_down(Packet pkt){
+
+	//clear uplink ids
+
+	//there are two uplink ids, one direct and one indirect
+	//we remove the direct one's reference from this ran, we remove indirect from sgw
+
+	ran_ctx.s1_uteid_ul = 0; //clearing uplink id
+	pkt.clear_pkt();
+	pkt.append_item(ran_ctx.indirect_s1_uteid_ul); //send the indirect teid that needs to be removed from sgw
+
+	pkt.prepend_s1ap_hdr(10, pkt.len, ran_ctx.enodeb_s1ap_ue_id,
+					ran_ctx.mme_s1ap_ue_id);
+
+		mme_client.snd(pkt);
+		cout << "ran_handover:" << " teardown completed at S Ran \n";
+
 
 }
 //HO changes end

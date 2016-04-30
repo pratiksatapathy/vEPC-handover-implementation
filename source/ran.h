@@ -21,10 +21,6 @@ extern string g_mme_ip_addr;
 extern int g_trafmon_port;
 extern int g_mme_port;
 
-//HO changes
-Ran ranS;
-Ran ranT;
-//
 
 class RanContext {
 public:
@@ -87,7 +83,7 @@ public:
 
 	//when inHandover = true use the below uplink
 	uint32_t indirect_s1_uteid_ul;
-	/* handover changes end/
+	// handover changes end/
 
 
 	 RanContext();
@@ -131,7 +127,8 @@ public:
 	TrafficMonitor();
 	void handle_uplink_udata();
 	void handle_downlink_udata();
-	void update_uplink_info(string, uint32_t, string, int);~TrafficMonitor();
+	void update_uplink_info(string, uint32_t, string, int);
+	~TrafficMonitor();
 };
 
 class Ran {
@@ -167,11 +164,18 @@ public:
 		 */
 
 	//ho methods
-	void Ran::initiate_handover();
-	void Ran::handle_handover(Packet pkt);
-	void Ran::indirect_tunnel_complete(Packet pkt);
-	void Ran::complete_handover();
+	void initiate_handover();
+	void handle_handover(Packet pkt);
+	void indirect_tunnel_complete(Packet pkt);
+	void complete_handover();
+	void request_tear_down(Packet pkt);
 	//
 };
+
+//HO changes
+//Ran ranS;
+//Ran ranT;
+//
+
 
 #endif /* RAN_H */
