@@ -120,7 +120,7 @@ private:
 	/* Lock parameters */
 	pthread_mutex_t s1mmeid_mux; /* Handles s1mme_id and ue_count */
 	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
-	
+
 	void clrstl();
 	uint32_t get_s11cteidmme(uint64_t);
 	void set_crypt_context(uint64_t);
@@ -129,7 +129,7 @@ private:
 	uint64_t get_guti(Packet);
 	void rem_itfid(uint32_t);
 	void rem_uectx(uint64_t);
-	
+
 public:
 	SctpServer server;
 
@@ -145,14 +145,14 @@ public:
 	void handle_detach(int, Packet);
 
 	//handover changes
-			void handle_handover(Packet);
-			void handle_handover_completion(Packet);
-			void setup_indirect_tunnel(Packet pkt);
-			void request_target_RAN( Packet pkt);
-			void teardown_indirect_tunnel(Packet pkt);
+	void handle_handover(Packet);
+	void handle_handover_completion(Packet);
+	void setup_indirect_tunnel(Packet pkt);
+	void request_target_RAN( Packet pkt);
+	void teardown_indirect_tunnel(Packet pkt);
 
 
-		//
+	//
 
 	~Mme();
 };

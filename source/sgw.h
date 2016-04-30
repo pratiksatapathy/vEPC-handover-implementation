@@ -57,15 +57,15 @@ private:
 	unordered_map<uint32_t, uint64_t> s5_id; /* S5 UE identification table: s5_uteid_dl -> imsi */
 	unordered_map<uint64_t, UeContext> ue_ctx; /* UE context table: imsi -> UeContext */
 	//HO changes
-		unordered_map<uint32_t, UeContext> ho_ue_ctx; /* UE context table: imsi -> UeContext */
+	unordered_map<uint32_t, UeContext> ho_ue_ctx; /* UE context table: imsi -> UeContext */
 
-		//HO changes
+	//HO changes
 	/* Lock parameters */
 	pthread_mutex_t s11id_mux; /* Handles s11_id */
 	pthread_mutex_t s1id_mux; /* Handles s1_id */
 	pthread_mutex_t s5id_mux; /* Handles s5_id */
 	pthread_mutex_t uectx_mux; /* Handles ue_ctx */
-	
+
 	void clrstl();
 	void update_itfid(int, uint32_t, uint64_t);
 	uint64_t get_imsi(int, uint32_t);
@@ -92,7 +92,7 @@ public:
 	void handle_indirect_tunnel_teardown_(struct sockaddr_in src_sock_addr,Packet pkt);
 	//
 
-		//
+	//
 
 	~Sgw();
 };

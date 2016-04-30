@@ -207,7 +207,7 @@ bool Ran::authenticate() {
 	pkt.extract_item(xautn_num);
 	pkt.extract_item(rand_num);
 	pkt.extract_item(ran_ctx.ksi_asme);
-	
+
 	cout << "ran_authenticate: " << " autn: " << xautn_num << " rand: " << rand_num  << " ksiasme: " << ran_ctx.ksi_asme << ": " << ran_ctx.imsi << endl;
 	sqn = rand_num + 1;
 	res = ran_ctx.key + sqn + rand_num;
@@ -294,14 +294,14 @@ bool Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	}	
 	cout << "ran_setepssession:" << " attach accept received from mme: " << ran_ctx.imsi << endl;
 	pkt.extract_s1ap_hdr();
-	
+
 	// res = g_integrity.hmac_check(pkt, ran_ctx.k_nas_int);
 	// if (res == false) {
 	// 	cout << "ran_setepssession:" << " hmac attach accept failure: " << ran_ctx.imsi << endl;
 	// 	return false;
 	// }
 	// g_crypt.dec(pkt, ran_ctx.k_nas_enc);
-	
+
 	pkt.extract_item(ran_ctx.guti);
 	pkt.extract_item(ran_ctx.eps_bearer_id);
 	pkt.extract_item(ran_ctx.e_rab_id);
@@ -324,10 +324,10 @@ bool Ran::set_eps_session(TrafficMonitor &traf_mon) {
 	pkt.clear_pkt();
 	pkt.append_item(ran_ctx.eps_bearer_id);
 	pkt.append_item(ran_ctx.s1_uteid_dl);
-	
+
 	// g_crypt.enc(pkt, ran_ctx.k_nas_enc);
 	// g_integrity.add_hmac(pkt, ran_ctx.k_nas_int);
-	
+
 	pkt.prepend_s1ap_hdr(4, pkt.len, ran_ctx.enodeb_s1ap_ue_id, ran_ctx.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
 	cout << "ran_setepssession:" << " attach complete sent to mme: " << ran_ctx.imsi << endl;
@@ -366,10 +366,10 @@ bool Ran::detach() {
 	pkt.append_item(ran_ctx.guti);
 	pkt.append_item(ran_ctx.ksi_asme);
 	pkt.append_item(detach_type);
-	
+
 	// g_crypt.enc(pkt, ran_ctx.k_nas_enc);
 	// g_integrity.add_hmac(pkt, ran_ctx.k_nas_int);
-	
+
 	pkt.prepend_s1ap_hdr(5, pkt.len, ran_ctx.enodeb_s1ap_ue_id, ran_ctx.mme_s1ap_ue_id);
 	mme_client.snd(pkt);
 	cout << "ran_detach:" << " detach request sent to mme: " << ran_ctx.imsi << endl;
@@ -379,14 +379,14 @@ bool Ran::detach() {
 	}	
 	cout << "ran_detach:" << " detach complete received from mme: " << ran_ctx.imsi << endl;
 	pkt.extract_s1ap_hdr();
-	
+
 	// res = g_integrity.hmac_check(pkt, ran_ctx.k_nas_int);
 	// if (res == false) {
 	// 	cout << "ran_detach:" << " hmac detach failure: " << ran_ctx.imsi << endl;
 	// 	return false;
 	// }
 	// g_crypt.dec(pkt, ran_ctx.k_nas_enc);
-	
+
 	pkt.extract_item(res);
 	if (res == false) {
 		cout << "ran_detach:" << " detach failure: " << ran_ctx.imsi << endl;
@@ -472,7 +472,7 @@ void Ran::complete_handover() {
 	pkt.clear_pkt();
 
 	pkt.prepend_s1ap_hdr(9, pkt.len, ran_ctx.enodeb_s1ap_ue_id,
-				ran_ctx.mme_s1ap_ue_id);
+			ran_ctx.mme_s1ap_ue_id);
 
 	mme_client.snd(pkt);
 	cout << "ran_handover:" << " teardown initiated from target ran \n";
@@ -491,10 +491,10 @@ void Ran::request_tear_down(Packet pkt){
 	pkt.append_item(ran_ctx.indirect_s1_uteid_ul); //send the indirect teid that needs to be removed from sgw
 
 	pkt.prepend_s1ap_hdr(10, pkt.len, ran_ctx.enodeb_s1ap_ue_id,
-					ran_ctx.mme_s1ap_ue_id);
+			ran_ctx.mme_s1ap_ue_id);
 
-		mme_client.snd(pkt);
-		cout << "ran_handover:" << " teardown completed at S Ran \n";
+	mme_client.snd(pkt);
+	cout << "ran_handover:" << " teardown completed at S Ran \n";
 
 
 }

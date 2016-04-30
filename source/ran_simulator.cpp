@@ -106,7 +106,7 @@ void simulate(int arg) {
 		if (time_exceeded) {
 			break;
 		}
-		
+
 		/* Start time */
 		start_time = CLOCK::now();	
 
@@ -172,29 +172,29 @@ void simulateHandover(int arg) {
 	//attaching ranS
 
 
-		ranS.initial_attach();
-		ok = ranS.authenticate();
-		if (!ok) {
-			cout<<"auth_error";
-		}
-		ok = ranS.set_security();
-		if (!ok) {
-			cout<<"set_Sec_error";
-		}
-		ok = ranS.set_eps_session(g_traf_mon);
-		if (!ok) {
-			cout<<"set_eps_error";
-		}
+	ranS.initial_attach();
+	ok = ranS.authenticate();
+	if (!ok) {
+		cout<<"auth_error";
+	}
+	ok = ranS.set_security();
+	if (!ok) {
+		cout<<"set_Sec_error";
+	}
+	ok = ranS.set_eps_session(g_traf_mon);
+	if (!ok) {
+		cout<<"set_eps_error";
+	}
 	//attach complete
-		cout<<"initiate Handover\n";
+	cout<<"initiate Handover\n";
 
-		ranS.initiate_handover();
-		//sleep for some time
-		usleep(10000000);
+	ranS.initiate_handover();
+	//sleep for some time
+	usleep(10000000);
 
-		//here ranT signals that ue has connected to tRan and its ready to take over
-		//this resultss in switching of down link to target enodeb and tearing down of indirect tunnel
-		ranT.complete_handover();
+	//here ranT signals that ue has connected to tRan and its ready to take over
+	//this resultss in switching of down link to target enodeb and tearing down of indirect tunnel
+	ranT.complete_handover();
 
 }
 
@@ -231,8 +231,8 @@ void run() {
 	// g_mon_thread = thread(traffic_monitor);
 	//	 g_mon_thread.detach();
 
-		g_threads[0] = thread(start_signal_monitor, 0);
-		g_threads[1] = thread(simulateHandover, 0);
+	g_threads[0] = thread(start_signal_monitor, 0);
+	g_threads[1] = thread(simulateHandover, 0);
 
 
 

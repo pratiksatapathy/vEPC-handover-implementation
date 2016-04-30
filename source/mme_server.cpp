@@ -106,7 +106,7 @@ int handle_ue(int conn_fd) {
 			cout << "send indirect tunnel teardwn req:" << " case 10:" << endl;
 			g_mme.teardown_indirect_tunnel(pkt);
 
-					break;
+			break;
 			/* For error handling */
 			/* For error handling */
 		default:

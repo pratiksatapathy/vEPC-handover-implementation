@@ -761,7 +761,7 @@ void Mme::teardown_indirect_tunnel(Packet pkt) {
 	pkt.extract_item(res);
 
 	if(res)
-	cout << "tear down completed:" << " " << endl;
+		cout << "tear down completed:" << " " << endl;
 
 
 }
