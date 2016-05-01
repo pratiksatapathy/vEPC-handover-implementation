@@ -694,7 +694,7 @@ void Mme::handle_handover_completion(Packet pkt) {
 	s11_cteid_sgw = ue_ctx[guti].s11_cteid_sgw;
 	g_sync.munlock(uectx_mux);
 	pkt.clear_pkt();
-	pkt.append_item(1);
+	pkt.append_item(1);//nothing required to send
 
 	pkt.prepend_gtp_hdr(2, 5, pkt.len, s11_cteid_sgw);
 	sgw_client.snd(pkt);
@@ -703,7 +703,7 @@ void Mme::handle_handover_completion(Packet pkt) {
 	//we will now return from here to source enb
 	pkt.extract_gtp_hdr();
 	pkt.extract_item(res);
-	pkt.extract_item(s1_uteid_ul);
+	//pkt.extract_item(s1_uteid_ul);removed
 
 	SctpClient to_source_ran_client;
 	to_source_ran_client.conn(s_ran_ip_addr.c_str(), s_ran_port);

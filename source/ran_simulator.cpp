@@ -182,15 +182,23 @@ void simulateHandover(int arg) {
 		cout<<"set_eps_error";
 	}
 	//attach complete
+	start_time = CLOCK::now();
 	cout<<"initiate Handover\n";
 
 	ranS.initiate_handover();
-	//sleep for some time
-	usleep(10000000);
+
+	//sleep for some time, then teardown
+	usleep(500000);
 
 	//here ranT signals that ue has connected to tRan and its ready to take over
 	//this resultss in switching of down link to target enodeb and tearing down of indirect tunnel
 	ranT.complete_handover();
+	/* Stop time */
+	stop_time = CLOCK::now();
+
+	/* Response time */
+	time_diff_us = std::chrono::duration_cast<MICROSECONDS>(stop_time - start_time);
+	cout <<"duration including sleep time "<< time_diff_us.count()<<" \n";
 
 }
 

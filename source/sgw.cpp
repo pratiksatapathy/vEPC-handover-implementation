@@ -198,8 +198,6 @@ void Sgw::handle_indirect_tunnel_setup(struct sockaddr_in src_sock_addr,
 	pkt.extract_item(s1_uteid_dl);
 	//update to s1 map
 
-	update_itfid(1, s1_uteid_ul, imsi);
-
 	g_sync.mlock(uectx_mux);
 	ho_ue_ctx[imsi].s1_uteid_dl = s1_uteid_dl; //lock ??//dl to sent uplink data to tRan
 	s11_cteid_mme = ue_ctx[imsi].s11_cteid_mme;
@@ -207,6 +205,8 @@ void Sgw::handle_indirect_tunnel_setup(struct sockaddr_in src_sock_addr,
 	res = true;
 
 	s1_uteid_ul = s11_cteid_mme + 1; //create an indirect tunnel end point
+	update_itfid(1, s1_uteid_ul, imsi);
+
 
 	pkt.clear_pkt();
 	pkt.append_item(res);

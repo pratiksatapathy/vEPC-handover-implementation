@@ -467,7 +467,7 @@ void Ran::handle_handover(Packet pkt) {
 void Ran::indirect_tunnel_complete(Packet pkt) {
 
 	this->handover_state = 4;//HO done now we can redirect packet through indirect tunnel id
-	pkt.extract_item(ran_ctx.s1_uteid_ul);
+	pkt.extract_item(ran_ctx.indirect_s1_uteid_ul);
 	cout<<"indirect tunnel setup complete\n";
 }
 
